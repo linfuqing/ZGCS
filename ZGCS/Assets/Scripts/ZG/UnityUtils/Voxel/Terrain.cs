@@ -233,7 +233,7 @@ namespace ZG.Voxel
                     return true;
                 }
 
-                public void Do(float increment, Vector3Int position, Vector3Int size, ProcessorEx.Engine engine, Chunk[] chunks)
+                public void Do(float increment, Vector3Int position, Vector3Int size, ProcessorEx.Engine engine, Chunk[] chunks, Action<Instance> instantiate)
                 {
                     if (engine == null)
                         return;
@@ -257,7 +257,11 @@ namespace ZG.Voxel
                         x.x -= position.x;
                         x.y -= position.z;
 
-                        return chunks[Mathf.RoundToInt(x.x) + Mathf.RoundToInt(x.y) * size.x].height;
+                        int indexX = Mathf.RoundToInt(x.x), indexY = Mathf.RoundToInt(x.y);
+                        if (indexX >= 0 && indexX < size.x && indexY >= 0 && indexY < size.z)
+                            return chunks[indexX + indexY * size.x].height;
+
+                        return 0.0f;
                     };
 
                     for (i = 0; i < numLineInfos; ++i)
@@ -267,7 +271,17 @@ namespace ZG.Voxel
                         if (numPoints < 2)
                             continue;
 
+                        for(j = 1; j < numPoints; ++j)
+                        {
+                            fromPointIndex = __random.Next(j, numPoints);
+                            toPointIndex = line[fromPointIndex];
+                            line[fromPointIndex] = line[j - 1];
+                            line[j - 1] = toPointIndex;
+                        }
+
                         lineInfo = __lineInfos[i];
+                        lineInfo.minDentity *= size.y;
+                        lineInfo.maxDentity *= size.y;
 
                         fromPointIndex = line[0];
                         fromPoint = new Vector2Int(fromPointIndex % size.x, fromPointIndex / size.x);
@@ -285,7 +299,7 @@ namespace ZG.Voxel
                             else
                             {
                                 source = __path.size;
-                                destination = Vector3Int.Max(source, size);
+                                destination = size;// Vector3Int.Max(source, size);
                                 if (source != destination)
                                     __path = new NavPath(destination);
                             }
@@ -295,7 +309,6 @@ namespace ZG.Voxel
                             toHeight = chunks[toPointIndex].height;
 
                             depth = __path.Search(
-                                NavPath.Type.Min,
                                 int.MaxValue,
                                 0,
                                 lineInfo.minDentity, 
@@ -310,7 +323,7 @@ namespace ZG.Voxel
                             fromPointIndex = toPointIndex;
                             fromPoint = toPoint;
                             fromHeight = toHeight;
-
+                            
                             if (depth > 0)
                             {
                                 foreach (Vector3Int pathPoint in __path)
@@ -331,15 +344,16 @@ namespace ZG.Voxel
                             else
                             {
                                 __Do(
-                                    lineInfo.materialIndex, 
-                                    lineInfo.halfWidth, 
-                                    lineInfo.radius, 
-                                    lineInfo.countPerUnit, 
-                                    temp, 
-                                    engine, 
+                                    lineInfo.materialIndex,
+                                    lineInfo.halfWidth,
+                                    lineInfo.radius,
+                                    lineInfo.countPerUnit,
+                                    temp,
+                                    engine,
                                     lineInfo.gameObject,
-                                    heightGetter);
-                                
+                                    heightGetter,
+                                    instantiate);
+
                                 temp = new Vector3(
                                     (fromPoint.x + position.x) * scale.x,
                                     fromHeight,
@@ -355,7 +369,8 @@ namespace ZG.Voxel
                             temp, 
                             engine, 
                             lineInfo.gameObject,
-                            heightGetter);
+                            heightGetter,
+                            instantiate);
                     }
                 }
 
@@ -367,10 +382,11 @@ namespace ZG.Voxel
                     Vector3 position, 
                     ProcessorEx.Engine engine, 
                     GameObject gameObject, 
-                    Func<Vector2, float> heightGetter)
+                    Func<Vector2, float> heightGetter, 
+                    Action<Instance> instantiate)
                 {
                     int numPoints = __points == null ? 0 : __points.Count;
-                    if (numPoints < 2)
+                    if (numPoints < 2 || instantiate == null)
                         return;
 
                     int i, count = numPoints - 1;
@@ -440,7 +456,7 @@ namespace ZG.Voxel
 
                     if (__triangles != null)
                         __triangles.Clear();
-
+                    
                     delaunay.DeleteFrames(triangle =>
                     {
                         if (triangle.x < 4 || triangle.y < 4 || triangle.z < 4)
@@ -458,7 +474,7 @@ namespace ZG.Voxel
                         return false;
                     });
 
-                    if(__triangles != null)
+                    if (__triangles != null)
                     {
                         Vector2 z;
                         pointCount = Mathf.RoundToInt(pointCount * (size.x * size.y));
@@ -486,10 +502,17 @@ namespace ZG.Voxel
                         }
                     }
 
-                    gameObject = gameObject == null ? new GameObject() : UnityEngine.Object.Instantiate(gameObject);
-                    MeshFilter meshFilter = gameObject == null ? null : gameObject.AddComponent<MeshFilter>();
-                    if(meshFilter != null)
-                        meshFilter.sharedMesh = delaunay.ToMesh(null, true, heightGetter);
+                    instantiate(new Instance(gameObject, null, target =>
+                    {
+                        GameObject instance = target as GameObject;
+                        MeshFilter meshFilter = instance == null ? null : instance.AddComponent<MeshFilter>();
+                        if (meshFilter != null)
+                        {
+                            meshFilter.sharedMesh = delaunay.ToMesh(null, true, heightGetter);
+
+                            instance.SendMessage("OnValidate", SendMessageOptions.DontRequireReceiver);
+                        }
+                    }));
 
                     if (__points != null)
                         __points.Clear();
@@ -593,14 +616,14 @@ namespace ZG.Voxel
                 __random = random;
             }
 
-            public float Get(int volumeIndex, Vector3 point, VolumeInfo[] volumeInfos)
+            public float Get(int volumeIndex, float result, Vector3 point, VolumeInfo[] volumeInfos)
             {
                 if (volumeIndex < 0)
-                    return -1.0f;
+                    return result;
 
                 int numVolumeInfos = volumeInfos == null ? 0 : volumeInfos.Length;
                 if (volumeIndex >= numVolumeInfos)
-                    return -1.0f;
+                    return result;
 
                 if (__noise == null)
                 {
@@ -612,382 +635,10 @@ namespace ZG.Voxel
                 }
 
                 VolumeInfo volumeInfo = volumeInfos[volumeIndex];
-                return volumeInfo.Get(__noise, point.x, point.y, point.z);// Mathf.Clamp(volumeInfo.Get(__noise, point.x, point.y, point.z) / (volumeInfo.scale.y * scale.y), -1.0f, 1.0f);
+                return Mathf.Max(volumeInfo.Get(__noise, point.x, point.y, point.z) / volumeInfo.scale.magnitude, result);// Mathf.Clamp(volumeInfo.Get(__noise, point.x, point.y, point.z) / (volumeInfo.scale.y * scale.y), -1.0f, 1.0f);
             }
-
-            /*public bool Create(float increment, Vector2Int position, MapInfo[] mapInfos, VolumeInfo[] volumeInfos, HeightInfo[] heightInfos, LineInfo[] riverInfos)
-            {
-                if (__chunks == null)
-                    __chunks = new Dictionary<Vector2Int, Chunk[]>();
-
-                if (__chunks.ContainsKey(position))
-                    return false;
-
-                int numHeightInfos = heightInfos == null ? 0 : heightInfos.Length;
-                if (__results == null || __results.Length < numHeightInfos)
-                    __results = new float[numHeightInfos];
-                
-                int size = __mapSize.x * __mapSize.y, index = 0, min = int.MaxValue, max = int.MinValue, i, j, k, l;
-                float height, result, source, destination, temp;
-                Vector3 scale = base.scale, point;
-                HeightInfo heightInfo;
-                Chunk chunk;
-                ProcessorEx.Block block;
-                Chunk[] chunks = new Chunk[size];
-
-                __chunks[position] = chunks;
-
-                position = Vector2Int.Scale(position, __mapSize);
-
-                float x = position.x * scale.x, y = 1.0f / scale.y, length = y * scale.y;
-                point.z = position.y * scale.z;
-                for (i = 0; i < __mapSize.y; ++i)
-                {
-                    point.x = x;
-                    for (j = 0; j < __mapSize.x; ++j)
-                    {
-                        if (__blocks == null)
-                            __blocks = new List<ProcessorEx.Block>(size * (1 << depth));
-
-                        chunk.index = __blocks.Count;
-                        chunk.count = 0;
-
-                        point.y = 0.0f;
-
-                        height = 0.0f;
-                        for (k = 0; k < numHeightInfos; ++k)
-                        {
-                            heightInfo = heightInfos[k];
-                            if (__Check(point.x, point.z, mapInfos, heightInfo.filters, out result))
-                            {
-                                result = (heightInfo.power > 0.0f ? Mathf.Pow(result, heightInfo.power) : result) * heightInfo.scale + heightInfo.offset;
-                                result = result + (heightInfo.layer > 0 ? __results[heightInfo.layer] : 0.0f);
-                                
-                                if (heightInfo.depth > 0)
-                                {
-                                    source = result - scale.y * heightInfo.depth;
-                                    if (point.y <= source)
-                                    {
-                                        destination = __blocks[chunk.index + chunk.count - 1].density + length;
-                                        temp = (source - point.y) * y;
-                                        do
-                                        {
-                                            block = new ProcessorEx.Block(
-                                                    heightInfo.materialIndex,
-                                                    Mathf.Clamp(Mathf.Min(destination, temp), -1.0f, 1.0f));
-                                            
-                                            l = chunk.index + chunk.count;
-                                            if (l < __blocks.Count)
-                                            {
-                                                block.density = Mathf.Min(block.density, __blocks[l].density);
-
-                                                __blocks[l] = block;
-                                            }
-                                            else
-                                                __blocks.Add(block);
-
-                                            ++chunk.count;
-
-                                            point.y += scale.y;
-                                            
-                                            destination += length;
-                                            
-                                            temp -= length;
-                                        } while (point.y <= source) ;
-
-                                        temp = block.density - length;
-                                        if (temp > -1.0f)
-                                        {
-                                            l = chunk.index + chunk.count;
-                                            do
-                                            {
-                                                block = new ProcessorEx.Block(
-                                                       heightInfo.materialIndex,
-                                                       Mathf.Clamp(temp, -1.0f, 1.0f));
-                                                
-                                                if (l < __blocks.Count)
-                                                {
-                                                    block.density = Mathf.Min(block.density, __blocks[l].density);
-
-                                                    __blocks[l] = block;
-                                                }
-                                                else
-                                                    __blocks.Add(block);
-
-                                                ++l;
-
-                                                temp -= length;
-                                            } while (temp > -1.0f);
-                                        }
-
-                                        height = source;
-                                    }
-                                    else
-                                    {
-                                        //temp += scale.y;
-
-                                        l = Mathf.FloorToInt((point.y - source) / scale.y);
-                                        if (l > chunk.count)
-                                        {
-                                            source += (l - chunk.count) * scale.y;
-
-                                            l = chunk.count;
-                                        }
-
-                                        if (result < height)
-                                        {
-                                            temp = source;
-                                            l = chunk.index + chunk.count - l;
-                                            while (temp < result)
-                                            {
-                                                if (temp > point.y)
-                                                    break;
-
-                                                block = __blocks[l];
-                                                block.materialIndex = heightInfo.materialIndex;
-                                                __blocks[l] = block;
-
-                                                ++l;
-
-                                                temp += scale.y;
-                                            }
-                                        }
-                                        else
-                                        {
-                                            point.y -= l * scale.y;
-
-                                            chunk.count -= l;
-
-                                            height = source;
-                                        }
-                                    }
-                                }
-
-                                if (result >= height)
-                                {
-                                    source = height > 0.0f ? (height - point.y) * y : -1.0f;
-                                    height = chunk.count > 0 ? __blocks[chunk.index + chunk.count - 1].density : -1.0f;
-                                    destination = length;
-
-                                    temp = (point.y - result) * y;
-                                    while (point.y <= result)
-                                    {
-                                        block = new ProcessorEx.Block(
-                                            heightInfo.materialIndex,
-                                            Mathf.Clamp(Get(heightInfo.volumeIndex, point, volumeInfos), temp, -temp));
-                                        
-                                        block.density = Mathf.Clamp(block.density, Mathf.Max(source, height - destination), height + destination);
-                                        if (block.density > -1.0f && min > chunk.count)
-                                            min = chunk.count;
-
-                                        l = chunk.index + chunk.count;
-                                        if (l < __blocks.Count)
-                                        {
-                                            block.density = Mathf.Min(block.density, __blocks[l].density);
-
-                                            __blocks[l] = block;
-                                        }
-                                        else
-                                            __blocks.Add(block);
-                                        
-                                        ++chunk.count;
-
-                                        point.y += scale.y;
-
-                                        source -= length;
-
-                                        destination += length;
-
-                                        temp += length;
-                                    }
-
-                                    if (temp < 1.0f)
-                                    {
-                                        l = chunk.index + chunk.count;
-                                        do
-                                        {
-                                            block = new ProcessorEx.Block(
-                                                   heightInfo.materialIndex,
-                                                   Mathf.Max(Get(heightInfo.volumeIndex, point, volumeInfos), temp));
-                                            
-                                            block.density = Mathf.Clamp(block.density, Mathf.Max(source, height - destination), height + destination);
-                                            if (l < __blocks.Count)
-                                            {
-                                                block.density = Mathf.Min(block.density, __blocks[l].density);
-
-                                                __blocks[l] = block;
-                                            }
-                                            else
-                                                __blocks.Add(block);
-
-                                            ++l;
-
-                                            point.y += scale.y;
-
-                                            source -= length;
-
-                                            destination += length;
-
-                                            temp += length;
-                                        } while (temp < 1.0f);
-
-                                        point.y = chunk.count * scale.y;
-                                    }
-
-                                    height = result;
-                                }
-                            }
-                            
-                            __results[k] = result;
-                        }
-
-                        chunk.count = __blocks.Count - chunk.index;
-                        max = Mathf.Max(max, chunk.count);
-
-                        chunk.height = height;
-
-                        chunks[index++] = chunk;
-                        
-                        point.x += scale.x;
-                    }
-
-                    point.z += scale.z;
-                }
-
-                if (min <= max)
-                {
-                    i = max - min;
-
-                    if (riverInfos != null)
-                    {
-                        Vector2Int from = new Vector2Int(UnityEngine.Random.Range(0, __mapSize.x), UnityEngine.Random.Range(0, __mapSize.y)),
-                            to = new Vector2Int(UnityEngine.Random.Range(0, __mapSize.x), UnityEngine.Random.Range(0, __mapSize.y));
-
-                        chunk = chunks[from.x + from.y * __mapSize.x];
-                        Vector3Int origin = new Vector3Int(from.x, chunk.count - min - 1, from.y);
-                        NavPath path = new NavPath(
-                            1.0f, 
-                            -0.4f, 
-                            new Vector3Int(1, 1, 1), 
-                            new Vector3Int(3, 5, 3), 
-                            new Vector3Int(__mapSize.x, i, __mapSize.y), 
-                            new Vector3Int(position.x, min, position.y), 
-                            this);
-                        j = path.Search(
-                            NavPath.Type.Min,
-                            int.MaxValue,
-                            0,
-                            origin,
-                            new Vector3Int(to.x, chunks[to.x + to.y * __mapSize.x].count - min - 1, to.y));
-
-                        if (j > 0)
-                        {
-                            Vector3 current;
-                            List<Vector3> points = new List<Vector3>();
-                            List<Vector2> lines = new List<Vector2>();
-                            points.Add(new Vector3(
-                                (origin.x + position.x) * scale.x,
-                                chunk.height,
-                                (origin.z + position.y) * scale.z));
-
-                            lines.Add(new Vector2((origin.x + position.x) * scale.x, (origin.z + position.y) * scale.z));
-
-                            foreach (Vector3Int pathPoint in path)
-                            {
-                                chunk = chunks[pathPoint.x + pathPoint.z * __mapSize.x];
-
-                                current = new Vector3(
-                                    (pathPoint.x + position.x) * scale.x,
-                                    (pathPoint.y + min) * scale.y,
-                                    (pathPoint.z + position.y) * scale.z);
-
-                                current = ApproximateZeroCrossingPosition(current, new Vector3(current.x, current.y - scale.y, current.z), increment);
-                                
-                                lines.Add(new Vector2(current.x, current.z));
-                                
-                                points.Add(current);
-                            }
-
-                            int numPoints = points == null ? 0 : points.Count;
-                            Delaunay delaunay = new Delaunay(lines.ToArray(), 4.0f, 10);
-                            GameObject gameObject = new GameObject();
-                            gameObject.AddComponent<MeshFilter>().sharedMesh = delaunay.ToMesh(null, true, pointToBuild =>
-                            {
-                                float minDistance = float.MaxValue, distance;
-                                Vector3 pointToCheck;
-                                j = numPoints;
-                                for(k = 0; k < numPoints; ++k)
-                                {
-                                    pointToCheck = points[k];
-
-                                    distance = (new Vector2(pointToCheck.x, pointToCheck.z) - pointToBuild).sqrMagnitude;
-                                    if(distance < minDistance)
-                                    {
-                                        minDistance = distance;
-
-                                        j = k;
-                                    }
-                                }
-
-                                if (j < numPoints)
-                                {
-                                    minDistance = int.MaxValue;
-                                    if (j > 0)
-                                    {
-                                        k = j - 1;
-
-                                        pointToCheck = points[k];
-
-                                        minDistance = (new Vector2(pointToCheck.x, pointToCheck.z) - pointToBuild).sqrMagnitude;
-                                    }
-
-                                    if(j < numPoints - 1)
-                                    {
-                                        pointToCheck = points[j + 1];
-
-                                        distance = (new Vector2(pointToCheck.x, pointToCheck.z) - pointToBuild).sqrMagnitude;
-                                        if(distance < minDistance)
-                                            k = j + 1;
-                                    }
-
-                                    Vector3 start = points[j], end = points[k], normal = end - start;
-
-                                    return Mathf.Lerp(start.y, end.y, Vector3.Project(new Vector3(pointToBuild.x - start.x, 0.0f, pointToBuild.y), normal).magnitude / normal.magnitude);
-                                }
-
-                                return 0.0f;
-                            });
-
-                            gameObject.AddComponent<MeshRenderer>();
-
-                            Vector3 previous = points[0];
-                            Quaternion rotation;
-                            for(k = 1; k < numPoints; ++k)
-                            {
-                                current = points[k];
-                                
-                                //Debug.DrawRay(previous, current - previous, Color.red, 1000.0f);
-
-                                rotation = Quaternion.FromToRotation(Vector3.forward, current - previous);
-
-                                //UnityEngine.Object.Instantiate(riverInfos[0].gameObject, current + new Vector3(0f, -2.0f, 0.0f), rotation);
-
-                                //Do(new Bounds(current, new Vector3(2f, 4f, 2f)), rotation, 1);
-                                Do(current, 3.0f);
-                                
-                                previous = current;
-                            }
-                        }
-                    }
-
-                    if (builder != null)
-                        builder.Set(new BoundsInt(new Vector3Int(position.x, min, position.y), new Vector3Int(__mapSize.x, max - min, __mapSize.y)));
-                }
-
-                return true;
-            }*/
-
-            public bool Create(float increment, Vector2Int position, MapInfo[] mapInfos, VolumeInfo[] volumeInfos, LayerInfo[] layerInfos, LineInfo[] lineInfos)
+            
+            public bool Create(float increment, Vector2Int position, MapInfo[] mapInfos, VolumeInfo[] volumeInfos, LayerInfo[] layerInfos, LineInfo[] lineInfos, Action<Instance> instantiate)
             {
                 lock (__chunks)
                 {
@@ -1092,15 +743,13 @@ namespace ZG.Voxel
                                             y = length * 0.5f;
 
                                             middle = previous + y;
-
-                                            length = 1.0f / y;
-
+                                            
                                             result = false;
                                             while (point.y <= next)
                                             {
                                                 block = new ProcessorEx.Block(
                                                     layerInfo.materialIndex,
-                                                    Mathf.Max(Get(layerInfo.volumeIndex, point, volumeInfos), 1.0f - Mathf.Abs(point.y - middle) * length));
+                                                    Get(layerInfo.volumeIndex, y - Mathf.Abs(point.y - middle), point, volumeInfos));
 
                                                 l = chunk.index + chunk.count;
                                                 if (l < __blocks.Count)
@@ -1144,9 +793,7 @@ namespace ZG.Voxel
                                             y = length * 0.5f;
 
                                             middle = previous + y;
-
-                                            length = 1.0f / y;
-
+                                            
                                             l = chunk.index + chunk.count;
                                             previous = previous - y;
                                             do
@@ -1154,7 +801,7 @@ namespace ZG.Voxel
                                                 --l;
                                                 point.y -= scale.y;
 
-                                                temp = Mathf.Max(Get(layerInfo.volumeIndex, point, volumeInfos), Mathf.Abs(point.y - middle) * length - 1.0f);
+                                                temp = Get(layerInfo.volumeIndex, Mathf.Abs(point.y - middle) - y, point, volumeInfos);
 
                                                 block = __blocks[l];
 
@@ -1175,8 +822,6 @@ namespace ZG.Voxel
                                             y = length;
 
                                             middle = 0.0f;
-
-                                            length = 1.0f / y;
                                         }
 
                                         result = false;
@@ -1184,8 +829,8 @@ namespace ZG.Voxel
                                         {
                                             block = new ProcessorEx.Block(
                                                 layerInfo.materialIndex,
-                                                Mathf.Max(Get(layerInfo.volumeIndex, point, volumeInfos), Mathf.Abs(point.y - middle) * length - 1.0f));
-
+                                                Get(layerInfo.volumeIndex, Mathf.Abs(point.y - middle) - y, point, volumeInfos));
+                                            
                                             if (block.density > -1.0f && min > chunk.count)
                                                 min = chunk.count;
 
@@ -1210,7 +855,7 @@ namespace ZG.Voxel
 
                                             point.y += scale.y;
                                         }
-
+                                        
                                         l = chunk.index + chunk.count;
 
                                         previous = current + y;
@@ -1218,7 +863,7 @@ namespace ZG.Voxel
                                         {
                                             block = new ProcessorEx.Block(
                                                 layerInfo.materialIndex,
-                                                Mathf.Max(Get(layerInfo.volumeIndex, point, volumeInfos), Mathf.Abs(point.y - middle) * length - 1.0f));
+                                                Get(layerInfo.volumeIndex, point.y - middle - y, point, volumeInfos));
 
                                             if (l < __blocks.Count)
                                             {
@@ -1238,8 +883,10 @@ namespace ZG.Voxel
 
                                             ++l;
 
+                                            block.density += scale.y;
+                                            
                                             point.y += scale.y;
-                                        } 
+                                        }
 
                                         if (result)
                                         {
@@ -1247,12 +894,12 @@ namespace ZG.Voxel
                                             {
                                                 block = new ProcessorEx.Block(
                                                        layerInfo.materialIndex,
-                                                       Mathf.Max(Get(layerInfo.volumeIndex, point, volumeInfos), Mathf.Abs(point.y - middle) * length - 1.0f));
+                                                       Get(layerInfo.volumeIndex, point.y - middle - y, point, volumeInfos));
 
                                                 __blocks[l] = block;
 
                                                 ++l;
-
+                                                
                                                 point.y += scale.y;
                                             }
                                         }
@@ -1286,7 +933,7 @@ namespace ZG.Voxel
                     {
                         Vector3Int offset = new Vector3Int(position.x, min, position.y), extends = new Vector3Int(__mapSize.x, max - min, __mapSize.y);
 
-                        __liner.Do(increment, offset, extends, this, chunks);
+                        __liner.Do(increment, offset, extends, this, chunks, instantiate);
 
                         if (builder != null)
                             builder.Set(new BoundsInt(offset, extends));
@@ -1297,13 +944,6 @@ namespace ZG.Voxel
 
             public override bool Get(Vector3Int position, out ProcessorEx.Block block)
             {
-                if (position.y < -1)
-                {
-                    block = new ProcessorEx.Block(0, -1.0f);
-
-                    return true;
-                }
-
                 if (__chunks != null)
                 {
                     Vector2Int world = new Vector2Int(position.x / __mapSize.x, position.z / __mapSize.y), 
@@ -1333,35 +973,23 @@ namespace ZG.Voxel
                         if(index < numChunks)
                         {
                             Chunk chunk = chunks[index];
-                            if(position.y < 0)
-                            {
-                                if (chunk.count > 0)
-                                {
-                                    block = __blocks[chunk.index];
-                                    block.density = Mathf.Max(block.density - 1.0f, -1.0f);
-
-                                    return true;
-                                }
-
-                                block = new ProcessorEx.Block(0, -1.0f);
-                            }
-                            else if(chunk.count > position.y)
+                            if (position.y >= 0 && position.y < chunk.count)
                                 block = __blocks[chunk.index + position.y];
                             else
                             {
-                                block = __blocks[chunk.index + chunk.count - 1];
-                                
-                                block.density = (position.y * scale.y - chunk.height) / chunk.height;
+                                block = __blocks[chunk.index + Mathf.Clamp(position.y, 0, chunk.count - 1)];
+
+                                block.density = position.y * scale.y - (position.y < 0 ? 0.0f : chunk.height);
                             }
                             
                             return true;
                         }
                     }
                 }
-                
-                block = default(ProcessorEx.Block);
 
-                return false;
+                block = new ProcessorEx.Block(0, position.y * scale.y);
+
+                return true;
             }
 
             public override bool Set(Vector3Int position, ProcessorEx.Block block)
@@ -1484,7 +1112,7 @@ namespace ZG.Voxel
                 for (i = min.x; i <= max.x; ++i)
                 {
                     for(j = min.y; j <= max.y; ++j)
-                        engine.Create(increment, new Vector2Int(i, j), mapInfos, volumeInfos, layerInfos, lineInfos);
+                        engine.Create(increment, new Vector2Int(i, j), mapInfos, volumeInfos, layerInfos, lineInfos, Instantiate);
                 }
             }
             

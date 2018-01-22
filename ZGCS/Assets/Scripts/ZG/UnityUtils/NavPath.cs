@@ -271,6 +271,9 @@ namespace ZG
                             {
                                 for (k = -1; k < 2; ++k)
                                 {
+                                    if (i == 0 && j == 0 && k == 0)
+                                        continue;
+
                                     offset = new Vector3Int(i, j, k);
                                     position = from + offset;
                                     if (position.x < 0 ||
