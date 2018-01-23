@@ -276,11 +276,6 @@ namespace ZG
         private Pool<Edge> __edges;
         private Pool<Triangle> __triangles;
 
-        public static float Cross(Vector2 x, Vector2 y)
-        {
-            return x.x * y.y - y.x * x.y;
-        }
-
         public Delaunay(Vector2 leftBottom, Vector2 leftTop, Vector2 rightTop, Vector2 rightBottom)
         {
             __frameVertexIndices = new HashSet<int>();
@@ -359,51 +354,63 @@ namespace ZG
 
             if (__triangles != null)
             {
+                bool isIntersect;
+                Vector2 x, y, z, u, v;
+                Edge edge;
+                Triangle triangle;
                 HashSet<int> edgeIndices = null;
                 foreach (KeyValuePair<int, Triangle> pair in (IEnumerable<KeyValuePair<int, Triangle>>)__triangles)
                 {
-                    if (!pair.Value.circle.Check(point))
+                    triangle = pair.Value;
+                    if (!triangle.circle.Check(point))
                         continue;
 
-                    /*x = __vertices[triangle.vertexIndexX].position;
+                    x = __vertices[triangle.vertexIndexX].position;
                     y = __vertices[triangle.vertexIndexY].position;
                     z = __vertices[triangle.vertexIndexZ].position;
 
-                    if (__frameEdgeIndices.Contains(triangle.edgeIndexX))
+                    if (x == point || y == point || z == point)
+                        continue;
+
+                    isIntersect = false;
+                    foreach (int frameEdgeIndex in __frameEdgeIndices)
                     {
-                        xy = y - x;
-                        if (Cross(point - x, xy) <= 0.0f)
-                            continue;
+                        edge = __edges[frameEdgeIndex];
+
+                        u = __vertices[edge.vertexIndexX].position;
+                        v = __vertices[edge.vertexIndexY].position;
+
+                        if ((edge.vertexIndexX != triangle.vertexIndexX &&
+                            edge.vertexIndexY != triangle.vertexIndexX &&
+                            MathHelper.IsIntersect(point, x, u, v)) ||
+                            (edge.vertexIndexX != triangle.vertexIndexY &&
+                            edge.vertexIndexY != triangle.vertexIndexY &&
+                            MathHelper.IsIntersect(point, y, u, v)) ||
+                            (edge.vertexIndexX != triangle.vertexIndexZ &&
+                            edge.vertexIndexY != triangle.vertexIndexZ &&
+                            MathHelper.IsIntersect(point, z, u, v)))
+                        {
+                            isIntersect = true;
+
+                            break;
+                        }
                     }
 
-                    if (__frameEdgeIndices.Contains(triangle.edgeIndexY))
-                    {
-                        yz = z - y;
-                        if (Cross(point - y, yz) <= 0.0f)
-                            continue;
-                    }
-
-                    if (__frameEdgeIndices.Contains(triangle.edgeIndexZ))
-                    {
-                        zx = x - z;
-                        if (Cross(point - z, zx) <= 0.0f)
-                            continue;
-                    }*/
+                    if (isIntersect)
+                        continue;
                     
                     __DeleteTriangle(pair.Key, ref edgeIndices);
                 }
 
                 if (edgeIndices != null)
                 {
-                    Vector2 x, y;
-                    Edge edge;
                     foreach (int edgeIndex in edgeIndices)
                     {
                         edge = __edges[edgeIndex];
 
                         x = __vertices[edge.vertexIndexX].position;
                         y = __vertices[edge.vertexIndexY].position;
-                        if (Cross(point - x, y - x) > 0.0f)
+                        if ((point - x).Cross(y - x) > 0.0f)
                             __MakeTriangle(edge.vertexIndexX, edge.vertexIndexY, result);
                         else
                             __MakeTriangle(edge.vertexIndexX, result, edge.vertexIndexY);
@@ -442,19 +449,18 @@ namespace ZG
                 }
 
                 if (edgeIndices != null)
+                    __frameEdgeIndices.UnionWith(edgeIndices);
+                
+                __frameVertexIndices.Clear();
+                Edge edge;
+                foreach (int frameEdgeIndex in __frameEdgeIndices)
                 {
-                    __frameEdgeIndices = edgeIndices;
-                    __frameVertexIndices.Clear();
-                    Edge edge;
-                    foreach (int edgeIndex in edgeIndices)
-                    {
-                        edge = __edges[edgeIndex];
-                        ++edge.count;
-                        __edges[edgeIndex] = edge;
+                    edge = __edges[frameEdgeIndex];
+                    ++edge.count;
+                    __edges[frameEdgeIndex] = edge;
 
-                        __frameVertexIndices.Add(edge.vertexIndexX);
-                        __frameVertexIndices.Add(edge.vertexIndexY);
-                    }
+                    __frameVertexIndices.Add(edge.vertexIndexX);
+                    __frameVertexIndices.Add(edge.vertexIndexY);
                 }
             }
         }
@@ -722,7 +728,7 @@ namespace ZG
             Vertex vertexX = __vertices[vertexIndexX], vertexY = __vertices[vertexIndexY], vertexZ = __vertices[vertexIndexZ];
             //if (vertexX.position == vertexY.position || vertexY.position == vertexZ.position || vertexX.position == vertexZ.position)
             //    return -1;
-
+            
             Triangle triangle;
             triangle.vertexIndexX = vertexIndexX;
             triangle.vertexIndexY = vertexIndexY;
@@ -862,6 +868,8 @@ namespace ZG
 
                     __edges.RemoveAt(triangle.edgeIndexX);
 
+                    __frameEdgeIndices.Remove(triangle.edgeIndexX);
+
                     if (edgeIndices != null)
                         edgeIndices.Remove(triangle.edgeIndexX);
                     break;
@@ -898,6 +906,8 @@ namespace ZG
 
                     __edges.RemoveAt(triangle.edgeIndexY);
 
+                    __frameEdgeIndices.Remove(triangle.edgeIndexY);
+
                     if (edgeIndices != null)
                         edgeIndices.Remove(triangle.edgeIndexY);
                     break;
@@ -933,6 +943,8 @@ namespace ZG
                     __vertices[edge.vertexIndexY] = vertex;
 
                     __edges.RemoveAt(triangle.edgeIndexZ);
+
+                    __frameEdgeIndices.Remove(triangle.edgeIndexZ);
 
                     if (edgeIndices != null)
                         edgeIndices.Remove(triangle.edgeIndexZ);

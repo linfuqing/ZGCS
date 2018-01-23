@@ -462,10 +462,40 @@ namespace ZG.Voxel
                         if (triangle.x < 4 || triangle.y < 4 || triangle.z < 4)
                             return true;
                         
-                        int vertexX = triangle.x & 1, vertexY = triangle.y & 1, vertexZ = triangle.z & 1;
-                        if (vertexX == vertexY && vertexY == vertexZ)
-                            return true;
-                        
+                        int indexX = triangle.x & 1, indexY = triangle.y & 1, indexZ = triangle.z & 1;
+                        if (indexX == indexY && indexY == indexZ)
+                        {
+                            Vector2 vertexX, vertexY, vertexZ;
+                            if (!delaunay.Get(triangle.x, out vertexX))
+                                return true;
+
+                            if (!delaunay.Get(triangle.y, out vertexY))
+                                return true;
+
+                            if (!delaunay.Get(triangle.z, out vertexZ))
+                                return true;
+
+                            bool result = true;
+                            float length = halfWidth * 3.0f, distance;
+                            for (i = 0; i < numPoints; ++i)
+                            {
+                                point = __points[i];
+
+                                x = new Vector2(point.x, point.z);
+
+                                distance = (x - vertexX).magnitude + (x - vertexY).magnitude + (x - vertexZ).magnitude;
+                                if(distance < length)
+                                {
+                                    result = false;
+
+                                    break;
+                                }
+                            }
+
+                            if(result)
+                                return true;
+                        }
+
                         if (__triangles == null)
                             __triangles = new List<Vector3Int>();
 
@@ -492,7 +522,7 @@ namespace ZG.Voxel
                                 if (!delaunay.Get(triangle.z, out z))
                                     continue;
                                 
-                                if (Delaunay.Cross(temp - x, y - x) > 0.0f && Delaunay.Cross(temp - y, z - y) > 0.0f && Delaunay.Cross(temp - z, x - z) > 0.0f)
+                                if ((temp - x).Cross(y - x) > 0.0f && (temp - y).Cross(z - y) > 0.0f && (temp - z).Cross(x - z) > 0.0f)
                                 {
                                     delaunay.AddPoint(temp);
 
@@ -505,13 +535,18 @@ namespace ZG.Voxel
                     instantiate(new Instance(gameObject, null, target =>
                     {
                         GameObject instance = target as GameObject;
-                        MeshFilter meshFilter = instance == null ? null : instance.AddComponent<MeshFilter>();
-                        if (meshFilter != null)
-                        {
-                            meshFilter.sharedMesh = delaunay.ToMesh(null, true, heightGetter);
+                        if (instance == null)
+                            return;
 
-                            instance.SendMessage("OnValidate", SendMessageOptions.DontRequireReceiver);
-                        }
+                        Mesh mesh = delaunay.ToMesh(null, true, heightGetter);
+
+                        MeshFilter meshFilter = instance.AddComponent<MeshFilter>();
+                        if (meshFilter != null)
+                            meshFilter.sharedMesh = mesh;
+                        
+                        MeshCollider meshCollider = instance.AddComponent<MeshCollider>();
+                        if(meshCollider != null)
+                            meshCollider.sharedMesh = mesh;
                     }));
 
                     if (__points != null)
