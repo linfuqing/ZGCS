@@ -86,9 +86,9 @@ namespace ZG.Voxel
         {
             public Info info;
 
-            public IDictionary<Vector3Int, MeshData<Bounds>>[] meshes;
+            public IDictionary<Vector3Int, MeshData<Vector3>>[] meshes;
 
-            public MeshData(Info info, IDictionary<Vector3Int, MeshData<Bounds>>[] meshes)
+            public MeshData(Info info, IDictionary<Vector3Int, MeshData<Vector3>>[] meshes)
             {
                 this.info = info;
                 this.meshes = meshes;
@@ -382,12 +382,12 @@ namespace ZG.Voxel
             Level level;
             Info info;
             Bounds bounds;
-            MeshData<Bounds> mesh;
+            MeshData<Vector3> mesh;
             DualContouring.Octree octree;
-            Dictionary<Vector3Int, MeshData<Bounds>> map;
-            List<KeyValuePair<Vector3Int, MeshData<Bounds>>> buffer;
-            List<KeyValuePair<Vector3Int, MeshData<Bounds>>>[] meshes;
-            IDictionary<Vector3Int, MeshData<Bounds>>[] result = null;
+            Dictionary<Vector3Int, MeshData<Vector3>> map;
+            List<KeyValuePair<Vector3Int, MeshData<Vector3>>> buffer;
+            List<KeyValuePair<Vector3Int, MeshData<Vector3>>>[] meshes;
+            IDictionary<Vector3Int, MeshData<Vector3>>[] result = null;
             do
             {
                 lock (__in)
@@ -436,10 +436,10 @@ namespace ZG.Voxel
                         }, out mesh))
                         {
                             if (meshes == null)
-                                meshes = new List<KeyValuePair<Vector3Int, MeshData<Bounds>>>[numLevels];
+                                meshes = new List<KeyValuePair<Vector3Int, MeshData<Vector3>>>[numLevels];
 
-                            buffer = new List<KeyValuePair<Vector3Int, MeshData<Bounds>>>();
-                            buffer.Add(new KeyValuePair<Vector3Int, MeshData<Bounds>>(Vector3Int.zero, mesh));
+                            buffer = new List<KeyValuePair<Vector3Int, MeshData<Vector3>>>();
+                            buffer.Add(new KeyValuePair<Vector3Int, MeshData<Vector3>>(Vector3Int.zero, mesh));
 
                             meshes[i] = buffer;
                         }
@@ -468,10 +468,10 @@ namespace ZG.Voxel
                         buffer.Split(bounds, _segments);
 
                         map = null;
-                        foreach (KeyValuePair<Vector3Int, MeshData<Bounds>> pair in buffer)
+                        foreach (KeyValuePair<Vector3Int, MeshData<Vector3>> pair in buffer)
                         {
                             if (map == null)
-                                map = new Dictionary<Vector3Int, MeshData<Bounds>>();
+                                map = new Dictionary<Vector3Int, MeshData<Vector3>>();
 
                             map.Add(pair.Key, pair.Value);
                         }
@@ -480,7 +480,7 @@ namespace ZG.Voxel
                             continue;
 
                         if (result == null)
-                            result = new IDictionary<Vector3Int, MeshData<Bounds>>[numLevels];
+                            result = new IDictionary<Vector3Int, MeshData<Vector3>>[numLevels];
 
                         result[i] = map;
                     }
@@ -522,7 +522,7 @@ namespace ZG.Voxel
                 gameObject = null;
             else
             {
-                IDictionary<Vector3Int, MeshData<Bounds>> source = meshData.meshes[0];
+                IDictionary<Vector3Int, MeshData<Vector3>> source = meshData.meshes[0];
                 if (source == null)
                     gameObject = null;
                 else
@@ -535,14 +535,14 @@ namespace ZG.Voxel
                         Vector3Int position;
                         Level level;
                         LOD lod;
-                        MeshData<Bounds> instance;
+                        MeshData<Vector3> instance;
                         Transform root = null, parent = null, child;
                         GameObject local, world;
                         LODGroup lodGroup;
-                        IDictionary<Vector3Int, MeshData<Bounds>> destination;
+                        IDictionary<Vector3Int, MeshData<Vector3>> destination;
                         List<LOD> lods;
                         List<Renderer> renderers = null;
-                        foreach (KeyValuePair<Vector3Int, MeshData<Bounds>> mesh in source)
+                        foreach (KeyValuePair<Vector3Int, MeshData<Vector3>> mesh in source)
                         {
                             world = null;
                             lodGroup = null;
@@ -614,7 +614,7 @@ namespace ZG.Voxel
                     {
                         GameObject instance;
                         List<GameObject> gameObjects = null;
-                        foreach (KeyValuePair<Vector3Int, MeshData<Bounds>> mesh in source)
+                        foreach (KeyValuePair<Vector3Int, MeshData<Vector3>> mesh in source)
                         {
                             instance = Convert(mesh.Value);
                             if (instance == null)
@@ -695,7 +695,7 @@ namespace ZG.Voxel
 
         public abstract DualContouring.IBuilder Create(int depth, Vector3 scale);
 
-        public abstract GameObject Convert(MeshData<Bounds> meshData);
+        public abstract GameObject Convert(MeshData<Vector3> meshData);
 
         private bool __Check(Info info, BoundsInt bounds)
         {

@@ -233,7 +233,7 @@ namespace ZG.Voxel
                     return true;
                 }
 
-                public void Do(float increment, Vector3Int position, Vector3Int size, ProcessorEx.Engine engine, Chunk[] chunks, Action<Instance> instantiate)
+                public void Do(float increment, Vector3Int position, Vector3Int size, Engine engine, Chunk[] chunks, Action<Instance> instantiate)
                 {
                     if (engine == null)
                         return;
@@ -249,21 +249,6 @@ namespace ZG.Voxel
                     Vector3 offset, scale = engine.scale, temp;
                     LineInfo lineInfo;
                     List<int> line;
-                    Func<Vector2, float> heightGetter = x =>
-                    {
-                        x.x /= scale.x;
-                        x.y /= scale.y;
-
-                        x.x -= position.x;
-                        x.y -= position.z;
-
-                        int indexX = Mathf.RoundToInt(x.x), indexY = Mathf.RoundToInt(x.y);
-                        if (indexX >= 0 && indexX < size.x && indexY >= 0 && indexY < size.z)
-                            return chunks[indexX + indexY * size.x].height;
-
-                        return 0.0f;
-                    };
-
                     for (i = 0; i < numLineInfos; ++i)
                     {
                         line = __lines[i];
@@ -351,7 +336,6 @@ namespace ZG.Voxel
                                     temp,
                                     engine,
                                     lineInfo.gameObject,
-                                    heightGetter,
                                     instantiate);
 
                                 temp = new Vector3(
@@ -369,7 +353,6 @@ namespace ZG.Voxel
                             temp, 
                             engine, 
                             lineInfo.gameObject,
-                            heightGetter,
                             instantiate);
                     }
                 }
@@ -380,17 +363,22 @@ namespace ZG.Voxel
                     float radius, 
                     float pointCount,
                     Vector3 position, 
-                    ProcessorEx.Engine engine, 
+                    Engine engine, 
                     GameObject gameObject, 
-                    Func<Vector2, float> heightGetter, 
                     Action<Instance> instantiate)
                 {
                     int numPoints = __points == null ? 0 : __points.Count;
                     if (numPoints < 2 || instantiate == null)
                         return;
 
+                    int segment = 50;
+                    float orginRadius = 30.0f;
+                    float doRadius = 25.0f;
+
+                    engine.Do(position, doRadius);
+                    
                     int i, count = numPoints - 1;
-                    Vector2 min = new Vector2(position.x, position.z), max = min, temp;
+                    Vector2 min = new Vector2(position.x - orginRadius, position.z - orginRadius), max = new Vector2(position.x + orginRadius, position.z + orginRadius), temp;
                     Vector3 point;
                     //Quaternion rotation;
                     for (i = 1; i < count; ++i)
@@ -399,7 +387,7 @@ namespace ZG.Voxel
 
                         //rotation = Quaternion.FromToRotation(Vector3.forward, to - from);
 
-                        engine.Do(point, radius, materialIndex);
+                        engine.Do(point, radius);
 
                         //from = to;
 
@@ -420,7 +408,7 @@ namespace ZG.Voxel
 
                     min = Vector2.Min(min, temp);
                     max = Vector2.Max(max, temp);
-
+                    
                     float width = halfWidth * 2.0f;
                     temp = new Vector2(width, width);
                     min -= temp;
@@ -454,48 +442,85 @@ namespace ZG.Voxel
                         }
                     }
 
+                    float anglePerSegment = Mathf.PI * 2.0f / segment, angle = 0.0f;
+                    for(i = 0; i < segment; ++i)
+                    {
+                        delaunay.AddPoint(new Vector2(position.x + orginRadius * Mathf.Cos(angle), position.z + orginRadius * Mathf.Sin(angle)));
+
+                        angle += anglePerSegment;
+                    }
+
                     if (__triangles != null)
                         __triangles.Clear();
-                    
+
+                    float length = orginRadius + halfWidth;
+                    length *= length;
+                    width += halfWidth;
+
+                    Vector2 orgin = new Vector2(position.x, position.z);
                     delaunay.DeleteFrames(triangle =>
                     {
                         if (triangle.x < 4 || triangle.y < 4 || triangle.z < 4)
                             return true;
-                        
-                        int indexX = triangle.x & 1, indexY = triangle.y & 1, indexZ = triangle.z & 1;
-                        if (indexX == indexY && indexY == indexZ)
+
+                        Vector2 vertexX, vertexY, vertexZ;
+                        if (!delaunay.Get(triangle.x, out vertexX))
+                            return true;
+
+                        if (!delaunay.Get(triangle.y, out vertexY))
+                            return true;
+
+                        if (!delaunay.Get(triangle.z, out vertexZ))
+                            return true;
+
+                        if (
+                            (vertexX - orgin).sqrMagnitude > length ||
+                            (vertexY - orgin).sqrMagnitude > length ||
+                            (vertexZ - orgin).sqrMagnitude > length)
                         {
-                            Vector2 vertexX, vertexY, vertexZ;
-                            if (!delaunay.Get(triangle.x, out vertexX))
-                                return true;
-
-                            if (!delaunay.Get(triangle.y, out vertexY))
-                                return true;
-
-                            if (!delaunay.Get(triangle.z, out vertexZ))
-                                return true;
-
                             bool result = true;
-                            float length = halfWidth * 3.0f, distance;
-                            for (i = 0; i < numPoints; ++i)
+                            int index = (numPoints + 1) << 1;
+                            if (triangle.x < index && triangle.y < index && triangle.z < index)
                             {
-                                point = __points[i];
+                                int indexX = triangle.x & 1, indexY = triangle.y & 1, indexZ = triangle.z & 1;
+                                result = indexX == indexY && indexY == indexZ;
+                            }
+                            else
+                            {
+                                if(triangle.x < index && triangle.y < index)
+                                    result = (triangle.x & 1) == (triangle.y & 1);
 
-                                x = new Vector2(point.x, point.z);
+                                if (triangle.y < index && triangle.z < index)
+                                    result = (triangle.y & 1) == (triangle.z & 1);
 
-                                distance = (x - vertexX).magnitude + (x - vertexY).magnitude + (x - vertexZ).magnitude;
-                                if(distance < length)
-                                {
-                                    result = false;
-
-                                    break;
-                                }
+                                if (triangle.z < index && triangle.x < index)
+                                    result = (triangle.z & 1) == (triangle.x & 1);
                             }
 
-                            if(result)
-                                return true;
-                        }
+                            if (result)
+                            {
+                                float distance;
 
+                                for (i = 0; i < numPoints; ++i)
+                                {
+                                    point = __points[i];
+
+                                    x = new Vector2(point.x, point.z);
+
+                                    distance = (x - vertexX).magnitude + (x - vertexY).magnitude + (x - vertexZ).magnitude;
+                                    if (distance < width)
+                                    {
+                                        result = false;
+
+                                        break;
+                                    }
+                                }
+
+                                if (result)
+                                    return true;
+                            }
+                        }
+                        
                         if (__triangles == null)
                             __triangles = new List<Vector3Int>();
 
@@ -532,31 +557,89 @@ namespace ZG.Voxel
                         }
                     }
 
-                    instantiate(new Instance(gameObject, null, target =>
+                    float height = position.y;
+                    for(i = 0; i < numPoints; ++i)
                     {
-                        GameObject instance = target as GameObject;
-                        if (instance == null)
-                            return;
+                        point = __points[i];
+                        if ((new Vector2(point.x, point.z) - orgin).sqrMagnitude < length && point.y < height)
+                            height = point.y;
+                    }
 
-                        Mesh mesh = delaunay.ToMesh(null, true, heightGetter);
+                    MeshData<int> meshData;
+                    if (delaunay.ToMesh(pointIndex =>
+                     {
+                         if (!delaunay.Get(pointIndex, out x))
+                             return 0.0f;
 
-                        MeshFilter meshFilter = instance.AddComponent<MeshFilter>();
-                        if (meshFilter != null)
-                            meshFilter.sharedMesh = mesh;
-                        
-                        MeshCollider meshCollider = instance.AddComponent<MeshCollider>();
-                        if(meshCollider != null)
-                            meshCollider.sharedMesh = mesh;
-                    }));
+                         if ((x - orgin).sqrMagnitude < length)
+                             return height;
+                         
+                         if (engine == null || engine.__chunks == null)
+                             return 0.0f;
 
+                         Vector3 scale = engine.scale;
+                         Vector2Int 
+                         offset = new Vector2Int(Mathf.RoundToInt(x.x / scale.x), Mathf.RoundToInt(x.y / scale.z)), 
+                         world = new Vector2Int(offset.x / engine.__mapSize.x, offset.y / engine.__mapSize.y),
+                         local = Vector2Int.Scale(world, engine.__mapSize);
+
+                         local.x = offset.x - local.x;
+                         local.y = offset.y - local.y;
+
+                         if (local.x < 0)
+                         {
+                             local.x += engine.__mapSize.x;
+
+                             --world.x;
+                         }
+
+                         if (local.y < 0)
+                         {
+                             local.y += engine.__mapSize.y;
+
+                             --world.y;
+                         }
+
+                         Chunk[] chunks;
+                         if (!engine.__chunks.TryGetValue(world, out chunks))
+                             return 0.0f;
+
+                         int index = local.x + local.y * engine.__mapSize.x, numChunks = chunks == null ? 0 : chunks.Length;
+                         if (index >= numChunks)
+                             return 0.0f;
+
+                         return chunks[index].height;
+
+                     }, out meshData))
+                    {
+                        instantiate(new Instance(gameObject, null, target =>
+                        {
+                            GameObject instance = target as GameObject;
+                            if (instance == null)
+                                return;
+
+                            Dictionary<int, int> subMeshIndices = null;
+                            Mesh mesh = meshData.ToFlatMesh(null, ref subMeshIndices);
+                            if (mesh == null)
+                                return;
+
+                            MeshFilter meshFilter = instance.AddComponent<MeshFilter>();
+                            if (meshFilter != null)
+                                meshFilter.sharedMesh = mesh;
+
+                            MeshCollider meshCollider = instance.AddComponent<MeshCollider>();
+                            if (meshCollider != null)
+                                meshCollider.sharedMesh = mesh;
+                        }));
+                    }
                     if (__points != null)
                         __points.Clear();
                 }
 
-                private float __GetLineHeight(Vector2 pointToBuild)
+                private float __GetLineHeight(Vector2 pointToBuild, Vector3 position)
                 {
                     int numPoints = __points == null ? 0 : __points.Count, source = numPoints, destination;
-                    float minDistance = float.MaxValue, distance;
+                    float minDistance = (new Vector2(position.x, position.z) - pointToBuild).sqrMagnitude, distance;
                     Vector3 pointToCheck;
                     for (int i = 0; i < numPoints; ++i)
                     {
@@ -599,7 +682,7 @@ namespace ZG.Voxel
                         return Mathf.Lerp(start.y, end.y, Vector3.Project(new Vector3(pointToBuild.x - start.x, 0.0f, pointToBuild.y), normal).magnitude / normal.magnitude);
                     }
 
-                    return 0.0f;
+                    return position.y;
                 }
                 
                 public int __GetLineIndex(float x, float y, LineInfo[] lineInfos, MapInfo[] mapInfos)
@@ -948,7 +1031,7 @@ namespace ZG.Voxel
                                 __layers[k] = previous;
                             }
 
-                            __liner.Set(index, point.x, point.z, mapInfos);
+                            //__liner.Set(index, point.x, point.z, mapInfos);
 
                             chunk.count = __blocks.Count - chunk.index;
 
@@ -1154,7 +1237,7 @@ namespace ZG.Voxel
             return base.Create(world, increment);
         }
 
-        public override GameObject Convert(MeshData<Bounds> meshData)
+        public override GameObject Convert(MeshData<Vector3> meshData)
         {
             /*meshData = meshData.Simplify(
                    5,

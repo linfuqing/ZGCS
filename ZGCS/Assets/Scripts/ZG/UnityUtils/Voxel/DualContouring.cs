@@ -1214,15 +1214,15 @@ namespace ZG.Voxel
                 __ContourCellProc(new NodeInfo(__root.type, __root.block.corners, new Info(0, Vector3Int.zero)), tileProcessor);
             }
 
-            public bool Build(TileProcessor tileProcessor, out MeshData<Bounds> meshData)
+            public bool Build(TileProcessor tileProcessor, out MeshData<Vector3> meshData)
             {
-                List<MeshData<Bounds>.Vertex> vertices = null;
-                List< MeshData<Bounds>.Triangle> triangles = null;
+                List<MeshData<Vector3>.Vertex> vertices = null;
+                List< MeshData<Vector3>.Triangle> triangles = null;
                 Dictionary<Info, int> indices = null;
                 Build((x, y, z, w, axis, offset) =>
                 {
                     int indexX, indexY, indexZ, indexW;
-                    MeshData<Bounds>.Vertex vertexX, vertexY, vertexZ, vertexW;
+                    MeshData<Vector3>.Vertex vertexX, vertexY, vertexZ, vertexW;
                     if (indices == null)
                         indices = new Dictionary<Info, int>(new InfoIntEqualityComparer());
 
@@ -1237,13 +1237,13 @@ namespace ZG.Voxel
                         if (!Get(x, out block))
                             return 0;
 
-                        vertexX.normal = block.normal.normalized;
+                        vertexX.data = block.normal.normalized;
 
-                        Vector3 min = Vector3.Scale(x.position, __scale) + __offset, max = min + __scale * (1 << (__depth - x.depth));
+                        /*Vector3 min = Vector3.Scale(x.position, __scale) + __offset, max = min + __scale * (1 << (__depth - x.depth));
                         vertexX.data = new Bounds((min + max) * 0.5f, max - min);
-
+                        */
                         if (vertices == null)
-                            vertices = new List<MeshData<Bounds>.Vertex>();
+                            vertices = new List<MeshData<Vector3>.Vertex>();
 
                         indexX = vertices.Count;
 
@@ -1263,13 +1263,13 @@ namespace ZG.Voxel
                         if (!Get(y, out block))
                             return 0;
 
-                        vertexY.normal = block.normal.normalized;
+                        vertexY.data = block.normal.normalized;
 
-                        Vector3 min = Vector3.Scale(y.position, __scale) + __offset, max = min + __scale * (1 << (__depth - y.depth));
+                        /*Vector3 min = Vector3.Scale(y.position, __scale) + __offset, max = min + __scale * (1 << (__depth - y.depth));
                         vertexY.data = new Bounds((min + max) * 0.5f, max - min);
-
+                        */
                         if (vertices == null)
-                            vertices = new List<MeshData<Bounds>.Vertex>();
+                            vertices = new List<MeshData<Vector3>.Vertex>();
 
                         indexY = vertices.Count;
 
@@ -1289,13 +1289,13 @@ namespace ZG.Voxel
                         if (!Get(z, out block))
                             return 0;
 
-                        vertexZ.normal = block.normal.normalized;
+                        vertexZ.data = block.normal.normalized;
 
-                        Vector3 min = Vector3.Scale(z.position, __scale) + __offset, max = min + __scale * (1 << (__depth - z.depth));
-                        vertexZ.data = new Bounds((min + max) * 0.5f, max - min);
+                        /*Vector3 min = Vector3.Scale(z.position, __scale) + __offset, max = min + __scale * (1 << (__depth - z.depth));
+                        vertexZ.data = new Bounds((min + max) * 0.5f, max - min);*/
 
                         if (vertices == null)
-                            vertices = new List<MeshData<Bounds>.Vertex>();
+                            vertices = new List<MeshData<Vector3>.Vertex>();
 
                         indexZ = vertices.Count;
 
@@ -1315,13 +1315,13 @@ namespace ZG.Voxel
                         if (!Get(w, out block))
                             return 0;
 
-                        vertexW.normal = block.normal.normalized;
+                        vertexW.data = block.normal.normalized;
 
-                        Vector3 min = Vector3.Scale(w.position, __scale) + __offset, max = min + __scale * (1 << (__depth - w.depth));
+                        /*Vector3 min = Vector3.Scale(w.position, __scale) + __offset, max = min + __scale * (1 << (__depth - w.depth));
                         vertexW.data = new Bounds((min + max) * 0.5f, max - min);
-
+                        */
                         if (vertices == null)
-                            vertices = new List<MeshData<Bounds>.Vertex>();
+                            vertices = new List<MeshData<Vector3>.Vertex>();
 
                         indexW = vertices.Count;
 
@@ -1333,7 +1333,7 @@ namespace ZG.Voxel
                     int index = tileProcessor == null ? 0 : tileProcessor(x, y, z, w, axis, offset);
 
                     if (triangles == null)
-                        triangles = new List<MeshData<Bounds>.Triangle>();
+                        triangles = new List<MeshData<Vector3>.Triangle>();
                     
                     /*Qef qef = new Qef();
                     qef.Add(new Qef.Data(vertexX.position, vertexX.normal));
@@ -1357,21 +1357,21 @@ namespace ZG.Voxel
                     qef.Add(new Qef.Data(vertexZ.position, vertexZ.normal));
                     destination += Mathf.Abs(qef.GetError(qef.Solve(__sweeps)));*/
 
-                    if (Vector3.Dot(vertexY.normal, vertexZ.normal) > Vector3.Dot(vertexX.normal, vertexW.normal))
+                    if (Vector3.Dot(vertexY.data, vertexZ.data) > Vector3.Dot(vertexX.data, vertexW.data))
                     {
-                        triangles.Add(new MeshData<Bounds>.Triangle(index, new Vector3Int(indexX, indexY, indexZ)));
-                        triangles.Add(new MeshData<Bounds>.Triangle(index, new Vector3Int(indexZ, indexY, indexW)));
+                        triangles.Add(new MeshData<Vector3>.Triangle(index, new Vector3Int(indexX, indexY, indexZ)));
+                        triangles.Add(new MeshData<Vector3>.Triangle(index, new Vector3Int(indexZ, indexY, indexW)));
                     }
                     else
                     {
-                        triangles.Add(new MeshData<Bounds>.Triangle(index, new Vector3Int(indexX, indexY, indexW)));
-                        triangles.Add(new MeshData<Bounds>.Triangle(index, new Vector3Int(indexX, indexW, indexZ)));
+                        triangles.Add(new MeshData<Vector3>.Triangle(index, new Vector3Int(indexX, indexY, indexW)));
+                        triangles.Add(new MeshData<Vector3>.Triangle(index, new Vector3Int(indexX, indexW, indexZ)));
                     }
 
                     return index;
                 });
 
-                meshData = new MeshData<Bounds>(vertices == null ? null : vertices.ToArray(), triangles == null ? null : triangles.ToArray());
+                meshData = new MeshData<Vector3>(vertices == null ? null : vertices.ToArray(), triangles == null ? null : triangles.ToArray());
 
                 return meshData.vertices != null && meshData.triangles != null;
             }

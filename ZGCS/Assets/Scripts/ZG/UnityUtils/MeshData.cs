@@ -10,15 +10,12 @@ namespace ZG
         public struct Vertex
         {
             public Vector3 position;
-
-            public Vector3 normal;
             
             public T data;
 
-            public Vertex(Vector3 position, Vector3 normal, T data)
+            public Vertex(Vector3 position, T data)
             {
                 this.position = position;
-                this.normal = normal;
                 this.data = data;
             }
         }
@@ -178,7 +175,7 @@ namespace ZG
             bool aboveX, aboveY, aboveZ, result;
             float enter, invMagnitude;
             Vertex vertexX, vertexY, vertexZ;
-            Vector3 position, normal;
+            Vector3 position;
             Triangle triangle;
             for (int i = 0; i < triangleCount; ++i)
             {
@@ -239,22 +236,20 @@ namespace ZG
                     position += vertexZ.position;
 
                     enter *= invMagnitude;
-
-                    normal = (vertexX.normal - vertexZ.normal) * enter + vertexZ.normal;
-
+                    
                     if (verticesX == null)
                         verticesX = new List<Vertex>();
 
                     indexXU = verticesX.Count;
 
-                    verticesX.Add(new Vertex(position, normal, lerp(enter, vertexZ.data, vertexX.data)));
+                    verticesX.Add(new Vertex(position, lerp(enter, vertexZ.data, vertexX.data)));
 
                     if (verticesY == null)
                         verticesY = new List<Vertex>();
 
                     indexYU = verticesY.Count;
 
-                    verticesY.Add(new Vertex(position, normal, lerp(enter, vertexZ.data, vertexX.data)));
+                    verticesY.Add(new Vertex(position, lerp(enter, vertexZ.data, vertexX.data)));
 
                     position = vertexY.position - vertexZ.position;
                     invMagnitude = position.magnitude;
@@ -267,21 +262,19 @@ namespace ZG
 
                     enter *= invMagnitude;
 
-                    normal = (vertexY.normal - vertexZ.normal) * enter + vertexZ.normal;
-
                     if (verticesX == null)
                         verticesX = new List<Vertex>();
 
                     indexXV = verticesX.Count;
 
-                    verticesX.Add(new Vertex(position, normal, lerp(enter, vertexZ.data, vertexY.data)));
+                    verticesX.Add(new Vertex(position, lerp(enter, vertexZ.data, vertexY.data)));
 
                     if (verticesY == null)
                         verticesY = new List<Vertex>();
 
                     indexYV = verticesY.Count;
 
-                    verticesY.Add(new Vertex(position, normal, lerp(enter, vertexZ.data, vertexY.data)));
+                    verticesY.Add(new Vertex(position, lerp(enter, vertexZ.data, vertexY.data)));
 
                     if (result)
                     {
@@ -331,79 +324,6 @@ namespace ZG
             }
             else
                 y = default(MeshData<T>);
-        }
-
-        public Mesh ToMesh(Mesh mesh, ref Dictionary<int, int> subMeshIndices)
-        {
-            int numVertices = vertices == null ? 0 : vertices.Length;
-            if (numVertices < 1)
-                return null;
-
-            int numTriangles = triangles == null ? 0 : triangles.Length;
-            if (numTriangles < 1)
-                return null;
-
-            int i;
-            Vertex vertex;
-            Vector3[] positions = new Vector3[numVertices];
-            Vector3[] normals = new Vector3[numVertices];
-            for(i = 0; i < numVertices; ++i)
-            {
-                vertex = vertices[i];
-                positions[i] = vertex.position;
-                normals[i] = vertex.normal;
-            }
-
-            if (subMeshIndices != null)
-                subMeshIndices.Clear();
-
-            int index;
-            Triangle triangle;
-            List<int> indices;
-            List<List<int>> indexMap = null;
-            for(i = 0; i < numTriangles; ++i)
-            {
-                triangle = triangles[i];
-                
-                if (subMeshIndices == null)
-                    subMeshIndices = new Dictionary<int, int>();
-
-                if (subMeshIndices.TryGetValue(triangle.subMeshIndex, out index))
-                    indices = indexMap[index];
-                else
-                {
-                    if (indexMap == null)
-                        indexMap = new List<List<int>>();
-
-                    subMeshIndices[triangle.subMeshIndex] = indexMap.Count;
-
-                    indices = new List<int>();
-
-                    indexMap.Add(indices);
-                }
-
-                indices.Add(triangle.instance.x);
-                indices.Add(triangle.instance.y);
-                indices.Add(triangle.instance.z);
-            }
-
-            int numSubMeshes = indexMap == null ? 0 : indexMap.Count;
-            if (numSubMeshes < 1)
-                return null;
-
-            if (mesh == null)
-                mesh = new Mesh();
-            else
-                mesh.Clear();
-
-            mesh.vertices = positions;
-            mesh.normals = normals;
-
-            mesh.subMeshCount = numSubMeshes;
-            for (i = 0; i < numSubMeshes; ++i)
-                mesh.SetTriangles(indexMap[i].ToArray(), i);
-            
-            return mesh;
         }
 
         public Mesh ToFlatMesh(Mesh mesh, ref Dictionary<int, int> subMeshIndices)
@@ -476,23 +396,6 @@ namespace ZG
 
     public static class MeshData
     {
-
-        private struct CollapseVertex
-        {
-            public Vector3 position;
-
-            public Vector3 normal;
-
-            public Bounds bounds;
-
-            public CollapseVertex(Vector3 position, Vector3 normal, Bounds bounds)
-            {
-                this.position = position;
-                this.normal = normal;
-                this.bounds = bounds;
-            }
-        }
-
         private struct CollapseEdge
         {
             public int index;
@@ -511,18 +414,91 @@ namespace ZG
             return x.y == y.y ? x.x - y.x : x.y - y.y;
         }
 
-        public static Bounds Lerp(float t, Bounds x, Bounds y)
+        public static Vector3 Lerp(float t, Vector3 x, Vector3 y)
         {
-            return new Bounds(Vector3.Lerp(x.center, y.center, t), x.size);
+            return (y - x) * t + x;
         }
 
-        public static void Split(this IList<KeyValuePair<Vector3Int, MeshData<Bounds>>> result, Bounds bounds, Vector3Int segments)
+        public static void Split(this IList<KeyValuePair<Vector3Int, MeshData<Vector3>>> result, Bounds bounds, Vector3Int segments)
         {
-            MeshData<Bounds>.Split(result, Lerp, bounds, segments);
+            MeshData<Vector3>.Split(result, Lerp, bounds, segments);
         }
         
-        public static MeshData<Bounds> Simplify(
-            this MeshData<Bounds> meshData, 
+        public static Mesh ToMesh(this MeshData<Vector3> data, Mesh mesh, ref Dictionary<int, int> subMeshIndices)
+        {
+            int numVertices = data.vertices == null ? 0 : data.vertices.Length;
+            if (numVertices < 1)
+                return null;
+
+            int numTriangles = data.triangles == null ? 0 : data.triangles.Length;
+            if (numTriangles < 1)
+                return null;
+
+            int i;
+            MeshData<Vector3>.Vertex vertex;
+            Vector3[] positions = new Vector3[numVertices];
+            Vector3[] normals = new Vector3[numVertices];
+            for (i = 0; i < numVertices; ++i)
+            {
+                vertex = data.vertices[i];
+                positions[i] = vertex.position;
+                normals[i] = vertex.data;
+            }
+
+            if (subMeshIndices != null)
+                subMeshIndices.Clear();
+
+            int index;
+            MeshData<Vector3>.Triangle triangle;
+            List<int> indices;
+            List<List<int>> indexMap = null;
+            for (i = 0; i < numTriangles; ++i)
+            {
+                triangle = data.triangles[i];
+
+                if (subMeshIndices == null)
+                    subMeshIndices = new Dictionary<int, int>();
+
+                if (subMeshIndices.TryGetValue(triangle.subMeshIndex, out index))
+                    indices = indexMap[index];
+                else
+                {
+                    if (indexMap == null)
+                        indexMap = new List<List<int>>();
+
+                    subMeshIndices[triangle.subMeshIndex] = indexMap.Count;
+
+                    indices = new List<int>();
+
+                    indexMap.Add(indices);
+                }
+
+                indices.Add(triangle.instance.x);
+                indices.Add(triangle.instance.y);
+                indices.Add(triangle.instance.z);
+            }
+
+            int numSubMeshes = indexMap == null ? 0 : indexMap.Count;
+            if (numSubMeshes < 1)
+                return null;
+
+            if (mesh == null)
+                mesh = new Mesh();
+            else
+                mesh.Clear();
+
+            mesh.vertices = positions;
+            mesh.normals = normals;
+
+            mesh.subMeshCount = numSubMeshes;
+            for (i = 0; i < numSubMeshes; ++i)
+                mesh.SetTriangles(indexMap[i].ToArray(), i);
+
+            return mesh;
+        }
+
+        public static MeshData<Vector3> Simplify(
+            this MeshData<Vector3> meshData, 
             int sweeps,
             int minCollapseDegree,
             int maxCollapseDegree,
@@ -531,7 +507,8 @@ namespace ZG
             float edgeFraction,
             float minAngleCosine,
             float maxEdgeSize,
-            float maxError)
+            float maxError, 
+            Func<int, int, Bounds> boundsGetter)
         {
             int numTriangles = meshData.triangles == null ? 0 : meshData.triangles.Length;
             if (numTriangles < 1)
@@ -539,7 +516,7 @@ namespace ZG
 
             int i, numEdges = numTriangles * 3;
             Vector2Int[] edges = new Vector2Int[numEdges];
-            MeshData<Bounds>.Triangle triangle;
+            MeshData<Vector3>.Triangle triangle;
             for (i = 0; i < numTriangles; ++i)
             {
                 triangle = meshData.triangles[i];
@@ -611,13 +588,13 @@ namespace ZG
             float error;
             Vector2Int edge;
             Vector3 point, min, max;
-            MeshData<Bounds>.Vertex x, y;
-            CollapseVertex collapseVertex;
+            Bounds bounds;
+            MeshData<Vector3>.Vertex x, y, collapseVertex;
             Qef qef;
-            MeshData<Bounds>.Vertex[] vertices = null;
-            MeshData<Bounds>.Triangle[] triangles = null;
-            List<MeshData<Bounds>.Triangle> triangleBuffer = null;
-            CollapseVertex[] collapseVertices = null;
+            MeshData<Vector3>.Vertex[] vertices = null;
+            MeshData<Vector3>.Triangle[] triangles = null;
+            List<MeshData<Vector3>.Triangle> triangleBuffer = null;
+            MeshData<Vector3>.Vertex[] collapseVertices = null;
             CollapseEdge[] collapseEdges = null;
             int[] collapseTargets = null;
             List<int> collapseValidEdgeIndices = null;
@@ -648,12 +625,12 @@ namespace ZG
                         edge = edges[i];
 
                         if (vertices == null)
-                            vertices = meshData.vertices.Clone() as MeshData<Bounds>.Vertex[];
+                            vertices = meshData.vertices.Clone() as MeshData<Vector3>.Vertex[];
 
                         x = vertices[edge.x];
                         y = vertices[edge.y];
 
-                        if (Vector3.Dot(x.normal, y.normal) < minAngleCosine)
+                        if (Vector3.Dot(x.data, y.data) < minAngleCosine)
                             continue;
 
                         if (Vector3.Distance(x.position, y.position) > maxEdgeSize)
@@ -664,8 +641,8 @@ namespace ZG
                             continue;
 
                         qef = new Qef();
-                        qef.Add(new Qef.Data(x.position, x.normal));
-                        qef.Add(new Qef.Data(y.position, y.normal));
+                        qef.Add(new Qef.Data(x.position, x.data));
+                        qef.Add(new Qef.Data(y.position, y.data));
 
                         point = qef.Solve(sweeps);
 
@@ -682,17 +659,17 @@ namespace ZG
 
                         collapseValidEdgeIndices.Add(i);
 
-                        min = Vector3.Min(x.data.min, y.data.min);// Vector3.Min(x.position, y.position);
-                        max = Vector3.Max(x.data.max, y.data.max);// Vector3.Max(x.position, y.position);
+                        bounds = boundsGetter(edge.x, edge.y);
+                        min = bounds.min;//Vector3.Min(x.data.min, y.data.min);// Vector3.Min(x.position, y.position);
+                        max = bounds.max;//Vector3.Max(x.data.max, y.data.max);// Vector3.Max(x.position, y.position);
 
                         if (collapseVertices == null)
-                            collapseVertices = new CollapseVertex[numRandomEdges];
+                            collapseVertices = new MeshData<Vector3>.Vertex[numRandomEdges];
 
-                        collapseVertices[i] = new CollapseVertex(
+                        collapseVertices[i] = new MeshData<Vector3>.Vertex(
                             point.x < min.x || point.y < min.y || point.z < min.z || point.x > max.x || point.y > max.y || point.z > max.z ?
                             qef.massPoint : point,
-                            (x.normal + y.normal).normalized,
-                            new Bounds((min + max) * 0.5f, max - min));
+                            (x.data + y.data).normalized);
 
                         if (collapseEdges == null)
                         {
@@ -735,7 +712,7 @@ namespace ZG
 
                         collapseVertex = collapseVertices[collapseValidEdgeIndex];
 
-                        vertices[edge.x] = new MeshData<Bounds>.Vertex(collapseVertex.position, collapseVertex.normal, collapseVertex.bounds);
+                        vertices[edge.x] = new MeshData<Vector3>.Vertex(collapseVertex.position, collapseVertex.data);
                     }
                 }
 
@@ -744,7 +721,7 @@ namespace ZG
 
                 if (triangles == null)
                 {
-                    triangles = new MeshData<Bounds>.Triangle[numTriangles];
+                    triangles = new MeshData<Vector3>.Triangle[numTriangles];
                     Array.Copy(meshData.triangles, triangles, numTriangles);
                 }
 
@@ -776,7 +753,7 @@ namespace ZG
                     vertexTriangleCounts[triangle.instance.z] += 1;
 
                     if (triangleBuffer == null)
-                        triangleBuffer = new List<MeshData<Bounds>.Triangle>();
+                        triangleBuffer = new List<MeshData<Vector3>.Triangle>();
 
                     triangleBuffer.Add(triangle);
                 }
@@ -812,7 +789,7 @@ namespace ZG
             if (triangleBuffer != null)
                 triangleBuffer.Clear();
 
-            List<MeshData<Bounds>.Vertex> vertexBuffer = null;
+            List<MeshData<Vector3>.Vertex> vertexBuffer = null;
             Dictionary<int, int> indices = null;
             for (i = 0; i < numTriangles; ++i)
             {
@@ -827,7 +804,7 @@ namespace ZG
                 if (!indices.TryGetValue(triangle.instance.x, out index))
                 {
                     if (vertexBuffer == null)
-                        vertexBuffer = new List<MeshData<Bounds>.Vertex>();
+                        vertexBuffer = new List<MeshData<Vector3>.Vertex>();
 
                     index = vertexBuffer.Count;
 
@@ -844,7 +821,7 @@ namespace ZG
                 if (!indices.TryGetValue(triangle.instance.y, out index))
                 {
                     if (vertexBuffer == null)
-                        vertexBuffer = new List<MeshData<Bounds>.Vertex>();
+                        vertexBuffer = new List<MeshData<Vector3>.Vertex>();
 
                     index = vertexBuffer.Count;
 
@@ -858,7 +835,7 @@ namespace ZG
                 if (!indices.TryGetValue(triangle.instance.z, out index))
                 {
                     if (vertexBuffer == null)
-                        vertexBuffer = new List<MeshData<Bounds>.Vertex>();
+                        vertexBuffer = new List<MeshData<Vector3>.Vertex>();
 
                     index = vertexBuffer.Count;
 
@@ -870,12 +847,12 @@ namespace ZG
                 triangle.instance.z = index;
 
                 if (triangleBuffer == null)
-                    triangleBuffer = new List<MeshData<Bounds>.Triangle>();
+                    triangleBuffer = new List<MeshData<Vector3>.Triangle>();
 
                 triangleBuffer.Add(triangle);
             }
 
-            return new MeshData<Bounds>(vertexBuffer == null ? null : vertexBuffer.ToArray(), triangleBuffer == null ? null : triangleBuffer.ToArray());
+            return new MeshData<Vector3>(vertexBuffer == null ? null : vertexBuffer.ToArray(), triangleBuffer == null ? null : triangleBuffer.ToArray());
         }
     }
 }

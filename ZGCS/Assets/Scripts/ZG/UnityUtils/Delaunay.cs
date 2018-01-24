@@ -481,142 +481,11 @@ namespace ZG
             });
         }
         
-        public Mesh ToMesh(Mesh mesh, bool isFlat, Rect rect, MeshInfo[] meshInfos, IMapInfo[] mapInfos)
-        {
-            int numMeshInfos = meshInfos == null ? 0 : meshInfos.Length;
-            if (numMeshInfos < 1)
-                return null;
-
-            if (mesh == null)
-                mesh = new Mesh();
-
-            bool result;
-            int numMapInfos = mapInfos == null ? 0 : mapInfos.Length, count = __vertices.Count, index = 0, i;
-            float x, y, z, height;
-            Vector2 vertex;
-            MeshInfo meshInfo;
-            IMapInfo mapInfo;
-            int[] layers = new int[count];
-            Vector3[] vertices = new Vector3[count];
-            Color[] colors = new Color[count];
-            Dictionary<int, int> indices = null;
-            foreach(KeyValuePair<int, Vertex> pair in (IEnumerable<KeyValuePair<int, Vertex>>)__vertices)
-            {
-                vertex = pair.Value.position;
-                x = (vertex.x - rect.x) / rect.width;
-                y = (vertex.y - rect.y) / rect.height;
-
-                height = 0.0f;
-                for (i = 0; i < numMeshInfos; ++i)
-                {
-                    meshInfo = meshInfos[i];
-                    result = true;
-                    z = 0.0f;
-                    if(meshInfo.items != null)
-                    {
-                        foreach(MeshInfo.Item item in meshInfo.items)
-                        {
-                            mapInfo = item.index >= 0 && item.index < numMapInfos ? mapInfos[item.index] : null;
-                            z = mapInfo == null ? 0.0f : mapInfo.Get(x, y);
-                            if (z < item.min || z > item.max)
-                            {
-                                result = false;
-
-                                break;
-                            }
-                        }
-                    }
-
-                    if (result)
-                    {
-                        layers[index] |= 1 << i;
-
-                        z = z * meshInfo.scale + meshInfo.offset;
-
-                        height = meshInfo.isOverlap ? Mathf.Max(z, height) : z + height;
-
-                        colors[index] = meshInfo.color;
-                    }
-                }
-
-                vertices[index] = new Vector3(
-                    vertex.x,
-                    height, 
-                    vertex.y);
-
-                if (indices == null)
-                    indices = new Dictionary<int, int>();
-
-                indices[pair.Key] = index;
-
-                ++index;
-            }
-
-            count = __triangles.count;
-            count *= 3;
-            index = 0;
-
-            int[] triangles = new int[count];
-            if (isFlat)
-            {
-                int colorIndex, indexX, indexY, indexZ;
-                Vector3 vertexX, vertexY, vertexZ;
-                Vector3[] targetVertices = new Vector3[count];
-                Color[] targetColors = new Color[count];
-                foreach (Triangle triangle in (IEnumerable<Triangle>)__triangles)
-                {
-                    indexX = indices[triangle.vertexIndexX];
-                    indexY = indices[triangle.vertexIndexY];
-                    indexZ = indices[triangle.vertexIndexZ];
-
-                    vertexX = vertices[indexX];
-                    vertexY = vertices[indexY];
-                    vertexZ = vertices[indexZ];
-
-                    targetVertices[index + 0] = vertexX;
-                    targetVertices[index + 1] = vertexY;
-                    targetVertices[index + 2] = vertexZ;
-
-                    colorIndex = vertexX.y < vertexY.y ? (vertexY.y < vertexZ.y ? indexZ : indexY) : (vertexX.y < vertexZ.y ? indexZ : indexX);
-
-                    targetColors[index + 0] = colors[colorIndex];
-                    targetColors[index + 1] = colors[colorIndex];
-                    targetColors[index + 2] = colors[colorIndex];
-
-                    index += 3;
-                }
-
-                vertices = targetVertices;
-                colors = targetColors;
-
-                for (i = 0; i < count; ++i)
-                    triangles[i] = i;
-            }
-            else
-            {
-                foreach (Triangle triangle in (IEnumerable<Triangle>)__triangles)
-                {
-                    triangles[index++] = indices[triangle.vertexIndexX];
-                    triangles[index++] = indices[triangle.vertexIndexY];
-                    triangles[index++] = indices[triangle.vertexIndexZ];
-                }
-            }
-
-            mesh.vertices = vertices;
-            mesh.colors = colors;
-            mesh.triangles = triangles;
-
-            mesh.RecalculateNormals();
-            mesh.RecalculateBounds();
-
-            return mesh;
-        }
-
-        public Mesh ToMesh(Mesh mesh, bool isFlat, System.Func<Vector2, float> heightGetter)
+        public bool ToMesh(System.Func<int, float> heightGetter, out MeshData<int> meshData)
         {
             int count = __vertices.Count, i;
             Vertex vertex;
-            List<Vector3> vertices = null;
+            List<MeshData<int>.Vertex> vertices = null;
             Dictionary<int, int> indices = null;
             foreach (KeyValuePair<int, Vertex> pair in (IEnumerable<KeyValuePair<int, Vertex>>)__vertices)
             {
@@ -625,104 +494,51 @@ namespace ZG
                     continue;
 
                 if (vertices == null)
-                    vertices = new List<Vector3>();
+                    vertices = new List<MeshData<int>.Vertex>();
 
                 if (indices == null)
                     indices = new Dictionary<int, int>();
 
-                indices[pair.Key] = vertices.Count;
+                i = pair.Key;
+
+                indices[i] = vertices.Count;
                 
-                vertices.Add(new Vector3(
+                vertices.Add(new MeshData<int>.Vertex(new Vector3(
                     vertex.position.x,
-                    heightGetter == null ? 0.0f : heightGetter(vertex.position),
-                    vertex.position.y));
+                    heightGetter == null ? 0.0f : heightGetter(i),
+                    vertex.position.y), i));
             }
 
             count = __triangles.count;
             count *= 3;
 
             int indexX, indexY, indexZ;
-            Vector3 vertexX, vertexY, vertexZ;
-            int[] triangles = null;
-            if (isFlat)
+            MeshData<int>.Vertex vertexX, vertexY, vertexZ;
+            List<MeshData<int>.Triangle> triangles = null;
+            foreach (Triangle triangle in (IEnumerable<Triangle>)__triangles)
             {
-                List<Vector3> targetVertices = null;
-                foreach (Triangle triangle in (IEnumerable<Triangle>)__triangles)
-                {
-                    indexX = indices[triangle.vertexIndexX];
-                    indexY = indices[triangle.vertexIndexY];
-                    indexZ = indices[triangle.vertexIndexZ];
+                indexX = indices[triangle.vertexIndexX];
+                indexY = indices[triangle.vertexIndexY];
+                indexZ = indices[triangle.vertexIndexZ];
 
-                    vertexX = vertices[indexX];
-                    vertexY = vertices[indexY];
-                    vertexZ = vertices[indexZ];
+                vertexX = vertices[indexX];
+                vertexY = vertices[indexY];
+                vertexZ = vertices[indexZ];
 
-                    if (vertexX == vertexY || vertexY == vertexZ || vertexX == vertexZ)
-                        continue;
+                if (vertexX.position == vertexY.position || vertexY.position == vertexZ.position || vertexX.position == vertexZ.position)
+                    continue;
 
-                    if (targetVertices == null)
-                        targetVertices = new List<Vector3>();
+                if (triangles == null)
+                    triangles = new List<MeshData<int>.Triangle>();
 
-                    targetVertices.Add(vertexX);
-                    targetVertices.Add(vertexY);
-                    targetVertices.Add(vertexZ);
-                }
-
-                if (targetVertices == null)
-                    return null;
-
-                vertices = targetVertices;
-
-                count = targetVertices.Count;
-                triangles = new int[count];
-
-                for (i = 0; i < count; ++i)
-                    triangles[i] = i;
-            }
-            else
-            {
-                List<int> targetTriangles = null;
-                foreach (Triangle triangle in (IEnumerable<Triangle>)__triangles)
-                {
-                    indexX = indices[triangle.vertexIndexX];
-                    indexY = indices[triangle.vertexIndexY];
-                    indexZ = indices[triangle.vertexIndexZ];
-
-                    vertexX = vertices[indexX];
-                    vertexY = vertices[indexY];
-                    vertexZ = vertices[indexZ];
-
-                    if (vertexX == vertexY || vertexY == vertexZ || vertexX == vertexZ)
-                        continue;
-
-                    if (targetTriangles == null)
-                        targetTriangles = new List<int>();
-
-                    targetTriangles.Add(indices[triangle.vertexIndexX]);
-                    targetTriangles.Add(indices[triangle.vertexIndexY]);
-                    targetTriangles.Add(indices[triangle.vertexIndexZ]);
-                }
-
-                if (targetTriangles == null)
-                    return null;
-
-                triangles = targetTriangles.ToArray();
+                triangles.Add(new MeshData<int>.Triangle(0, new Vector3Int(indices[triangle.vertexIndexX], indices[triangle.vertexIndexY], indices[triangle.vertexIndexZ])));
             }
 
-            if (mesh == null)
-                mesh = new Mesh();
-            else
-                mesh.Clear();
+            meshData = new MeshData<int>(vertices.ToArray(), triangles.ToArray());
 
-            mesh.vertices = vertices.ToArray();
-            mesh.triangles = triangles;
-
-            mesh.RecalculateNormals();
-            mesh.RecalculateBounds();
-
-            return mesh;
+            return true;
         }
-
+        
         private int __MakeTriangle(int vertexIndexX, int vertexIndexY, int vertexIndexZ)
         {
             Vertex vertexX = __vertices[vertexIndexX], vertexY = __vertices[vertexIndexY], vertexZ = __vertices[vertexIndexZ];
