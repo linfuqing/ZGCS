@@ -326,6 +326,76 @@ namespace ZG
                 y = default(MeshData<T>);
         }
 
+        public Mesh ToMesh(Mesh mesh, ref Dictionary<int, int> subMeshIndices)
+        {
+            int numVertices = vertices == null ? 0 : vertices.Length;
+            if (numVertices < 1)
+                return null;
+
+            int numTriangles = triangles == null ? 0 : triangles.Length;
+            if (numTriangles < 1)
+                return null;
+
+            int i;
+            MeshData<T>.Vertex vertex;
+            Vector3[] positions = new Vector3[numVertices];
+            for (i = 0; i < numVertices; ++i)
+            {
+                vertex = vertices[i];
+                positions[i] = vertex.position;
+            }
+
+            if (subMeshIndices != null)
+                subMeshIndices.Clear();
+
+            int index;
+            MeshData<T>.Triangle triangle;
+            List<int> indices;
+            List<List<int>> indexMap = null;
+            for (i = 0; i < numTriangles; ++i)
+            {
+                triangle = triangles[i];
+
+                if (subMeshIndices == null)
+                    subMeshIndices = new Dictionary<int, int>();
+
+                if (subMeshIndices.TryGetValue(triangle.subMeshIndex, out index))
+                    indices = indexMap[index];
+                else
+                {
+                    if (indexMap == null)
+                        indexMap = new List<List<int>>();
+
+                    subMeshIndices[triangle.subMeshIndex] = indexMap.Count;
+
+                    indices = new List<int>();
+
+                    indexMap.Add(indices);
+                }
+
+                indices.Add(triangle.instance.x);
+                indices.Add(triangle.instance.y);
+                indices.Add(triangle.instance.z);
+            }
+
+            int numSubMeshes = indexMap == null ? 0 : indexMap.Count;
+            if (numSubMeshes < 1)
+                return null;
+
+            if (mesh == null)
+                mesh = new Mesh();
+            else
+                mesh.Clear();
+
+            mesh.vertices = positions;
+
+            mesh.subMeshCount = numSubMeshes;
+            for (i = 0; i < numSubMeshes; ++i)
+                mesh.SetTriangles(indexMap[i].ToArray(), i);
+
+            return mesh;
+        }
+
         public Mesh ToFlatMesh(Mesh mesh, ref Dictionary<int, int> subMeshIndices)
         {
             int numVertices = vertices == null ? 0 : vertices.Length;

@@ -172,7 +172,19 @@ namespace ZG.Voxel
 
             public MapFilter[] mapFilters;
         }
-        
+
+        [Serializable]
+        public struct DrawInfo
+        {
+            public string name;
+            
+            public float countPerUnit;
+            
+            public GameObject gameObject;
+
+            public MapFilter[] mapFilters;
+        }
+
         public new class Engine : ProcessorEx.Engine
         {
             private struct Chunk
@@ -213,7 +225,7 @@ namespace ZG.Voxel
 
                     __lineInfos = lineInfos;
                 }
-
+                
                 public bool Set(int index, float x, float y, MapInfo[] mapInfos)
                 {
                     int lineIndex = __GetLineIndex(x, y, __lineInfos, mapInfos);
@@ -710,7 +722,235 @@ namespace ZG.Voxel
                     return -1;
                 }
             }
-            
+
+            public class Drawer
+            {
+                private Vector2 __scale;
+                private System.Random __random;
+                private MapInfo[] __mapInfos;
+                private DrawInfo[] __drawInfos;
+                private HashSet<Vector2Int>[] __drawers;
+                private List<Vector3Int> __triangles;
+
+                public Drawer(System.Random random)
+                {
+                    __random = random;
+                }
+
+                public void Create(Vector2 scale, DrawInfo[] drawInfos, MapInfo[] mapInfos)
+                {
+                    int numDrawInfos = drawInfos == null ? 0 : drawInfos.Length;
+                    if (__drawers == null || __drawers.Length < numDrawInfos)
+                        Array.Resize(ref __drawers, numDrawInfos);
+
+                    HashSet<Vector2Int> drawer;
+                    for (int i = 0; i < numDrawInfos; ++i)
+                    {
+                        drawer = __drawers[i];
+                        if (drawer != null)
+                            drawer.Clear();
+                    }
+                    
+                    __scale = scale;
+
+                    __drawInfos = drawInfos;
+                    __mapInfos = mapInfos;
+                }
+
+                public void Set(int index, Vector2Int point)
+                {
+                    int numDrawInfos = __drawInfos == null ? 0 : __drawInfos.Length;
+                    float result;
+                    HashSet<Vector2Int> drawer;
+                    for (int i = 0; i < numDrawInfos; ++i)
+                    {
+                        if (__Get(point.x * __scale.x, point.y * __scale.y, __mapInfos, __drawInfos[i].mapFilters, out result))
+                        {
+                            drawer = __drawers[i];
+                            if(drawer == null)
+                            {
+                                drawer = new HashSet<Vector2Int>();
+                                __drawers[i] = drawer;
+                            }
+
+                            drawer.Add(point);
+                        }
+                    }
+                }
+
+                public void Do(Action<Instance> instantiate, Engine engine)
+                {
+                    if (instantiate == null)
+                        return;
+
+                    bool result;
+                    int count = Mathf.Min(__drawInfos == null ? 0 : __drawInfos.Length, __drawers == null ? 0 : __drawers.Length), numPoints, i, j, k;
+                    Vector2 point, min, max, size, x, y, z, temp;
+                    Delaunay delaunay;
+                    HashSet<Vector2Int> drawer;
+                    Func<int, float> heightGetter;
+                    for(i = 0; i < count; ++i)
+                    {
+                        drawer = __drawers[i];
+                        numPoints = drawer == null ? 0 : drawer.Count;
+                        if (numPoints < 1)
+                            continue;
+
+                        min = new Vector2(float.MaxValue, float.MaxValue);
+                        max = new Vector2(float.MinValue, float.MinValue);
+                        foreach(Vector2Int pointToDraw in drawer)
+                        {
+                            point = Vector2.Scale(pointToDraw, __scale);
+
+                            min = Vector2.Min(min, point);
+                            max = Vector2.Max(max, point);
+                        }
+
+                        min -= __scale;
+                        max += __scale;
+
+                        size = max - min;
+                        delaunay = new Delaunay(new Rect(min, size), 0);
+                        foreach (Vector2Int pointToDraw in drawer)
+                        {
+                            result = false;
+                            for (j = -1; j < 2; ++j)
+                            {
+                                for (k = -1; k < 2; ++k)
+                                {
+                                    if (j == 0 && k == 0)
+                                        continue;
+
+                                    if (!drawer.Contains(pointToDraw + new Vector2Int(j, k)))
+                                    {
+                                        result = true;
+
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if (!result)
+                                continue;
+
+                            delaunay.AddPoint(Vector2.Scale(pointToDraw, __scale));
+                        }
+
+                        if (__triangles != null)
+                            __triangles.Clear();
+
+                        DrawInfo drawInfo = __drawInfos[i];
+
+                        delaunay.DeleteFrames(triangle =>
+                        {
+                            if (triangle.x < 4 || triangle.y < 4 || triangle.z < 4)
+                                return true;
+                            
+                            if (!delaunay.Get(triangle.x, out x))
+                                return true;
+
+                            if (!delaunay.Get(triangle.y, out y))
+                                return true;
+
+                            if (!delaunay.Get(triangle.z, out z))
+                                return true;
+
+                            float value;
+
+                            point = (x + y) * 0.5f;
+                            if (!__Get(point.x, point.y, __mapInfos, drawInfo.mapFilters, out value))
+                                return true;
+
+                            point = (y + z) * 0.5f;
+                            if (!__Get(point.x, point.y, __mapInfos, drawInfo.mapFilters, out value))
+                                return true;
+
+                            point = (z + x) * 0.5f;
+                            if (!__Get(point.x, point.y, __mapInfos, drawInfo.mapFilters, out value))
+                                return true;
+
+                            if (__triangles == null)
+                                __triangles = new List<Vector3Int>();
+
+                            __triangles.Add(triangle);
+
+                            return false;
+                        });
+
+                        heightGetter = pointIndex =>
+                        {
+                            if (!delaunay.Get(pointIndex, out point))
+                                return 0.0f;
+
+                            float value;
+                            if (!__Get(point.x, point.y, __mapInfos, drawInfo.mapFilters, out value))
+                                return 0.0f;
+
+                            return value;
+                        };
+
+                        MeshData<int> meshForCollide;
+                        result = delaunay.ToMesh(heightGetter, out meshForCollide);
+
+                        if (__triangles != null)
+                        {
+                            numPoints = Mathf.RoundToInt((size.x * size.y) * drawInfo.countPerUnit);
+                            for (j = 0; j < numPoints; ++j)
+                            {
+                                temp = new Vector2((float)(__random.NextDouble() * size.x + min.x), (float)(__random.NextDouble() * size.y + min.y));
+                                foreach (Vector3Int triangle in __triangles)
+                                {
+                                    if (!delaunay.Get(triangle.x, out x))
+                                        continue;
+
+                                    if (!delaunay.Get(triangle.y, out y))
+                                        continue;
+
+                                    if (!delaunay.Get(triangle.z, out z))
+                                        continue;
+
+                                    if ((temp - x).Cross(y - x) > 0.0f && (temp - y).Cross(z - y) > 0.0f && (temp - z).Cross(x - z) > 0.0f)
+                                    {
+                                        delaunay.AddPoint(temp);
+
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        
+                        MeshData<int> meshForRender;
+                        if (delaunay.ToMesh(heightGetter, out meshForRender))
+                        {
+                            instantiate(new Instance(drawInfo.gameObject, null, target =>
+                            {
+                                GameObject instance = target as GameObject;
+                                if (instance == null)
+                                    return;
+
+                                Dictionary<int, int> subMeshIndices = null;
+
+                                MeshFilter meshFilter = instance.AddComponent<MeshFilter>();
+                                if (meshFilter != null)
+                                    meshFilter.sharedMesh = meshForRender.ToFlatMesh(null, ref subMeshIndices);
+
+                                if (result)
+                                {
+                                    MeshCollider meshCollider = instance.AddComponent<MeshCollider>();
+                                    if (meshCollider != null)
+                                    {
+                                        subMeshIndices = null;
+
+                                        meshCollider.sharedMesh = meshForCollide.ToMesh(null, ref subMeshIndices);
+                                    }
+                                }
+                            }));
+                        }
+                    }
+                }
+            }
+
+
             public IBuilder builder;
 
             private int __noiseSize;
@@ -719,7 +959,7 @@ namespace ZG.Voxel
 
             private System.Random __random;
             private PerlinNoise3 __noise;
-            private Liner __liner;
+            private Drawer __drawer;
             //private float[] __results;
             private float[] __layers;
             private List<ProcessorEx.Block> __blocks;
@@ -756,7 +996,7 @@ namespace ZG.Voxel
                 return Mathf.Max(volumeInfo.Get(__noise, point.x, point.y, point.z) / volumeInfo.scale.magnitude, result);// Mathf.Clamp(volumeInfo.Get(__noise, point.x, point.y, point.z) / (volumeInfo.scale.y * scale.y), -1.0f, 1.0f);
             }
             
-            public bool Create(float increment, Vector2Int position, MapInfo[] mapInfos, VolumeInfo[] volumeInfos, LayerInfo[] layerInfos, LineInfo[] lineInfos, Action<Instance> instantiate)
+            public bool Create(float increment, Vector2Int position, MapInfo[] mapInfos, VolumeInfo[] volumeInfos, LayerInfo[] layerInfos, DrawInfo[] drawInfos, Action<Instance> instantiate)
             {
                 lock (__chunks)
                 {
@@ -778,11 +1018,12 @@ namespace ZG.Voxel
                     if (__layers == null || __layers.Length < numLayerInfos)
                         __layers = new float[numLayerInfos];
 
-                    if (__liner == null)
-                        __liner = new Liner(__random);
+                    if (__drawer == null)
+                        __drawer = new Drawer(__random);
 
-                    __liner.Create(lineInfos);
+                    __drawer.Create(new Vector2(scale.x, scale.z), drawInfos, mapInfos);
 
+                    Vector2Int offset = position;
                     position = Vector2Int.Scale(position, __mapSize);
 
                     float x = position.x * scale.x, y, length;
@@ -807,7 +1048,7 @@ namespace ZG.Voxel
                                 if (__Check(point.x, point.z, mapInfos, layerInfo.filters, out current))
                                 {
                                     current = (layerInfo.power > 0.0f ? Mathf.Pow(current, layerInfo.power) : current) * layerInfo.scale + layerInfo.offset;
-                                    current = current + (layerInfo.layer > 0 ? __layers[layerInfo.layer] : 0.0f);
+                                    current = current + (layerInfo.layer >= 0 ? __layers[layerInfo.layer] : 0.0f);
 
                                     if (layerInfo.max > 0.0f)
                                         current = Mathf.Min(current, layerInfo.max);
@@ -1031,7 +1272,7 @@ namespace ZG.Voxel
                                 __layers[k] = previous;
                             }
 
-                            //__liner.Set(index, point.x, point.z, mapInfos);
+                            __drawer.Set(index, new Vector2Int(position.x + i, position.y + j));
 
                             chunk.count = __blocks.Count - chunk.index;
 
@@ -1047,14 +1288,56 @@ namespace ZG.Voxel
                         point.z += scale.z;
                     }
 
+                    if (__chunks.ContainsKey(new Vector2Int(offset.x, offset.y - 1)))
+                    {
+                        Vector2Int target = new Vector2Int(position.x, position.y - 1);
+                        for (i = 0; i < __mapSize.x; ++i)
+                        {
+                            __drawer.Set(index, target);
+
+                            ++target.x;
+                        }
+                    }
+
+                    if (__chunks.ContainsKey(new Vector2Int(offset.x, offset.y + 1)))
+                    {
+                        Vector2Int target = new Vector2Int(position.x, position.y + __mapSize.y);
+                        for (i = 0; i < __mapSize.x; ++i)
+                        {
+                            __drawer.Set(index, target);
+
+                            ++target.x;
+                        }
+                    }
+
+                    if (__chunks.ContainsKey(new Vector2Int(offset.x - 1, offset.y)))
+                    {
+                        Vector2Int target = new Vector2Int(position.x - 1, position.y);
+                        for (i = 0; i < __mapSize.y; ++i)
+                        {
+                            __drawer.Set(index, target);
+
+                            ++target.y;
+                        }
+                    }
+
+                    if (__chunks.ContainsKey(new Vector2Int(offset.x + 1, offset.y)))
+                    {
+                        Vector2Int target = new Vector2Int(position.x + __mapSize.x, position.y);
+                        for (i = 0; i < __mapSize.y; ++i)
+                        {
+                            __drawer.Set(index, target);
+
+                            ++target.y;
+                        }
+                    }
+
+                    __drawer.Do(instantiate, this);
+
                     if (min <= max)
                     {
-                        Vector3Int offset = new Vector3Int(position.x, min, position.y), extends = new Vector3Int(__mapSize.x, max - min, __mapSize.y);
-
-                        __liner.Do(increment, offset, extends, this, chunks, instantiate);
-
                         if (builder != null)
-                            builder.Set(new BoundsInt(offset, extends));
+                            builder.Set(new BoundsInt(new Vector3Int(position.x, min, position.y), new Vector3Int(__mapSize.x, max - min, __mapSize.y)));
                     }
                 }
                 return true;
@@ -1177,6 +1460,7 @@ namespace ZG.Voxel
         public LayerInfo[] layerInfos;
         public ObjectInfo[] objectInfos;
         public LineInfo[] lineInfos;
+        public DrawInfo[] drawInfos;
 
         public Material[] materials;
         public GameObject[] gameObjects;
@@ -1230,7 +1514,7 @@ namespace ZG.Voxel
                 for (i = min.x; i <= max.x; ++i)
                 {
                     for(j = min.y; j <= max.y; ++j)
-                        engine.Create(increment, new Vector2Int(i, j), mapInfos, volumeInfos, layerInfos, lineInfos, Instantiate);
+                        engine.Create(increment, new Vector2Int(i, j), mapInfos, volumeInfos, layerInfos, drawInfos, Instantiate);
                 }
             }
             
@@ -1454,6 +1738,39 @@ namespace ZG.Voxel
                             }
                             
                             result *= 1.0f - Mathf.Clamp01(Mathf.Abs(temp - filter.center) * filter.scale + filter.offset);
+                        }
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        private static bool __Get(float x, float y, MapInfo[] mapInfos, MapFilter[] filters, out float result)
+        {
+            result = 0.0f;
+            int numFilters = filters == null ? 0 : filters.Length;
+            if (numFilters > 0)
+            {
+                int numMaps = mapInfos == null ? 0 : mapInfos.Length;
+                if (numMaps > 0)
+                {
+                    float temp;
+                    MapFilter filter;
+                    for (int i = 0; i < numFilters; ++i)
+                    {
+                        filter = filters[i];
+                        if (filter.index >= 0 && filter.index < numMaps)
+                        {
+                            temp = mapInfos[filter.index].Get(x, y);
+                            if (temp < filter.min || temp > filter.max)
+                            {
+                                result = 0.0f;
+
+                                return false;
+                            }
+
+                            result += Mathf.Abs(temp - filter.center) * filter.scale + filter.offset;
                         }
                     }
                 }

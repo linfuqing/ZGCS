@@ -534,7 +534,7 @@ namespace ZG
                 triangles.Add(new MeshData<int>.Triangle(0, new Vector3Int(indices[triangle.vertexIndexX], indices[triangle.vertexIndexY], indices[triangle.vertexIndexZ])));
             }
 
-            meshData = new MeshData<int>(vertices.ToArray(), triangles.ToArray());
+            meshData = new MeshData<int>(vertices == null ? null : vertices.ToArray(), triangles == null ? null : triangles.ToArray());
 
             return true;
         }
