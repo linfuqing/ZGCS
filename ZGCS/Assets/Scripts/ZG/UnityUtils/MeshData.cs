@@ -577,8 +577,7 @@ namespace ZG
             float edgeFraction,
             float minAngleCosine,
             float maxEdgeSize,
-            float maxError, 
-            Func<int, int, Bounds> boundsGetter)
+            float maxError)
         {
             int numTriangles = meshData.triangles == null ? 0 : meshData.triangles.Length;
             if (numTriangles < 1)
@@ -658,9 +657,9 @@ namespace ZG
             float error;
             Vector2Int edge;
             Vector3 point, min, max;
-            Bounds bounds;
             MeshData<Vector3>.Vertex x, y, collapseVertex;
             Qef qef;
+            System.Random random = null;
             MeshData<Vector3>.Vertex[] vertices = null;
             MeshData<Vector3>.Triangle[] triangles = null;
             List<MeshData<Vector3>.Triangle> triangleBuffer = null;
@@ -675,7 +674,10 @@ namespace ZG
                 {
                     for (i = 1; i < numRandomEdges; ++i)
                     {
-                        index = UnityEngine.Random.Range(i, numEdges);
+                        if (random == null)
+                            random = new System.Random();
+
+                        index = random.Next(i, numEdges);
                         edge = edges[index];
                         edges[index] = edges[i - 1];
                         edges[i - 1] = edge;
@@ -728,10 +730,9 @@ namespace ZG
                             collapseValidEdgeIndices = new List<int>();
 
                         collapseValidEdgeIndices.Add(i);
-
-                        bounds = boundsGetter(edge.x, edge.y);
-                        min = bounds.min;//Vector3.Min(x.data.min, y.data.min);// Vector3.Min(x.position, y.position);
-                        max = bounds.max;//Vector3.Max(x.data.max, y.data.max);// Vector3.Max(x.position, y.position);
+                        
+                        min = Vector3.Min(x.position, y.position);
+                        max = Vector3.Max(x.position, y.position);
 
                         if (collapseVertices == null)
                             collapseVertices = new MeshData<Vector3>.Vertex[numRandomEdges];
@@ -855,7 +856,7 @@ namespace ZG
                 if (numEdges > 0)
                     edgeBuffer.CopyTo(edges);
             }
-
+            
             if (triangleBuffer != null)
                 triangleBuffer.Clear();
 

@@ -10,7 +10,8 @@ namespace ZG.Voxel
         public enum Flag
         {
             Boundary = 0x01, 
-            CastShadows = 0x02
+            CastShadows = 0x02, 
+            Collide = 0x04
         }
 
         [Serializable]
@@ -21,6 +22,16 @@ namespace ZG.Voxel
 
             //public int depth;
             public int qefSweeps;
+            
+            public int minCollapseDegree;
+            public int maxCollapseDegree;
+            public int maxIterations;
+            public float targetPecentage;
+            public float edgeFraction;
+            public float minAngleCosine;
+            public float maxEdgeSize;
+            public float maxError;
+
             //public float qefError;
             public float threshold;
 
@@ -123,12 +134,13 @@ namespace ZG.Voxel
         }
         
         public delegate int TileProcessor(
+            int level, 
+            DualContouring.Axis axis,
+            Vector3Int offset,
             DualContouring.Octree.Info x,
             DualContouring.Octree.Info y, 
             DualContouring.Octree.Info z, 
             DualContouring.Octree.Info w, 
-            DualContouring.Axis axis, 
-            Vector3Int offset, 
             DualContouring.Octree octree);
 
         public TileProcessor tileProcessor;
@@ -432,9 +444,23 @@ namespace ZG.Voxel
                     {
                         if (octree.Build((x, y, z, w, aixs, offset) =>
                         {
-                            return tileProcessor == null ? 0 : tileProcessor(x, y, z, w, aixs, offset, octree);
+                            return tileProcessor == null ? 0 : tileProcessor(i, aixs, offset, x, y, z, w, octree);
                         }, out mesh))
                         {
+                            if(level.minCollapseDegree > 0)
+                            {
+                                mesh = mesh.Simplify(
+                                    level.qefSweeps,
+                                    level.minCollapseDegree,
+                                    level.maxCollapseDegree,
+                                    level.maxIterations,
+                                    level.targetPecentage,
+                                    level.edgeFraction,
+                                    level.minAngleCosine,
+                                    level.maxEdgeSize,
+                                    level.maxError);
+                            }
+
                             if (meshes == null)
                                 meshes = new List<KeyValuePair<Vector3Int, MeshData<Vector3>>>[numLevels];
 
@@ -493,7 +519,7 @@ namespace ZG.Voxel
                     --__count;
                 }
             } while (result == null);
-
+            
             return true;
         }
 
@@ -538,10 +564,12 @@ namespace ZG.Voxel
                         MeshData<Vector3> instance;
                         Transform root = null, parent = null, child;
                         GameObject local, world;
+                        MeshCollider meshCollider;
                         LODGroup lodGroup;
                         IDictionary<Vector3Int, MeshData<Vector3>> destination;
                         List<LOD> lods;
                         List<Renderer> renderers = null;
+                        List<MeshFilter> meshFilters = null;
                         foreach (KeyValuePair<Vector3Int, MeshData<Vector3>> mesh in source)
                         {
                             world = null;
@@ -555,7 +583,9 @@ namespace ZG.Voxel
                                 if (destination == null || !destination.TryGetValue(position, out instance))
                                     continue;
 
-                                local = Convert(instance);
+                                level = meshData.info.levels[i];
+
+                                local = Convert(instance, level);
                                 if (local == null)
                                     continue;
 
@@ -586,14 +616,6 @@ namespace ZG.Voxel
 
                                 local.GetComponentsInChildren(renderers);
 
-                                level = meshData.info.levels[i];
-
-                                if ((level.flag & Flag.CastShadows) == 0)
-                                {
-                                    foreach (Renderer renderer in renderers)
-                                        renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-                                }
-                                
                                 lod.screenRelativeTransitionHeight = level.screenRelativeTransitionHeight;
                                 lod.fadeTransitionWidth = level.fadeTransitionWidth;
                                 lod.renderers = renderers.ToArray();
@@ -602,6 +624,51 @@ namespace ZG.Voxel
                                     lods = new List<LOD>();
 
                                 lods.Add(lod);
+
+                                foreach (Renderer renderer in renderers)
+                                    renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+
+                                if ((level.flag & Flag.CastShadows) != 0)
+                                {
+                                    local = UnityEngine.Object.Instantiate(local, parent);
+                                    if (local != null)
+                                    {
+                                        local.GetComponentsInChildren(renderers);
+
+                                        foreach (Renderer renderer in renderers)
+                                            renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly;
+                                    }
+                                }
+                                
+                                if ((level.flag |= Flag.Collide) != 0)
+                                {
+                                    local = UnityEngine.Object.Instantiate(local, parent);
+                                    if (local != null)
+                                    {
+                                        local.GetComponentsInChildren(renderers);
+                                        if (local != null)
+                                        {
+                                            foreach (Renderer renderer in renderers)
+                                                UnityEngine.Object.Destroy(renderer);
+                                            
+                                            if (meshFilters == null)
+                                                meshFilters = new List<MeshFilter>();
+
+                                            local.GetComponentsInChildren(meshFilters);
+                                            foreach(MeshFilter meshFilter in meshFilters)
+                                            {
+                                                local = meshFilter == null ? null : meshFilter.gameObject;
+                                                meshCollider = local == null ? null : local.AddComponent<MeshCollider>();
+                                                if (meshCollider != null)
+                                                {
+                                                    meshCollider.sharedMesh = meshFilter.sharedMesh;
+
+                                                    UnityEngine.Object.Destroy(meshFilter);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                             }
 
                             if (lodGroup != null && lods != null)
@@ -612,39 +679,44 @@ namespace ZG.Voxel
                     }
                     else
                     {
-                        GameObject instance;
-                        List<GameObject> gameObjects = null;
-                        foreach (KeyValuePair<Vector3Int, MeshData<Vector3>> mesh in source)
-                        {
-                            instance = Convert(mesh.Value);
-                            if (instance == null)
-                                continue;
-
-                            if (gameObjects == null)
-                                gameObjects = new List<GameObject>();
-
-                            gameObjects.Add(instance);
-                        }
-
                         gameObject = null;
 
-                        if (gameObjects != null)
+                        Level level = meshData.info.levels[0];
+                        Transform parent = null, child;
+                        GameObject instance;
+                        List<Renderer> renderers = null;
+                        foreach (KeyValuePair<Vector3Int, MeshData<Vector3>> mesh in source)
                         {
-                            Transform parent = null, child;
-                            foreach(GameObject target in gameObjects)
+                            instance = Convert(mesh.Value, level);
+                            if (instance == null)
+                                continue;
+                            
+                            child = instance == null ? null : instance.transform;
+                            if (child == null)
+                                continue;
+
+                            if (gameObject == null)
                             {
-                                child = target == null ? null : target.transform;
-                                if (child == null)
-                                    continue;
+                                gameObject = new GameObject();
 
-                                if (gameObject == null)
-                                {
-                                    gameObject = new GameObject();
+                                parent = gameObject.transform;
+                            }
 
-                                    parent = gameObject.transform;
-                                }
+                            child.SetParent(parent);
+                            
+                            if (renderers == null)
+                                renderers = new List<Renderer>();
 
-                                child.SetParent(parent);
+                            instance.GetComponentsInChildren(renderers);
+                            if ((level.flag & Flag.CastShadows) == 0)
+                            {
+                                foreach (Renderer renderer in renderers)
+                                    renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                            }
+                            else
+                            {
+                                foreach (Renderer renderer in renderers)
+                                    renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
                             }
                         }
                     }
@@ -695,7 +767,7 @@ namespace ZG.Voxel
 
         public abstract DualContouring.IBuilder Create(int depth, Vector3 scale);
 
-        public abstract GameObject Convert(MeshData<Vector3> meshData);
+        public abstract GameObject Convert(MeshData<Vector3> meshData, Level level);
 
         private bool __Check(Info info, BoundsInt bounds)
         {

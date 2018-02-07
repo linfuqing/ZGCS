@@ -732,33 +732,48 @@ namespace ZG
 
             path = Path.Combine("Assets", path);
 
+            int i, j, numMeshFilters;
             string name, temp;
+            GameObject gameObject;
             Mesh mesh;
+            MeshFilter meshFilter;
             List<MeshFilter> meshFilters = null;
-            foreach (GameObject gameObject in gameObjects)
+            for(i = 0; i < numGameObjects; ++i)
             {
+                gameObject = gameObjects[i];
                 if (gameObject == null)
                     continue;
 
                 name = Path.Combine(path, gameObject.name);
+
+                if (EditorUtility.DisplayCancelableProgressBar("Save GameObjects..", name, i * 1.0f / numGameObjects))
+                    break;
 
                 if (meshFilters == null)
                     meshFilters = new List<MeshFilter>();
 
                 gameObject.GetComponentsInChildren(meshFilters);
 
-                if(meshFilters != null)
+                numMeshFilters = meshFilters == null ? 0 : meshFilters.Count;
+                if (numMeshFilters > 0)
                 {
                     EditorHelper.CreateFolder(name);
 
-                    foreach(MeshFilter meshFilter in meshFilters)
+                    for (j = 0; j < numMeshFilters; ++j)
                     {
+                        meshFilter = meshFilters[j];
+                        if (meshFilter == null)
+                            continue;
+
                         mesh = meshFilter == null ? null : meshFilter.sharedMesh;
                         if (mesh == null)
                             continue;
 
                         if (AssetDatabase.IsNativeAsset(mesh))
                             continue;
+
+                        if (EditorUtility.DisplayCancelableProgressBar("Save Mesh Filters..", meshFilter.name, j * 1.0f / numMeshFilters))
+                            break;
 
                         temp = mesh.name;
                         if (string.IsNullOrEmpty(temp))
@@ -773,6 +788,8 @@ namespace ZG
                 
                 PrefabUtility.CreatePrefab(AssetDatabase.GenerateUniqueAssetPath(name + ".prefab"), gameObject);
             }
+            
+            EditorUtility.ClearProgressBar();
         }
 
         [MenuItem("GameObject/ZG/Mesh/Split", false, 10)]

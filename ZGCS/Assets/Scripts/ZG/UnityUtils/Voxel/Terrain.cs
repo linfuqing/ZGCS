@@ -23,6 +23,8 @@ namespace ZG.Voxel
         [Serializable]
         public struct MapFilter
         {
+            public bool isInverce;
+
             [Index("mapInfos", pathLevel = 2, uniqueLevel = 1)]
             public int index;
             public float min;
@@ -124,9 +126,14 @@ namespace ZG.Voxel
             {
                 None,
                 AixY,
+                NormalUp, 
+                NormalAixY, 
                 All
             }
-
+#if UNITY_EDITOR
+            public string name;
+#endif
+            
             public Rotation rotation;
 
             [Index("gameObjects", pathLevel = 1, uniqueLevel = 2)]
@@ -137,6 +144,8 @@ namespace ZG.Voxel
             public float dot;
 
             public float offset;
+
+            public float height;
 
             public Vector3 normal;
             
@@ -149,8 +158,9 @@ namespace ZG.Voxel
         [Serializable]
         public struct LineInfo
         {
+#if UNITY_EDITOR
             public string name;
-
+#endif
             [Index("materials", pathLevel = 1)]
             public int materialIndex;
 
@@ -176,8 +186,9 @@ namespace ZG.Voxel
         [Serializable]
         public struct DrawInfo
         {
+#if UNITY_EDITOR
             public string name;
-            
+#endif
             public float countPerUnit;
             
             public GameObject gameObject;
@@ -894,26 +905,29 @@ namespace ZG.Voxel
 
                         if (__triangles != null)
                         {
-                            numPoints = Mathf.RoundToInt((size.x * size.y) * drawInfo.countPerUnit);
-                            for (j = 0; j < numPoints; ++j)
+                            lock (__random)
                             {
-                                temp = new Vector2((float)(__random.NextDouble() * size.x + min.x), (float)(__random.NextDouble() * size.y + min.y));
-                                foreach (Vector3Int triangle in __triangles)
+                                numPoints = Mathf.RoundToInt((size.x * size.y) * drawInfo.countPerUnit);
+                                for (j = 0; j < numPoints; ++j)
                                 {
-                                    if (!delaunay.Get(triangle.x, out x))
-                                        continue;
-
-                                    if (!delaunay.Get(triangle.y, out y))
-                                        continue;
-
-                                    if (!delaunay.Get(triangle.z, out z))
-                                        continue;
-
-                                    if ((temp - x).Cross(y - x) > 0.0f && (temp - y).Cross(z - y) > 0.0f && (temp - z).Cross(x - z) > 0.0f)
+                                    temp = new Vector2((float)(__random.NextDouble() * size.x + min.x), (float)(__random.NextDouble() * size.y + min.y));
+                                    foreach (Vector3Int triangle in __triangles)
                                     {
-                                        delaunay.AddPoint(temp);
+                                        if (!delaunay.Get(triangle.x, out x))
+                                            continue;
 
-                                        break;
+                                        if (!delaunay.Get(triangle.y, out y))
+                                            continue;
+
+                                        if (!delaunay.Get(triangle.z, out z))
+                                            continue;
+
+                                        if ((temp - x).Cross(y - x) > 0.0f && (temp - y).Cross(z - y) > 0.0f && (temp - z).Cross(x - z) > 0.0f)
+                                        {
+                                            delaunay.AddPoint(temp);
+
+                                            break;
+                                        }
                                     }
                                 }
                             }
@@ -986,8 +1000,11 @@ namespace ZG.Voxel
                 if (__noise == null)
                 {
                     PerlinNoise3.RandomValue[] randomValues = new PerlinNoise3.RandomValue[__noiseSize];
-                    for (int i = 0; i < __noiseSize; ++i)
-                        randomValues[i] = new PerlinNoise3.RandomValue((float)__random.NextDouble(), (float)__random.NextDouble());
+                    lock (__random)
+                    {
+                        for (int i = 0; i < __noiseSize; ++i)
+                            randomValues[i] = new PerlinNoise3.RandomValue((float)__random.NextDouble(), (float)__random.NextDouble());
+                    }
 
                     __noise = new PerlinNoise3(randomValues);
                 }
@@ -1345,7 +1362,7 @@ namespace ZG.Voxel
 
             public override bool Get(Vector3Int position, out ProcessorEx.Block block)
             {
-                if (__chunks != null)
+                lock (__chunks)
                 {
                     Vector2Int world = new Vector2Int(position.x / __mapSize.x, position.z / __mapSize.y), 
                         local = Vector2Int.Scale(world, __mapSize);
@@ -1398,7 +1415,7 @@ namespace ZG.Voxel
                 if (position.y < 0)
                     return false;
 
-                if (__chunks != null)
+                lock (__chunks)
                 {
                     Vector2Int world = new Vector2Int(position.x / __mapSize.x, position.z / __mapSize.y),
                         local = Vector2Int.Scale(world, __mapSize);
@@ -1521,7 +1538,7 @@ namespace ZG.Voxel
             return base.Create(world, increment);
         }
 
-        public override GameObject Convert(MeshData<Vector3> meshData)
+        public override GameObject Convert(MeshData<Vector3> meshData, Level level)
         {
             /*meshData = meshData.Simplify(
                    5,
@@ -1557,10 +1574,6 @@ namespace ZG.Voxel
                     meshRenderer.sharedMaterials = materials;
             }
 
-            MeshCollider meshCollider = gameObject.AddComponent<MeshCollider>();
-            if (meshCollider != null)
-                meshCollider.sharedMesh = mesh;
-
             return gameObject;
         }
 
@@ -1575,12 +1588,13 @@ namespace ZG.Voxel
         }
         
         private int __GetMaterialIndex(
+            int level, 
+            DualContouring.Axis axis,
+            Vector3Int offset,
             DualContouring.Octree.Info x,
             DualContouring.Octree.Info y,
             DualContouring.Octree.Info z,
             DualContouring.Octree.Info w,
-            DualContouring.Axis axis,
-            Vector3Int offset,
             DualContouring.Octree octree)
         {
             if (octree == null)
@@ -1601,10 +1615,15 @@ namespace ZG.Voxel
                 return -1;
             }
 
+            if (level > 0)
+                return block.materialIndex;
+
             lock(__nodes)
             {
                 if (__nodes.ContainsKey(offset))
                     return block.materialIndex;
+
+                __nodes[offset] = new Node(-1, null);
             }
 
             if (objectInfos != null)
@@ -1616,96 +1635,137 @@ namespace ZG.Voxel
                 DualContouring.Block a, b, c, d;
                 if (!octree.Get(x, out a) || !octree.Get(y, out b) || !octree.Get(z, out c) || !octree.Get(w, out d))
                     return block.materialIndex;
-                
-                lock (__nodes)
-                {
-                    __nodes[offset] = new Node(-1, null);
-                }
-                
-                int numGameObjects = gameObjects == null ? 0 : gameObjects.Length;
-                float chance = 0.0f, random = (float)__random.NextDouble(), temp;
-                Vector3 normal;
-                Plane plane;
-                GameObject gameObject;
-                foreach (ObjectInfo objectInfo in objectInfos)
-                {
-                    chance += objectInfo.chance;
 
-                    if (chance > random && (objectInfo.materialFilters == null || objectInfo.materialFilters.Length < 1 || Array.IndexOf(objectInfo.materialFilters, block.materialIndex) != -1))
+                lock (__random)
+                {
+                    int numGameObjects = gameObjects == null ? 0 : gameObjects.Length;
+                    float temp;
+                    Vector3 normal;
+                    Plane plane;
+                    GameObject gameObject;
+                    foreach (ObjectInfo objectInfo in objectInfos)
                     {
-                        normal = (a.normal + b.normal + c.normal + d.normal).normalized;
-                        if (Vector3.Dot(normal, objectInfo.normal) > objectInfo.dot && __Check(position.x, position.z, mapInfos, objectInfo.mapFilters, out temp) && temp > (float)__random.NextDouble())
+                        if ((objectInfo.materialFilters == null || objectInfo.materialFilters.Length < 1 || Array.IndexOf(objectInfo.materialFilters, block.materialIndex) != -1))
                         {
-                            gameObject = objectInfo.index >= 0 && objectInfo.index < numGameObjects ? gameObjects[objectInfo.index] : null;
-                            if (gameObject == null)
-                                continue;
-                            
-                            int index = objectInfo.index;
-                            
-                            plane = new Plane(normal, point);
-                            Vector3 finalPosition = plane.ClosestPointOnPlane(position) + objectInfo.normal * objectInfo.offset;
-
-                            Quaternion rotation;
-                            switch (objectInfo.rotation)
+                            normal = (a.normal + b.normal + c.normal + d.normal).normalized;
+                            if (Vector3.Dot(normal, objectInfo.normal) > objectInfo.dot &&
+                                __Check(position.x, position.z, mapInfos, objectInfo.mapFilters, out temp) && temp > (float)__random.NextDouble() &&
+                                objectInfo.chance > (float)__random.NextDouble())
                             {
-                                case ObjectInfo.Rotation.AixY:
-                                    rotation = Quaternion.Euler(0.0f, (float)(__random.NextDouble() * 360.0), 0.0f);
-                                    break;
-                                case ObjectInfo.Rotation.All:
-                                    rotation = Quaternion.Euler((float)(__random.NextDouble() * 360.0), (float)(__random.NextDouble() * 360.0), (float)(__random.NextDouble() * 360.0));
-                                    break;
-                                default:
-                                    rotation = Quaternion.identity;
-                                    break;
-                            }
+                                gameObject = objectInfo.index >= 0 && objectInfo.index < numGameObjects ? gameObjects[objectInfo.index] : null;
+                                if (gameObject == null)
+                                    continue;
 
-                            Instantiate(new Instance(gameObject, instance =>
-                            {
-                                GameObject target = instance as GameObject;
-                                if (target == null)
-                                    return false;
-                                List<Collider> colliders = new List<Collider>();
+                                int index = objectInfo.index;
 
-                                target.GetComponentsInChildren(colliders);
-                                foreach (Collider collider in colliders)
+                                plane = new Plane(normal, point);
+                                Vector3 finalPosition = plane.ClosestPointOnPlane(position) + objectInfo.normal * objectInfo.offset;
+
+                                Quaternion rotation;
+                                switch (objectInfo.rotation)
                                 {
-                                    Transform transform = collider == null ? null : collider.transform;
+                                    case ObjectInfo.Rotation.AixY:
+                                        rotation = Quaternion.Euler(0.0f, (float)(__random.NextDouble() * 360.0), 0.0f);
+                                        break;
+                                    case ObjectInfo.Rotation.NormalUp:
+                                        rotation = Quaternion.FromToRotation(Vector3.up, normal);
+                                        break;
+                                    case ObjectInfo.Rotation.NormalAixY:
+                                        rotation = Quaternion.FromToRotation(Vector3.up, normal) * Quaternion.Euler(0.0f, (float)(__random.NextDouble() * 360.0), 0.0f);
+                                        break;
+                                    case ObjectInfo.Rotation.All:
+                                        rotation = Quaternion.Euler((float)(__random.NextDouble() * 360.0), (float)(__random.NextDouble() * 360.0), (float)(__random.NextDouble() * 360.0));
+                                        break;
+                                    default:
+                                        rotation = Quaternion.identity;
+                                        break;
+                                }
+
+                                string name = objectInfo.name;
+                                float height = objectInfo.height;
+                                Instantiate(new Instance(gameObject, instance =>
+                                {
+                                    GameObject target = instance as GameObject;
+                                    if (target == null)
+                                        return false;
+
+                                    List<MeshFilter> meshFilters = new List<MeshFilter>();
+                                    Mesh mesh;
+                                    Transform transform;
+                                    Matrix4x4 matrix = Matrix4x4.Rotate(rotation);
+                                    Bounds bounds;
+                                    Vector3 min, max;
+                                    float radius, sizeY;
+                                    target.GetComponentsInChildren(true, meshFilters);
+                                    foreach (MeshFilter meshFilter in meshFilters)
+                                    {
+                                        mesh = meshFilter == null ? null : meshFilter.sharedMesh;
+                                        if (mesh != null)
+                                        {
+                                            transform = meshFilter.transform;
+                                            if (transform != null)
+                                            {
+                                                bounds = (transform.localToWorldMatrix * matrix).Multiply(mesh.bounds);
+                                                max = bounds.max;
+                                                if (max.y < height)
+                                                    continue;
+
+                                                min = bounds.min;
+                                                if (min.y < height)
+                                                    min.y = height;
+
+                                                max += finalPosition;
+                                                min += finalPosition;
+
+                                                radius = Mathf.Max(max.x - min.x, max.z - min.z);
+                                                sizeY = max.y - min.y;
+                                                if (sizeY > radius)
+                                                {
+                                                    radius *= 0.5f;
+
+                                                    min.y += radius;
+                                                    max.y -= radius;
+                                                    if (Physics.CheckCapsule(
+                                                        min,
+                                                        max,
+                                                        radius,
+                                                        Physics.AllLayers))
+                                                        return false;
+                                                }
+                                                else
+                                                {
+                                                    if (Physics.CheckSphere(
+                                                        (min + max) * 0.5f,
+                                                        sizeY * 0.5f,
+                                                        Physics.AllLayers))
+                                                        return false;
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    return true;
+                                }, instance =>
+                                {
+                                    Node node = new Node(index, instance as GameObject);
+
+                                    Transform transform = node.gameObject == null ? null : node.gameObject.transform;
                                     if (transform != null)
                                     {
-                                        Bounds bounds = collider.bounds;
-                                        if (Physics.CheckBox(transform.position + bounds.center, Vector3.Scale(bounds.extents, transform.lossyScale), transform.rotation))
-                                            return false;
+                                        transform.position = finalPosition;
+                                        transform.rotation = rotation;
+                                        transform.SetParent(root);
                                     }
-                                }
 
-                                return true;
-                            }, instance =>
-                            {
-                                Node node = new Node(index, instance as GameObject);
+                                    lock (__nodes)
+                                    {
+                                        __nodes[offset] = node;
+                                    }
+                                }));
 
-                                Transform transform = node.gameObject == null ? null : node.gameObject.transform;
-                                if (transform != null)
-                                {
-                                    transform.position = finalPosition;
-                                    transform.rotation = rotation;
-                                    transform.SetParent(root);
-                                }
-                                
-                                lock (__nodes)
-                                {
-                                    __nodes[offset] = node;
-                                }
-                            }));
-
-                            break;
+                                break;
+                            }
                         }
-                    }
-
-                    if (chance >= 1.0f)
-                    {
-                        chance = 0.0f;
-
-                        random = (float)__random.NextDouble();
                     }
                 }
             }
@@ -1736,8 +1796,10 @@ namespace ZG.Voxel
 
                                 return false;
                             }
-                            
-                            result *= 1.0f - Mathf.Clamp01(Mathf.Abs(temp - filter.center) * filter.scale + filter.offset);
+
+                            temp = Mathf.Clamp01(Mathf.Abs(temp - filter.center) * filter.scale + filter.offset);
+
+                            result *= filter.isInverce ? temp : 1.0f - temp;
                         }
                     }
                 }
