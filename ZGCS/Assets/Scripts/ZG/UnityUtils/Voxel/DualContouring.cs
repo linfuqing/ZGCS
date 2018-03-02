@@ -144,7 +144,7 @@ namespace ZG.Voxel
                                         continue;
 
                                     point = __parent.ApproximateZeroCrossingPosition(from, to, increment);
-                                    normal = __parent.CalculateSurfaceNormal(point);
+                                    normal = __parent.CalculateSurfaceNormal(point, increment);
                                     for (n = 0; n < 4; ++n)
                                     {
                                         offset = local + __edgeToBlockOffsets[m, n];
@@ -381,7 +381,7 @@ namespace ZG.Voxel
                                     continue;
 
                                 point = __parent.ApproximateZeroCrossingPosition(from, to, increment);
-                                normal = __parent.CalculateSurfaceNormal(point);
+                                normal = __parent.CalculateSurfaceNormal(point, increment);
                                 for (n = 0; n < 4; ++n)
                                 {
                                     offset = local + __edgeToBlockOffsets[m, n];
@@ -1818,10 +1818,10 @@ namespace ZG.Voxel
             return x + (y - x) * result;
         }
 
-        public Vector3 CalculateSurfaceNormal(Vector3 point)
+        public Vector3 CalculateSurfaceNormal(Vector3 point, float increment)
         {
-            Vector3 x = new Vector3(__scale.x, 0.0f, 0.0f), y = new Vector3(0.0f, __scale.y, 0.0f), z = new Vector3(0.0f, 0.0f, __scale.z);
-            //Vector3 x = new Vector3(0.001f, 0.0f, 0.0f), y = new Vector3(0.0f, 0.001f, 0.0f), z = new Vector3(0.0f, 0.0f, 0.001f);
+            //Vector3 x = new Vector3(__scale.x, 0.0f, 0.0f), y = new Vector3(0.0f, __scale.y, 0.0f), z = new Vector3(0.0f, 0.0f, __scale.z);
+            Vector3 x = new Vector3(increment, 0.0f, 0.0f), y = new Vector3(0.0f, increment, 0.0f), z = new Vector3(0.0f, 0.0f, increment);
 
             return new Vector3(
                 GetDensity(point + x) - GetDensity(point - x),
@@ -1884,7 +1884,7 @@ namespace ZG.Voxel
                                 continue;
 
                             point = ApproximateZeroCrossingPosition(from, to, increment);
-                            normal = CalculateSurfaceNormal(point);
+                            normal = CalculateSurfaceNormal(point, increment);
                             for (n = 0; n < 4; ++n)
                             {
                                 offset = local + __edgeToBlockOffsets[m, n];

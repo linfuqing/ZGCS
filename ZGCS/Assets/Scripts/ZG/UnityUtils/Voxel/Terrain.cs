@@ -147,6 +147,8 @@ namespace ZG.Voxel
 
             public float height;
 
+            public float range;
+
             public Vector3 normal;
             
             [Index("materials", pathLevel = 1, uniqueLevel = 1)]
@@ -1349,6 +1351,18 @@ namespace ZG.Voxel
                         }
                     }
 
+                    if (__chunks.ContainsKey(new Vector2Int(offset.x - 1, offset.y - 1)))
+                        __drawer.Set(index, new Vector2Int(position.x - 1, position.y - 1));
+
+                    if (__chunks.ContainsKey(new Vector2Int(offset.x + 1, offset.y - 1)))
+                        __drawer.Set(index, new Vector2Int(position.x + __mapSize.x, position.y - 1));
+
+                    if (__chunks.ContainsKey(new Vector2Int(offset.x - 1, offset.y + 1)))
+                        __drawer.Set(index, new Vector2Int(position.x - 1, position.y + __mapSize.y));
+
+                    if (__chunks.ContainsKey(new Vector2Int(offset.x + 1, offset.y + 1)))
+                        __drawer.Set(index, new Vector2Int(position.x + __mapSize.x, position.y + __mapSize.y));
+
                     __drawer.Do(instantiate, this);
 
                     if (min <= max)
@@ -1659,7 +1673,13 @@ namespace ZG.Voxel
                                 int index = objectInfo.index;
 
                                 plane = new Plane(normal, point);
-                                Vector3 finalPosition = plane.ClosestPointOnPlane(position) + objectInfo.normal * objectInfo.offset;
+                                temp = objectInfo.range * 2.0f;
+                                Vector3 finalPosition = plane.ClosestPointOnPlane(
+                                    position + new Vector3(
+                                        (float)(__random.NextDouble() * temp - objectInfo.range),
+                                        (float)(__random.NextDouble() * temp - objectInfo.range),
+                                        (float)(__random.NextDouble() * temp - objectInfo.range))) 
+                                    + objectInfo.normal * objectInfo.offset;
 
                                 Quaternion rotation;
                                 switch (objectInfo.rotation)

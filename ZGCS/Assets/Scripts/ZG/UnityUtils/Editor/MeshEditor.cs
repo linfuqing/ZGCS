@@ -732,6 +732,7 @@ namespace ZG
 
             path = Path.Combine("Assets", path);
 
+            bool result;
             int i, j, numMeshFilters;
             string name, temp;
             GameObject gameObject;
@@ -744,20 +745,21 @@ namespace ZG
                 if (gameObject == null)
                     continue;
 
-                name = Path.Combine(path, gameObject.name);
+                name = Path.Combine(path, gameObject.name + ".asset");
 
                 if (EditorUtility.DisplayCancelableProgressBar("Save GameObjects..", name, i * 1.0f / numGameObjects))
                     break;
 
+                result = false;
                 if (meshFilters == null)
                     meshFilters = new List<MeshFilter>();
 
                 gameObject.GetComponentsInChildren(meshFilters);
-
+                
                 numMeshFilters = meshFilters == null ? 0 : meshFilters.Count;
                 if (numMeshFilters > 0)
                 {
-                    EditorHelper.CreateFolder(name);
+                    //EditorHelper.CreateFolder(name);
 
                     for (j = 0; j < numMeshFilters; ++j)
                     {
@@ -775,14 +777,25 @@ namespace ZG
                         if (EditorUtility.DisplayCancelableProgressBar("Save Mesh Filters..", meshFilter.name, j * 1.0f / numMeshFilters))
                             break;
 
-                        temp = mesh.name;
+                        //mesh.hideFlags = HideFlags.HideInHierarchy;
+
+                        if (result)
+                            AssetDatabase.AddObjectToAsset(mesh, name);
+                        else
+                        {
+                            result = true;
+
+                            AssetDatabase.CreateAsset(mesh, name);
+                        }
+
+                        /*temp = mesh.name;
                         if (string.IsNullOrEmpty(temp))
                             temp = "mesh";
 
                         temp = Path.Combine(name, temp + ".asset");
                         temp = AssetDatabase.GenerateUniqueAssetPath(temp);
 
-                        AssetDatabase.CreateAsset(mesh, temp);
+                        AssetDatabase.CreateAsset(mesh, temp);*/
                     }
                 }
                 
@@ -1061,6 +1074,217 @@ namespace ZG
             }
 
             EditorUtility.ClearProgressBar();
+        }
+
+        [MenuItem("Assets/ZG/Mesh/Instantiate Sub Material", false, 10)]
+        public static void InstantiateSubMaterial()
+        {
+            UnityEngine.Object[] objects = Selection.objects;
+            int numObjects = objects == null ? 0 : objects.Length;
+            if (numObjects < 1)
+                return;
+
+            MeshRenderer[] renderers = FindObjectsOfType<MeshRenderer>();
+            int numRenderers = renderers == null ? 0 : renderers.Length;
+            if (numRenderers < 1)
+                return;
+
+            const uint MAX_INDEX_COUNT = 65000;
+
+            int i, j, k, temp, numCombineInstances, numVertexIndices, vertexIndex, index;
+            uint numIndices;
+            CombineInstance combineInstance;
+            Mesh mesh;
+            MeshRenderer renderer;
+            MeshFilter meshFilter;
+            GameObject gameObject;
+            Material material;
+            Material[] materials;
+            Vector3[] vertexBuffer;
+            CombineInstance[] results;
+            List<CombineInstance> combineInstances = null;
+            List<Vector3> vertices = null;
+            List<int> indices = null, indexBuffer = null;
+            Dictionary<int, int> indexMap = null;
+            for (i = 0; i < numObjects; ++i)
+            {
+                material = objects[i] as Material;
+                if (material == null)
+                    continue;
+
+                for(j = 0; j < numRenderers; ++j)
+                {
+                    renderer = renderers[j];
+                    gameObject = renderer == null ? null : renderer.gameObject;
+                    if (gameObject == null || !gameObject.isStatic)
+                        continue;
+
+                    materials = renderer == null ? null : renderer.sharedMaterials;
+                    index = materials == null ? -1 : System.Array.IndexOf(materials, material);
+                    if (index == -1)
+                        continue;
+
+                    meshFilter = renderer.GetComponent<MeshFilter>();
+                    mesh = meshFilter == null ? null : meshFilter.sharedMesh;
+                    if (mesh == null)
+                        continue;
+
+                    combineInstance = new CombineInstance();
+                    combineInstance.mesh = mesh;
+                    combineInstance.subMeshIndex = index;
+
+                    if (combineInstances == null)
+                        combineInstances = new List<CombineInstance>();
+
+                    combineInstances.Add(combineInstance);
+                }
+
+                numCombineInstances = combineInstances == null ? 0 : combineInstances.Count;
+                if (numCombineInstances < 1)
+                    continue;
+
+                index = 0;
+                numIndices = 0;
+                for (j = 0; j < numCombineInstances; ++j)
+                {
+                    combineInstance = combineInstances[j];
+                    temp = (int)combineInstance.mesh.GetIndexCount(combineInstance.subMeshIndex);
+                    numIndices += (uint)temp;
+                    if (numIndices > MAX_INDEX_COUNT)
+                    {
+                        numIndices = (uint)temp;
+                        temp = j - index;
+                        results = new CombineInstance[temp];
+
+                        combineInstances.CopyTo(index, results, 0, (int)temp);
+
+                        index = j;
+
+                        mesh = new Mesh();
+                        //mesh.CombineMeshes(results, true, false, false);
+                        
+                        if (vertices != null)
+                            vertices.Clear();
+
+                        if (indices != null)
+                            indices.Clear();
+
+                        foreach (CombineInstance result in results)
+                        {
+                            if (indexBuffer == null)
+                                indexBuffer = new List<int>();
+
+                            vertexBuffer = result.mesh.vertices;
+
+                            result.mesh.GetIndices(indexBuffer, result.subMeshIndex);
+
+                            if (indexMap == null)
+                                indexMap = new Dictionary<int, int>();
+                            else
+                                indexMap.Clear();
+
+                            numVertexIndices = indexBuffer.Count;
+                            for(k = 0; k < numVertexIndices; ++k)
+                            {
+                                vertexIndex = indexBuffer[k];
+                                if (!indexMap.TryGetValue(vertexIndex, out temp))
+                                {
+                                    if (vertices == null)
+                                        vertices = new List<Vector3>();
+
+                                    temp = vertices.Count;
+
+                                    vertices.Add(vertexBuffer[vertexIndex]);
+
+                                    indexMap[vertexIndex] = temp;
+                                }
+
+                                if (indices == null)
+                                    indices = new List<int>();
+
+                                indices.Add(temp);
+                            }
+                        }
+
+                        mesh.vertices = vertices == null ? null : vertices.ToArray();
+                        mesh.triangles = indices == null ? null : indices.ToArray();
+
+                        gameObject = new GameObject(material.name);
+                        meshFilter = gameObject.AddComponent<MeshFilter>();
+                        if (meshFilter != null)
+                            meshFilter.sharedMesh = mesh;
+
+                        renderer = gameObject.AddComponent<MeshRenderer>();
+                        if (renderer != null)
+                            renderer.sharedMaterial = material;
+                    }
+                }
+                
+                temp = numCombineInstances - index;
+                results = new CombineInstance[temp];
+
+                combineInstances.CopyTo(index, results, 0, (int)temp);
+                
+                mesh = new Mesh();
+                //mesh.CombineMeshes(results, true, false, false);
+
+                if (vertices != null)
+                    vertices.Clear();
+
+                if (indices != null)
+                    indices.Clear();
+
+                foreach (CombineInstance result in results)
+                {
+                    if (indexBuffer == null)
+                        indexBuffer = new List<int>();
+
+                    vertexBuffer = result.mesh.vertices;
+
+                    result.mesh.GetIndices(indexBuffer, result.subMeshIndex);
+
+                    if (indexMap == null)
+                        indexMap = new Dictionary<int, int>();
+                    else
+                        indexMap.Clear();
+
+                    numVertexIndices = indexBuffer.Count;
+                    for (k = 0; k < numVertexIndices; ++k)
+                    {
+                        vertexIndex = indexBuffer[k];
+                        if (!indexMap.TryGetValue(vertexIndex, out temp))
+                        {
+                            if (vertices == null)
+                                vertices = new List<Vector3>();
+
+                            temp = vertices.Count;
+
+                            vertices.Add(vertexBuffer[vertexIndex]);
+
+                            indexMap[vertexIndex] = temp;
+                        }
+
+                        if (indices == null)
+                            indices = new List<int>();
+
+                        indices.Add(temp);
+                    }
+                }
+
+                mesh.vertices = vertices == null ? null : vertices.ToArray();
+                mesh.triangles = indices == null ? null : indices.ToArray();
+
+                gameObject = new GameObject(material.name);
+                meshFilter = gameObject.AddComponent<MeshFilter>();
+                if (meshFilter != null)
+                    meshFilter.sharedMesh = mesh;
+
+                renderer = gameObject.AddComponent<MeshRenderer>();
+                if (renderer != null)
+                    renderer.sharedMaterial = material;
+
+                combineInstances.Clear();
+            }
         }
 
         [MenuItem("Window/ZG/Mesh Editor")]

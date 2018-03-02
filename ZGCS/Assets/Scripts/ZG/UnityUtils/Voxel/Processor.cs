@@ -11,7 +11,8 @@ namespace ZG.Voxel
         {
             Boundary = 0x01, 
             CastShadows = 0x02, 
-            Collide = 0x04
+            Collide = 0x04, 
+            Static = 0x08
         }
 
         [Serializable]
@@ -625,26 +626,27 @@ namespace ZG.Voxel
 
                                 lods.Add(lod);
 
-                                foreach (Renderer renderer in renderers)
-                                    renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                                local.isStatic = (level.flag & Flag.Static) != 0;
 
-                                if ((level.flag & Flag.CastShadows) != 0)
+                                if ((level.flag & Flag.CastShadows) == 0)
                                 {
-                                    local = UnityEngine.Object.Instantiate(local, parent);
-                                    if (local != null)
-                                    {
-                                        local.GetComponentsInChildren(renderers);
-
-                                        foreach (Renderer renderer in renderers)
-                                            renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly;
-                                    }
+                                    foreach (Renderer renderer in renderers)
+                                        renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
                                 }
-                                
-                                if ((level.flag |= Flag.Collide) != 0)
+                                else
+                                {
+                                    foreach (Renderer renderer in renderers)
+                                        renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
+                                }
+
+                                if ((level.flag & Flag.Collide) != 0)
                                 {
                                     local = UnityEngine.Object.Instantiate(local, parent);
                                     if (local != null)
                                     {
+                                        if ((level.flag & Flag.Static) != 0)
+                                            local.isStatic = false;
+
                                         local.GetComponentsInChildren(renderers);
                                         if (local != null)
                                         {
@@ -683,14 +685,16 @@ namespace ZG.Voxel
 
                         Level level = meshData.info.levels[0];
                         Transform parent = null, child;
-                        GameObject instance;
+                        GameObject instance, temp;
+                        MeshCollider meshCollider;
                         List<Renderer> renderers = null;
+                        List<MeshFilter> meshFilters = null;
                         foreach (KeyValuePair<Vector3Int, MeshData<Vector3>> mesh in source)
                         {
                             instance = Convert(mesh.Value, level);
                             if (instance == null)
                                 continue;
-                            
+
                             child = instance == null ? null : instance.transform;
                             if (child == null)
                                 continue;
@@ -703,7 +707,9 @@ namespace ZG.Voxel
                             }
 
                             child.SetParent(parent);
-                            
+
+                            instance.isStatic = (level.flag & Flag.Static) != 0;
+
                             if (renderers == null)
                                 renderers = new List<Renderer>();
 
@@ -717,6 +723,22 @@ namespace ZG.Voxel
                             {
                                 foreach (Renderer renderer in renderers)
                                     renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
+                            }
+
+                            if ((level.flag & Flag.Collide) != 0)
+                            {
+                                if (meshFilters == null)
+                                    meshFilters = new List<MeshFilter>();
+
+                                instance.GetComponentsInChildren(meshFilters);
+
+                                foreach (MeshFilter meshFilter in meshFilters)
+                                {
+                                    temp = meshFilter == null ? null : meshFilter.gameObject;
+                                    meshCollider = temp == null ? null : temp.AddComponent<MeshCollider>();
+                                    if (meshCollider != null)
+                                        meshCollider.sharedMesh = meshFilter.sharedMesh;
+                                }
                             }
                         }
                     }
