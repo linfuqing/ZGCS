@@ -1701,7 +1701,7 @@ namespace ZG.Voxel
                                         break;
                                 }
 
-                                string name = objectInfo.name;
+                                //string name = objectInfo.name;
                                 float height = objectInfo.height;
                                 Instantiate(new Instance(gameObject, instance =>
                                 {

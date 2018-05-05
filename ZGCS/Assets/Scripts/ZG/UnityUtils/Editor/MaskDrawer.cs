@@ -17,7 +17,7 @@ namespace ZG
                 case SerializedPropertyType.Enum:
                     FieldInfo fieldInfo = base.fieldInfo;
                     Enum value = fieldInfo == null ? null : Enum.ToObject(fieldInfo.FieldType, property.intValue) as Enum;
-                    value = EditorGUI.EnumMaskField(position, property.displayName, value);
+                    value = EditorGUI.EnumFlagsField(position, property.displayName, value);
                     property.intValue = value == null ? 0 : value.GetHashCode();
                     break;
                 default:

@@ -1183,7 +1183,7 @@ namespace ZG.Voxel
                 if (__engine.Get(__position + from, out block) && block.density <= 0.0f)
                     return int.MaxValue;
 
-                float source = block.density;
+                //float source = block.density;
 
                 if (!__engine.Get(__position + new Vector3Int(from.x, from.y - 1, from.z), out block) || block.density > 0.0f)
                     return int.MaxValue;

@@ -7,6 +7,9 @@ namespace ZG
 {
     public class MeshEditor : EditorWindow
     {
+        private static Dictionary<UnityEngine.Object, UnityEngine.Object> __map;
+        private static string __path;
+
         public const char KEY_SEPARATOR = ',';
 
         public const string KEY_IS_NORMALS_ONLY = "MeshEditorIsNormalsOnly";
@@ -179,25 +182,43 @@ namespace ZG
                 if (Split(plane, source.sharedMesh, out x, out y))
                 {
                     if (x != null)
+                    {
                         source.sharedMesh = x;
+
+                        MeshCollider meshCollider = source.GetComponent<MeshCollider>();
+                        if (meshCollider != null)
+                            meshCollider.sharedMesh = x;
+                    }
 
                     if (y != null)
                     {
                         if (x == null)
+                        {
                             source.sharedMesh = y;
+
+                            MeshCollider meshCollider = source.GetComponent<MeshCollider>();
+                            if (meshCollider != null)
+                                meshCollider.sharedMesh = y;
+                        }
                         else
                         {
                             Transform tranform = source.transform;
                             if (tranform != null)
                             {
-                                tranform.DetachChildren();
+                                //tranform.DetachChildren();
 
                                 tranform = tranform.parent;
                             }
 
                             destination = Instantiate(source, tranform);
                             if (destination != null)
+                            {
                                 destination.sharedMesh = y;
+
+                                MeshCollider meshCollider = destination.GetComponent<MeshCollider>();
+                                if (meshCollider != null)
+                                    meshCollider.sharedMesh = y;
+                            }
                         }
                     }
 
@@ -226,13 +247,26 @@ namespace ZG
             Vector3[] vertices = mesh.vertices;
             Vector2[] uvs0 = mesh.uv, uvs1 = mesh.uv2;
 
+            bool isUVs0, isUVs1;
             int vertexCount = mesh.vertexCount;
 
             if (uvs0 == null || uvs0.Length < vertexCount)
+            {
                 uvs0 = new Vector2[vertexCount];
 
+                isUVs0 = false;
+            }
+            else
+                isUVs0 = true;
+
             if (uvs1 == null || uvs1.Length < vertexCount)
+            {
                 uvs1 = new Vector2[vertexCount];
+
+                isUVs1 = false;
+            }
+            else
+                isUVs1 = true;
 
             bool[] above = new bool[vertexCount];
             int[] indices = new int[vertexCount];
@@ -483,10 +517,17 @@ namespace ZG
 
                 x = new Mesh();
                 x.vertices = tempVertices;
-                x.uv = tempUVs0;
-                x.uv2 = tempUVs1;
+
+                if(isUVs0)
+                    x.uv = tempUVs0;
+
+                if(isUVs1)
+                    x.uv2 = tempUVs1;
 
                 x.triangles = indicesX.ToArray();
+
+                x.RecalculateNormals();
+                x.RecalculateBounds();
             }
             else
                 x = null;
@@ -511,10 +552,17 @@ namespace ZG
 
                 y = new Mesh();
                 y.vertices = tempVertices;
-                y.uv = tempUVs0;
-                y.uv2 = tempUVs1;
+
+                if (isUVs0)
+                    y.uv = tempUVs0;
+
+                if(isUVs1)
+                    y.uv2 = tempUVs1;
 
                 y.triangles = indicesY.ToArray();
+
+                y.RecalculateNormals();
+                y.RecalculateBounds();
             }
             else
                 y = null;
@@ -716,189 +764,200 @@ namespace ZG
         }
 
         [MenuItem("GameObject/ZG/Mesh/Save", false, 10)]
-        public static void Save()
+        public static void Save(MenuCommand menuCommand)
         {
-            GameObject[] gameObjects = Selection.gameObjects;
-            int numGameObjects = gameObjects == null ? 0 : gameObjects.Length;
-            if (numGameObjects < 1)
+            GameObject gameObject = menuCommand == null ? null : menuCommand.context as GameObject;
+            if (gameObject == null)
                 return;
 
-            string path = EditorUtility.SaveFolderPanel("Save Meshes", string.Empty, string.Empty);
-            if(path != null)
-                path = path.Remove(0, Application.dataPath.Length + 1);
+            if (__path == null)
+            {
+                __path = EditorUtility.SaveFolderPanel("Save Meshes", string.Empty, string.Empty);
+                if (string.IsNullOrEmpty(__path))
+                {
+                    __path = null;
 
-            if (string.IsNullOrEmpty(path))
+                    return;
+                }
+
+                __path = __path.Remove(0, Application.dataPath.Length + 1);
+                __path = "Assets/" + __path;
+
+                if (__map != null)
+                    __map.Clear();
+
+                Selection.selectionChanged += __OnSelectionChange;
+            }
+            else if (__path == string.Empty)
                 return;
 
-            path = Path.Combine("Assets", path);
-
-            bool result;
-            int i, j, numMeshFilters;
-            string name, temp;
-            GameObject gameObject;
+            bool result = false;
+            int i, numMeshFilters;
+            string name;
+            UnityEngine.Object instance;
             Mesh mesh;
             MeshFilter meshFilter;
             List<MeshFilter> meshFilters = null;
-            for(i = 0; i < numGameObjects; ++i)
+
+            string path = __path + '/' + gameObject.name;
+
+            name = path + ".asset";
+            
+            if (meshFilters == null)
+                meshFilters = new List<MeshFilter>();
+
+            gameObject.GetComponentsInChildren(meshFilters);
+                
+            numMeshFilters = meshFilters == null ? 0 : meshFilters.Count;
+            if (numMeshFilters > 0)
             {
-                gameObject = gameObjects[i];
-                if (gameObject == null)
-                    continue;
+                //EditorHelper.CreateFolder(name);
 
-                name = Path.Combine(path, gameObject.name + ".asset");
-
-                if (EditorUtility.DisplayCancelableProgressBar("Save GameObjects..", name, i * 1.0f / numGameObjects))
-                    break;
-
-                result = false;
-                if (meshFilters == null)
-                    meshFilters = new List<MeshFilter>();
-
-                gameObject.GetComponentsInChildren(meshFilters);
-                
-                numMeshFilters = meshFilters == null ? 0 : meshFilters.Count;
-                if (numMeshFilters > 0)
+                for (i = 0; i < numMeshFilters; ++i)
                 {
-                    //EditorHelper.CreateFolder(name);
+                    meshFilter = meshFilters[i];
+                    if (meshFilter == null)
+                        continue;
 
-                    for (j = 0; j < numMeshFilters; ++j)
+                    mesh = meshFilter == null ? null : meshFilter.sharedMesh;
+                    if (mesh == null)
+                        continue;
+                    
+                    if (EditorUtility.DisplayCancelableProgressBar("Save Mesh Filters..", meshFilter.name, i * 1.0f / numMeshFilters))
+                        break;
+
+                    if (__map == null)
+                        __map = new Dictionary<UnityEngine.Object, UnityEngine.Object>();
+
+                    if (!__map.TryGetValue(mesh, out instance) || !(instance is Mesh))
                     {
-                        meshFilter = meshFilters[j];
-                        if (meshFilter == null)
-                            continue;
+                        instance = Instantiate(mesh);
 
-                        mesh = meshFilter == null ? null : meshFilter.sharedMesh;
-                        if (mesh == null)
-                            continue;
-
-                        if (AssetDatabase.IsNativeAsset(mesh))
-                            continue;
-
-                        if (EditorUtility.DisplayCancelableProgressBar("Save Mesh Filters..", meshFilter.name, j * 1.0f / numMeshFilters))
-                            break;
-
-                        //mesh.hideFlags = HideFlags.HideInHierarchy;
-
-                        if (result)
-                            AssetDatabase.AddObjectToAsset(mesh, name);
-                        else
-                        {
-                            result = true;
-
-                            AssetDatabase.CreateAsset(mesh, name);
-                        }
-
-                        /*temp = mesh.name;
-                        if (string.IsNullOrEmpty(temp))
-                            temp = "mesh";
-
-                        temp = Path.Combine(name, temp + ".asset");
-                        temp = AssetDatabase.GenerateUniqueAssetPath(temp);
-
-                        AssetDatabase.CreateAsset(mesh, temp);*/
+                        __map[mesh] = instance;
                     }
+
+                    //mesh.hideFlags = HideFlags.HideInHierarchy;
+
+                    if (result)
+                        AssetDatabase.AddObjectToAsset(instance, name);
+                    else
+                    {
+                        result = true;
+
+                        AssetDatabase.CreateAsset(instance, name);
+                    }
+
+                    meshFilter.sharedMesh = instance as Mesh;
+
+                    /*temp = mesh.name;
+                    if (string.IsNullOrEmpty(temp))
+                        temp = "mesh";
+
+                    temp = Path.Combine(name, temp + ".asset");
+                    temp = AssetDatabase.GenerateUniqueAssetPath(temp);
+
+                    AssetDatabase.CreateAsset(mesh, temp);*/
                 }
-                
-                PrefabUtility.CreatePrefab(AssetDatabase.GenerateUniqueAssetPath(name + ".prefab"), gameObject);
             }
+                
+            PrefabUtility.CreatePrefab(path + ".prefab", gameObject);
             
             EditorUtility.ClearProgressBar();
         }
 
         [MenuItem("GameObject/ZG/Mesh/Split", false, 10)]
-        public static void Split()
+        public static void Split(MenuCommand menuCommand)
         {
+            GameObject gameObject = menuCommand == null ? null : menuCommand.context as GameObject;
+            if (gameObject == null)
+                return;
+
             int length = splitSegmentLength, width = splitSegmentWidth, height = splitSegmentHeight;
             if (length < 2 && width < 2 && height < 2)
                 return;
 
-            GameObject[] gameObjects = Selection.gameObjects;
-            int numGameObjects = gameObjects == null ? 0 : gameObjects.Length;
-            if (numGameObjects < 1)
-                return;
-
-            int count = (Mathf.Max(length - 1, 0) + Mathf.Max(width - 1, 0) + Mathf.Max(height, 0)) * numGameObjects, index = 0, i, j, numFilters;
+            int count = (Mathf.Max(length - 1, 0) + Mathf.Max(width - 1, 0) + Mathf.Max(height, 0)), index = 0, i, j, numFilters;
             Bounds bounds = splitBounds;
-            Vector3 center = bounds.center, size = bounds.size;
+            Vector3 center = bounds.center, extents = bounds.extents, segments = new Vector3(extents.x / width, extents.y / height, extents.z / length);
             Transform transform;
             MeshFilter source, destination;
             List<MeshFilter> meshFilters = null;
-            foreach (GameObject gameObject in gameObjects)
+
+            segments *= 2.0f;
+
+            if (meshFilters != null)
+                meshFilters.Clear();
+
+            if (gameObject != null)
             {
-                if (meshFilters != null)
-                    meshFilters.Clear();
+                if (meshFilters == null)
+                    meshFilters = new List<MeshFilter>();
 
-                if (gameObject != null)
+                gameObject.GetComponentsInChildren(true, meshFilters);
+            }
+
+            numFilters = meshFilters == null ? 0 : meshFilters.Count;
+            if (numFilters > 0)
+            {
+                for (i = 1; i < length; ++i)
                 {
-                    if (meshFilters == null)
-                        meshFilters = new List<MeshFilter>();
+                    if (EditorUtility.DisplayCancelableProgressBar("Split Mesh", "Lenght: " + i, index++ * 1.0f / count))
+                    {
+                        EditorUtility.ClearProgressBar();
 
-                    gameObject.GetComponentsInChildren(true, meshFilters);
+                        return;
+                    }
+
+                    for (j = 0; j < numFilters; ++j)
+                    {
+                        source = meshFilters[j];
+                        transform = source == null ? null : source.transform;
+                        if (transform != null && Split(source,
+                            transform.worldToLocalMatrix.TransformPlane(new Plane(Vector3.forward, -(center.z - extents.z + segments.z * i))),
+                            out destination) && destination != null)
+                            meshFilters.Add(destination);
+                    }
                 }
 
-                numFilters = meshFilters == null ? 0 : meshFilters.Count;
-                if (numFilters > 0)
+                numFilters = meshFilters.Count;
+                for (i = 1; i < width; ++i)
                 {
-                    for (i = 1; i < length; ++i)
+                    if (EditorUtility.DisplayCancelableProgressBar("Split Mesh", "Width: " + i, index++ * 1.0f / count))
                     {
-                        if (EditorUtility.DisplayCancelableProgressBar("Split Mesh", "Lenght: " + i, index++ * 1.0f / count))
-                        {
-                            EditorUtility.ClearProgressBar();
+                        EditorUtility.ClearProgressBar();
 
-                            return;
-                        }
-
-                        for (j = 0; j < numFilters; ++j)
-                        {
-                            source = meshFilters[j];
-                            transform = source == null ? null : source.transform;
-                            if (transform != null && Split(source,
-                                transform.worldToLocalMatrix.TransformPlane(new Plane(Vector3.forward, -(center.z + size.z * (i * 1.0f / length - 0.5f)))),
-                                out destination) && destination != null)
-                                meshFilters.Add(destination);
-                        }
+                        return;
                     }
 
-                    numFilters = meshFilters.Count;
-                    for (i = 1; i < width; ++i)
+                    for (j = 0; j < numFilters; ++j)
                     {
-                        if (EditorUtility.DisplayCancelableProgressBar("Split Mesh", "Width: " + i, index++ * 1.0f / count))
-                        {
-                            EditorUtility.ClearProgressBar();
+                        source = meshFilters[j];
+                        transform = source == null ? null : source.transform;
+                        if (transform != null && Split(source,
+                            transform.worldToLocalMatrix.TransformPlane(new Plane(Vector3.right, -(center.x - extents.x + segments.x * i))),
+                            out destination) && destination != null)
+                            meshFilters.Add(destination);
+                    }
+                }
 
-                            return;
-                        }
+                numFilters = meshFilters.Count;
+                for (i = 1; i < height; ++i)
+                {
+                    if (EditorUtility.DisplayCancelableProgressBar("Split Mesh", "Height: " + i, index++ * 1.0f / count))
+                    {
+                        EditorUtility.ClearProgressBar();
 
-                        for (j = 0; j < numFilters; ++j)
-                        {
-                            source = meshFilters[j];
-                            transform = source == null ? null : source.transform;
-                            if (transform != null && Split(source,
-                                transform.worldToLocalMatrix.TransformPlane(new Plane(Vector3.right, -(center.x + size.x * (i * 1.0f / width - 0.5f)))),
-                                out destination) && destination != null)
-                                meshFilters.Add(destination);
-                        }
+                        return;
                     }
 
-                    numFilters = meshFilters.Count;
-                    for (i = 1; i < height; ++i)
+                    for (j = 0; j < numFilters; ++j)
                     {
-                        if (EditorUtility.DisplayCancelableProgressBar("Split Mesh", "Height: " + i, index++ * 1.0f / count))
-                        {
-                            EditorUtility.ClearProgressBar();
-
-                            return;
-                        }
-
-                        for (j = 0; j < numFilters; ++j)
-                        {
-                            source = meshFilters[j];
-                            transform = source == null ? null : source.transform;
-                            if (transform != null && Split(source,
-                                transform.worldToLocalMatrix.TransformPlane(new Plane(Vector3.up, -(center.y + size.y * (i * 1.0f / height - 0.5f)))),
-                                out destination) && destination != null)
-                                meshFilters.Add(destination);
-                        }
+                        source = meshFilters[j];
+                        transform = source == null ? null : source.transform;
+                        if (transform != null && Split(source,
+                            transform.worldToLocalMatrix.TransformPlane(new Plane(Vector3.up, -(center.y - extents.y + segments.y * i))),
+                            out destination) && destination != null)
+                            meshFilters.Add(destination);
                     }
                 }
             }
@@ -907,107 +966,90 @@ namespace ZG
         }
 
         [MenuItem("GameObject/ZG/Mesh/Flat", false, 10)]
-        public static void Flat()
+        public static void Flat(MenuCommand menuCommand)
         {
-            GameObject[] gameObjects = Selection.gameObjects;
-            if (gameObjects == null)
+            GameObject gameObject = menuCommand == null ? null : menuCommand.context as GameObject;
+            if (gameObject == null)
                 return;
 
             Mesh mesh;
             MeshFilter[] meshFilters;
-            foreach (GameObject gameObject in gameObjects)
+            meshFilters = gameObject == null ? null : gameObject.GetComponentsInChildren<MeshFilter>(true);
+            if (meshFilters != null)
             {
-                meshFilters = gameObject == null ? null : gameObject.GetComponentsInChildren<MeshFilter>(true);
-                if (meshFilters != null)
+                foreach (MeshFilter meshFilter in meshFilters)
                 {
-                    foreach (MeshFilter meshFilter in meshFilters)
+                    if (meshFilter != null)
                     {
-                        if (meshFilter != null)
-                        {
-                            mesh = null;
-                            if (Flat(meshFilter.sharedMesh, ref mesh) && mesh != null)
-                                meshFilter.sharedMesh = mesh;
-                        }
+                        mesh = null;
+                        if (Flat(meshFilter.sharedMesh, ref mesh) && mesh != null)
+                            meshFilter.sharedMesh = mesh;
                     }
                 }
             }
         }
 
         [MenuItem("GameObject/ZG/Mesh/Phong", false, 10)]
-        public static void Phong()
+        public static void Phong(MenuCommand menuCommand)
         {
-            GameObject[] gameObjects = Selection.gameObjects;
-            if (gameObjects == null)
+            GameObject gameObject = menuCommand == null ? null : menuCommand.context as GameObject;
+            if (gameObject == null)
                 return;
 
             Mesh mesh;
             MeshFilter[] meshFilters;
-            foreach (GameObject gameObject in gameObjects)
+            meshFilters = gameObject == null ? null : gameObject.GetComponentsInChildren<MeshFilter>(true);
+            if (meshFilters != null)
             {
-                meshFilters = gameObject == null ? null : gameObject.GetComponentsInChildren<MeshFilter>(true);
-                if (meshFilters != null)
+                foreach (MeshFilter meshFilter in meshFilters)
                 {
-                    foreach (MeshFilter meshFilter in meshFilters)
+                    if (meshFilter != null)
                     {
-                        if (meshFilter != null)
-                        {
-                            mesh = null;
-                            if (Phong(isNormalsOnly, isBackupToTangents, meshFilter.sharedMesh, ref mesh) && mesh != null)
-                                meshFilter.sharedMesh = mesh;
-                        }
+                        mesh = null;
+                        if (Phong(isNormalsOnly, isBackupToTangents, meshFilter.sharedMesh, ref mesh) && mesh != null)
+                            meshFilter.sharedMesh = mesh;
                     }
                 }
             }
         }
 
         [MenuItem("GameObject/ZG/Mesh/Generate Per Triangle UV", false, 10)]
-        public static void GeneratePerTriangleUV()
+        public static void GeneratePerTriangleUV(MenuCommand menuCommand)
         {
-            GameObject[] gameObjects = Selection.gameObjects;
-            int numGameObjects = gameObjects == null ? 0 : gameObjects.Length;
-            if (numGameObjects < 1)
+            GameObject gameObject = menuCommand == null ? null : menuCommand.context as GameObject;
+            if (gameObject == null)
                 return;
 
-            int i, j, numMeshFilters;
-            GameObject gameObject;
+            int i, numMeshFilters;
             Mesh mesh;
             MeshFilter meshFilter;
             MeshFilter[] meshFilters;
             HashSet<Mesh> meshes = null;
-            for (i = 0; i < numGameObjects; ++i)
+
+            meshFilters = gameObject.GetComponentsInChildren<MeshFilter>(true);
+            numMeshFilters = meshFilters == null ? 0 : meshFilters.Length;
+            if (numMeshFilters > 0)
             {
-                gameObject = gameObjects[i];
-                if (gameObject == null)
-                    continue;
-
-                if (EditorUtility.DisplayCancelableProgressBar("Generate By GameObjects..", gameObject.name, i * 1.0f / numGameObjects))
-                    break;
-
-                meshFilters = gameObject.GetComponentsInChildren<MeshFilter>(true);
-                numMeshFilters = meshFilters == null ? 0 : meshFilters.Length;
-                if (numMeshFilters > 0)
+                for (i = 0; i < numMeshFilters; ++i)
                 {
-                    for(j = 0; j < numMeshFilters; ++j)
+                    meshFilter = meshFilters[i];
+                    if (meshFilter == null)
+                        continue;
+
+                    if (EditorUtility.DisplayCancelableProgressBar("Generate By Mesh Filters..", meshFilter.name, i * 1.0f / numMeshFilters))
+                        break;
+
+                    mesh = meshFilter.sharedMesh;
+                    if (mesh != null)
                     {
-                        meshFilter = meshFilters[j];
-                        if (meshFilter == null)
-                            continue;
+                        if (meshes == null)
+                            meshes = new HashSet<Mesh>();
 
-                        if (EditorUtility.DisplayCancelableProgressBar("Generate By Mesh Filters..", meshFilter.name, j * 1.0f / numMeshFilters))
-                            break;
-
-                        mesh = meshFilter.sharedMesh;
-                        if (mesh != null)
+                        if (meshes.Add(mesh))
                         {
-                            if (meshes == null)
-                                meshes = new HashSet<Mesh>();
+                            mesh.uv = Unwrapping.GeneratePerTriangleUV(mesh, unwrapParam);
 
-                            if (meshes.Add(mesh))
-                            {
-                                mesh.uv = Unwrapping.GeneratePerTriangleUV(mesh, unwrapParam);
-
-                                EditorUtility.SetDirty(mesh);
-                            }
+                            EditorUtility.SetDirty(mesh);
                         }
                     }
                 }
@@ -1017,57 +1059,45 @@ namespace ZG
         }
 
         [MenuItem("GameObject/ZG/Mesh/Generate Secondary UV Set", false, 10)]
-        public static void GenerateSecondaryUVSet()
+        public static void GenerateSecondaryUVSet(MenuCommand menuCommand)
         {
-            GameObject[] gameObjects = Selection.gameObjects;
-            int numGameObjects = gameObjects == null ? 0 : gameObjects.Length;
-            if (numGameObjects < 1)
+            GameObject gameObject = menuCommand == null ? null : menuCommand.context as GameObject;
+            if (gameObject == null)
                 return;
 
-            int i, j, numMeshFilters;
-            GameObject gameObject;
+            int i, numMeshFilters;
             Mesh mesh;
             MeshFilter meshFilter;
             MeshFilter[] meshFilters;
             HashSet<Mesh> meshes = null;
-            for (i = 0; i < numGameObjects; ++i)
+            meshFilters = gameObject.GetComponentsInChildren<MeshFilter>(true);
+            numMeshFilters = meshFilters == null ? 0 : meshFilters.Length;
+            if (numMeshFilters > 0)
             {
-                gameObject = gameObjects[i];
-                if (gameObject == null)
-                    continue;
-
-                if (EditorUtility.DisplayCancelableProgressBar("Generate By GameObjects..", gameObject.name, i * 1.0f / numGameObjects))
-                    break;
-
-                meshFilters = gameObject.GetComponentsInChildren<MeshFilter>(true);
-                numMeshFilters = meshFilters == null ? 0 : meshFilters.Length;
-                if (numMeshFilters > 0)
+                for (i = 0; i < numMeshFilters; ++i)
                 {
-                    for (j = 0; j < numMeshFilters; ++j)
+                    meshFilter = meshFilters[i];
+                    if (meshFilter == null)
+                        continue;
+
+                    if (EditorUtility.DisplayCancelableProgressBar("Generate By Mesh Filters..", meshFilter.name, i * 1.0f / numMeshFilters))
+                        break;
+
+                    mesh = meshFilter.sharedMesh;
+                    if (mesh != null)
                     {
-                        meshFilter = meshFilters[j];
-                        if (meshFilter == null)
-                            continue;
+                        if (meshes == null)
+                            meshes = new HashSet<Mesh>();
 
-                        if (EditorUtility.DisplayCancelableProgressBar("Generate By Mesh Filters..", meshFilter.name, j * 1.0f / numMeshFilters))
-                            break;
-
-                        mesh = meshFilter.sharedMesh;
-                        if (mesh != null)
+                        if (meshes.Add(mesh))
                         {
-                            if (meshes == null)
-                                meshes = new HashSet<Mesh>();
+                            Unwrapping.GenerateSecondaryUVSet(mesh, unwrapParam);
+                            //mesh.uv2 = mesh.uv;
+                            Vector2[] uv = mesh.uv;
+                            if (uv == null || uv.Length < mesh.vertexCount)
+                                mesh.uv = mesh.uv2;
 
-                            if (meshes.Add(mesh))
-                            {
-                                Unwrapping.GenerateSecondaryUVSet(mesh, unwrapParam);
-                                //mesh.uv2 = mesh.uv;
-                                Vector2[] uv = mesh.uv;
-                                if (uv == null || uv.Length < mesh.vertexCount)
-                                    mesh.uv = mesh.uv2;
-
-                                EditorUtility.SetDirty(mesh);
-                            }
+                            EditorUtility.SetDirty(mesh);
                         }
                     }
                 }
@@ -1077,11 +1107,10 @@ namespace ZG
         }
 
         [MenuItem("Assets/ZG/Mesh/Instantiate Sub Material", false, 10)]
-        public static void InstantiateSubMaterial()
+        public static void InstantiateSubMaterial(MenuCommand menuCommand)
         {
-            UnityEngine.Object[] objects = Selection.objects;
-            int numObjects = objects == null ? 0 : objects.Length;
-            if (numObjects < 1)
+            Material material = menuCommand.context as Material;
+            if (material == null)
                 return;
 
             MeshRenderer[] renderers = FindObjectsOfType<MeshRenderer>();
@@ -1091,14 +1120,14 @@ namespace ZG
 
             const uint MAX_INDEX_COUNT = 65000;
 
-            int i, j, k, temp, numCombineInstances, numVertexIndices, vertexIndex, index;
+            int i, k, temp, numCombineInstances, numVertexIndices, vertexIndex, index;
             uint numIndices;
             CombineInstance combineInstance;
             Mesh mesh;
             MeshRenderer renderer;
             MeshFilter meshFilter;
             GameObject gameObject;
-            Material material;
+
             Material[] materials;
             Vector3[] vertexBuffer;
             CombineInstance[] results;
@@ -1106,191 +1135,192 @@ namespace ZG
             List<Vector3> vertices = null;
             List<int> indices = null, indexBuffer = null;
             Dictionary<int, int> indexMap = null;
-            for (i = 0; i < numObjects; ++i)
+
+            for (i = 0; i < numRenderers; ++i)
             {
-                material = objects[i] as Material;
-                if (material == null)
+                renderer = renderers[i];
+                gameObject = renderer == null ? null : renderer.gameObject;
+                if (gameObject == null || !gameObject.isStatic)
                     continue;
 
-                for(j = 0; j < numRenderers; ++j)
-                {
-                    renderer = renderers[j];
-                    gameObject = renderer == null ? null : renderer.gameObject;
-                    if (gameObject == null || !gameObject.isStatic)
-                        continue;
-
-                    materials = renderer == null ? null : renderer.sharedMaterials;
-                    index = materials == null ? -1 : System.Array.IndexOf(materials, material);
-                    if (index == -1)
-                        continue;
-
-                    meshFilter = renderer.GetComponent<MeshFilter>();
-                    mesh = meshFilter == null ? null : meshFilter.sharedMesh;
-                    if (mesh == null)
-                        continue;
-
-                    combineInstance = new CombineInstance();
-                    combineInstance.mesh = mesh;
-                    combineInstance.subMeshIndex = index;
-
-                    if (combineInstances == null)
-                        combineInstances = new List<CombineInstance>();
-
-                    combineInstances.Add(combineInstance);
-                }
-
-                numCombineInstances = combineInstances == null ? 0 : combineInstances.Count;
-                if (numCombineInstances < 1)
+                materials = renderer == null ? null : renderer.sharedMaterials;
+                index = materials == null ? -1 : System.Array.IndexOf(materials, material);
+                if (index == -1)
                     continue;
 
-                index = 0;
-                numIndices = 0;
-                for (j = 0; j < numCombineInstances; ++j)
-                {
-                    combineInstance = combineInstances[j];
-                    temp = (int)combineInstance.mesh.GetIndexCount(combineInstance.subMeshIndex);
-                    numIndices += (uint)temp;
-                    if (numIndices > MAX_INDEX_COUNT)
-                    {
-                        numIndices = (uint)temp;
-                        temp = j - index;
-                        results = new CombineInstance[temp];
+                meshFilter = renderer.GetComponent<MeshFilter>();
+                mesh = meshFilter == null ? null : meshFilter.sharedMesh;
+                if (mesh == null)
+                    continue;
 
-                        combineInstances.CopyTo(index, results, 0, (int)temp);
+                combineInstance = new CombineInstance();
+                combineInstance.mesh = mesh;
+                combineInstance.subMeshIndex = index;
 
-                        index = j;
+                if (combineInstances == null)
+                    combineInstances = new List<CombineInstance>();
 
-                        mesh = new Mesh();
-                        //mesh.CombineMeshes(results, true, false, false);
-                        
-                        if (vertices != null)
-                            vertices.Clear();
-
-                        if (indices != null)
-                            indices.Clear();
-
-                        foreach (CombineInstance result in results)
-                        {
-                            if (indexBuffer == null)
-                                indexBuffer = new List<int>();
-
-                            vertexBuffer = result.mesh.vertices;
-
-                            result.mesh.GetIndices(indexBuffer, result.subMeshIndex);
-
-                            if (indexMap == null)
-                                indexMap = new Dictionary<int, int>();
-                            else
-                                indexMap.Clear();
-
-                            numVertexIndices = indexBuffer.Count;
-                            for(k = 0; k < numVertexIndices; ++k)
-                            {
-                                vertexIndex = indexBuffer[k];
-                                if (!indexMap.TryGetValue(vertexIndex, out temp))
-                                {
-                                    if (vertices == null)
-                                        vertices = new List<Vector3>();
-
-                                    temp = vertices.Count;
-
-                                    vertices.Add(vertexBuffer[vertexIndex]);
-
-                                    indexMap[vertexIndex] = temp;
-                                }
-
-                                if (indices == null)
-                                    indices = new List<int>();
-
-                                indices.Add(temp);
-                            }
-                        }
-
-                        mesh.vertices = vertices == null ? null : vertices.ToArray();
-                        mesh.triangles = indices == null ? null : indices.ToArray();
-
-                        gameObject = new GameObject(material.name);
-                        meshFilter = gameObject.AddComponent<MeshFilter>();
-                        if (meshFilter != null)
-                            meshFilter.sharedMesh = mesh;
-
-                        renderer = gameObject.AddComponent<MeshRenderer>();
-                        if (renderer != null)
-                            renderer.sharedMaterial = material;
-                    }
-                }
-                
-                temp = numCombineInstances - index;
-                results = new CombineInstance[temp];
-
-                combineInstances.CopyTo(index, results, 0, (int)temp);
-                
-                mesh = new Mesh();
-                //mesh.CombineMeshes(results, true, false, false);
-
-                if (vertices != null)
-                    vertices.Clear();
-
-                if (indices != null)
-                    indices.Clear();
-
-                foreach (CombineInstance result in results)
-                {
-                    if (indexBuffer == null)
-                        indexBuffer = new List<int>();
-
-                    vertexBuffer = result.mesh.vertices;
-
-                    result.mesh.GetIndices(indexBuffer, result.subMeshIndex);
-
-                    if (indexMap == null)
-                        indexMap = new Dictionary<int, int>();
-                    else
-                        indexMap.Clear();
-
-                    numVertexIndices = indexBuffer.Count;
-                    for (k = 0; k < numVertexIndices; ++k)
-                    {
-                        vertexIndex = indexBuffer[k];
-                        if (!indexMap.TryGetValue(vertexIndex, out temp))
-                        {
-                            if (vertices == null)
-                                vertices = new List<Vector3>();
-
-                            temp = vertices.Count;
-
-                            vertices.Add(vertexBuffer[vertexIndex]);
-
-                            indexMap[vertexIndex] = temp;
-                        }
-
-                        if (indices == null)
-                            indices = new List<int>();
-
-                        indices.Add(temp);
-                    }
-                }
-
-                mesh.vertices = vertices == null ? null : vertices.ToArray();
-                mesh.triangles = indices == null ? null : indices.ToArray();
-
-                gameObject = new GameObject(material.name);
-                meshFilter = gameObject.AddComponent<MeshFilter>();
-                if (meshFilter != null)
-                    meshFilter.sharedMesh = mesh;
-
-                renderer = gameObject.AddComponent<MeshRenderer>();
-                if (renderer != null)
-                    renderer.sharedMaterial = material;
-
-                combineInstances.Clear();
+                combineInstances.Add(combineInstance);
             }
+
+            numCombineInstances = combineInstances == null ? 0 : combineInstances.Count;
+            if (numCombineInstances < 1)
+                return;
+
+            index = 0;
+            numIndices = 0;
+            for (i = 0; i < numCombineInstances; ++i)
+            {
+                combineInstance = combineInstances[i];
+                temp = (int)combineInstance.mesh.GetIndexCount(combineInstance.subMeshIndex);
+                numIndices += (uint)temp;
+                if (numIndices > MAX_INDEX_COUNT)
+                {
+                    numIndices = (uint)temp;
+                    temp = i - index;
+                    results = new CombineInstance[temp];
+
+                    combineInstances.CopyTo(index, results, 0, (int)temp);
+
+                    index = i;
+
+                    mesh = new Mesh();
+                    //mesh.CombineMeshes(results, true, false, false);
+
+                    if (vertices != null)
+                        vertices.Clear();
+
+                    if (indices != null)
+                        indices.Clear();
+
+                    foreach (CombineInstance result in results)
+                    {
+                        if (indexBuffer == null)
+                            indexBuffer = new List<int>();
+
+                        vertexBuffer = result.mesh.vertices;
+
+                        result.mesh.GetIndices(indexBuffer, result.subMeshIndex);
+
+                        if (indexMap == null)
+                            indexMap = new Dictionary<int, int>();
+                        else
+                            indexMap.Clear();
+
+                        numVertexIndices = indexBuffer.Count;
+                        for (k = 0; k < numVertexIndices; ++k)
+                        {
+                            vertexIndex = indexBuffer[k];
+                            if (!indexMap.TryGetValue(vertexIndex, out temp))
+                            {
+                                if (vertices == null)
+                                    vertices = new List<Vector3>();
+
+                                temp = vertices.Count;
+
+                                vertices.Add(vertexBuffer[vertexIndex]);
+
+                                indexMap[vertexIndex] = temp;
+                            }
+
+                            if (indices == null)
+                                indices = new List<int>();
+
+                            indices.Add(temp);
+                        }
+                    }
+
+                    mesh.vertices = vertices == null ? null : vertices.ToArray();
+                    mesh.triangles = indices == null ? null : indices.ToArray();
+
+                    gameObject = new GameObject(material.name);
+                    meshFilter = gameObject.AddComponent<MeshFilter>();
+                    if (meshFilter != null)
+                        meshFilter.sharedMesh = mesh;
+
+                    renderer = gameObject.AddComponent<MeshRenderer>();
+                    if (renderer != null)
+                        renderer.sharedMaterial = material;
+                }
+            }
+
+            temp = numCombineInstances - index;
+            results = new CombineInstance[temp];
+
+            combineInstances.CopyTo(index, results, 0, (int)temp);
+
+            mesh = new Mesh();
+            //mesh.CombineMeshes(results, true, false, false);
+
+            if (vertices != null)
+                vertices.Clear();
+
+            if (indices != null)
+                indices.Clear();
+
+            foreach (CombineInstance result in results)
+            {
+                if (indexBuffer == null)
+                    indexBuffer = new List<int>();
+
+                vertexBuffer = result.mesh.vertices;
+
+                result.mesh.GetIndices(indexBuffer, result.subMeshIndex);
+
+                if (indexMap == null)
+                    indexMap = new Dictionary<int, int>();
+                else
+                    indexMap.Clear();
+
+                numVertexIndices = indexBuffer.Count;
+                for (k = 0; k < numVertexIndices; ++k)
+                {
+                    vertexIndex = indexBuffer[k];
+                    if (!indexMap.TryGetValue(vertexIndex, out temp))
+                    {
+                        if (vertices == null)
+                            vertices = new List<Vector3>();
+
+                        temp = vertices.Count;
+
+                        vertices.Add(vertexBuffer[vertexIndex]);
+
+                        indexMap[vertexIndex] = temp;
+                    }
+
+                    if (indices == null)
+                        indices = new List<int>();
+
+                    indices.Add(temp);
+                }
+            }
+
+            mesh.vertices = vertices == null ? null : vertices.ToArray();
+            mesh.triangles = indices == null ? null : indices.ToArray();
+
+            gameObject = new GameObject(material.name);
+            meshFilter = gameObject.AddComponent<MeshFilter>();
+            if (meshFilter != null)
+                meshFilter.sharedMesh = mesh;
+
+            renderer = gameObject.AddComponent<MeshRenderer>();
+            if (renderer != null)
+                renderer.sharedMaterial = material;
+
+            combineInstances.Clear();
         }
 
         [MenuItem("Window/ZG/Mesh Editor")]
         public static void GetWindow()
         {
             GetWindow<MeshEditor>();
+        }
+
+        private static void __OnSelectionChange()
+        {
+            Selection.selectionChanged -= __OnSelectionChange;
+
+            __path = null;
         }
 
         void OnGUI()

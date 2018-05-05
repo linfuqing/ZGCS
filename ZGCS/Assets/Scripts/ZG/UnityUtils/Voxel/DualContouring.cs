@@ -833,7 +833,7 @@ namespace ZG.Voxel
                 { 0, 1, 0, 1 },
             };
 
-            private int __sweeps;
+            //private int __sweeps;
             private int __depth;
             private Vector3 __scale;
             private Vector3 __offset;
@@ -945,7 +945,7 @@ namespace ZG.Voxel
                 if (!parent.__blocks.TryGetValue(world, out blocks) || blocks == null || blocks.Count < 1)
                     return false;
 
-                __sweeps = sweeps;
+                //__sweeps = sweeps;
                 __depth = parent.__depth;
                 __scale = parent.__scale;
                 __offset = Vector3.Scale(world * ((1 << __depth) - 1), parent.__scale) + parent.__offset;
