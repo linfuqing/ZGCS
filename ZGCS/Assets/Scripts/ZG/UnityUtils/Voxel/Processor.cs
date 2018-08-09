@@ -781,8 +781,11 @@ namespace ZG.Voxel
             DualContouring.IBuilder builder = this.builder;
             if (builder == null)
                 return null;
-            
-            builder.Create(world, increment);
+
+            lock (builder)
+            {
+                builder.Create(world, increment);
+            }
 
             return builder.parent;
         }
