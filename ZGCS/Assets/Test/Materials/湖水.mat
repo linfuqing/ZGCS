@@ -74,7 +74,7 @@ Material:
     - _Scale_: 1
     - _Shading: 0
     - _Shadow: 0.7
-    - _ShoreDistance: 0.5
+    - _ShoreDistance: 0.05
     - _ShoreIntensity: 1
     - _Specular: 70
     - _Speed: 0.5

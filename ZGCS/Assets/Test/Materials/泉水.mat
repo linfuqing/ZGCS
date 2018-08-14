@@ -8,8 +8,7 @@ Material:
   m_PrefabInternal: {fileID: 0}
   m_Name: "\u6CC9\u6C34"
   m_Shader: {fileID: 4800000, guid: 8165be4dd0b12774d80426d906df9c38, type: 3}
-  m_ShaderKeywords: LPW_FOAM _CUSTOM_SHAPE _EDGEBLEND_ON _LIGHTABS_ON _SHADING_FLAT
-    _WAVES_HIGHQUALITY
+  m_ShaderKeywords: _CUSTOM_SHAPE _LIGHTABS_ON _SHADING_FLAT _WAVES_HIGHQUALITY
   m_LightmapFlags: 1
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -50,7 +49,7 @@ Material:
     - _Direction: 180
     - _Distort: 0
     - _Distortion: 1
-    - _EdgeBlend: 1
+    - _EdgeBlend: 0
     - _EnableShadows: 0
     - _FoamScale: 20
     - _FoamSpeed: 0.3
@@ -87,8 +86,8 @@ Material:
     - _Waves: 2
     - _ZWrite: 1
     m_Colors:
-    - _Color: {r: 0, g: 0.5, b: 0.7, a: 1}
-    - _DeepColor: {r: 0, g: 0.1, b: 0.2, a: 1}
+    - _Color: {r: 0.23729573, g: 0.42352942, b: 0.1764706, a: 1}
+    - _DeepColor: {r: 1, g: 1, b: 1, a: 1}
     - _Direction_: {r: -1, g: -0.00000008742278, b: -0.8, a: -0.000000069938224}
     - _FresColor: {r: 0.305, g: 0.371, b: 0.395, a: 1}
     - _ShoreColor: {r: 1, g: 1, b: 1, a: 1}

@@ -998,6 +998,7 @@ MonoBehaviour:
       dot: 0.9
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 03000000
       mapFilters:
@@ -1015,6 +1016,7 @@ MonoBehaviour:
       dot: 0.9
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 03000000
       mapFilters:
@@ -1032,6 +1034,7 @@ MonoBehaviour:
       dot: 0.9
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 03000000
       mapFilters:
@@ -1049,6 +1052,7 @@ MonoBehaviour:
       dot: 0.9
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 03000000
       mapFilters:
@@ -1073,6 +1077,7 @@ MonoBehaviour:
       dot: 0.8
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 03000000
       mapFilters:
@@ -1097,6 +1102,7 @@ MonoBehaviour:
       dot: 0.8
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 03000000
       mapFilters:
@@ -1121,6 +1127,7 @@ MonoBehaviour:
       dot: 0.8
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 03000000
       mapFilters:
@@ -1145,6 +1152,7 @@ MonoBehaviour:
       dot: 0.8
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 03000000
       mapFilters:
@@ -1169,6 +1177,7 @@ MonoBehaviour:
       dot: 0.8
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 03000000
       mapFilters:
@@ -1193,6 +1202,7 @@ MonoBehaviour:
       dot: 0.9
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 03000000
       mapFilters:
@@ -1210,6 +1220,7 @@ MonoBehaviour:
       dot: 0.9
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 03000000
       mapFilters:
@@ -1227,6 +1238,7 @@ MonoBehaviour:
       dot: 0.9
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 03000000
       mapFilters:
@@ -1244,6 +1256,7 @@ MonoBehaviour:
       dot: 0.8
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 03000000
       mapFilters:
@@ -1261,6 +1274,7 @@ MonoBehaviour:
       dot: 0.8
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 03000000
       mapFilters:
@@ -1278,6 +1292,7 @@ MonoBehaviour:
       dot: 0.8
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 03000000
       mapFilters:
@@ -1295,6 +1310,7 @@ MonoBehaviour:
       dot: 0.8
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 03000000
       mapFilters:
@@ -1312,6 +1328,7 @@ MonoBehaviour:
       dot: 0.8
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 03000000
       mapFilters:
@@ -1329,6 +1346,7 @@ MonoBehaviour:
       dot: 0.8
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 03000000
       mapFilters:
@@ -1346,6 +1364,7 @@ MonoBehaviour:
       dot: 0.8
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 03000000
       mapFilters:
@@ -1363,6 +1382,7 @@ MonoBehaviour:
       dot: 0.8
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 03000000
       mapFilters:
@@ -1380,6 +1400,7 @@ MonoBehaviour:
       dot: 0.8
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 03000000
       mapFilters:
@@ -1397,6 +1418,7 @@ MonoBehaviour:
       dot: 0.8
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 01000000
       mapFilters:
@@ -1414,6 +1436,7 @@ MonoBehaviour:
       dot: 0.8
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 01000000
       mapFilters:
@@ -1431,6 +1454,7 @@ MonoBehaviour:
       dot: 0.8
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 01000000
       mapFilters:
@@ -1448,6 +1472,7 @@ MonoBehaviour:
       dot: 0.9
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 04000000
       mapFilters:
@@ -1465,6 +1490,7 @@ MonoBehaviour:
       dot: 0.9
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 04000000
       mapFilters:
@@ -1482,6 +1508,7 @@ MonoBehaviour:
       dot: 0.9
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 04000000
       mapFilters:
@@ -1499,6 +1526,7 @@ MonoBehaviour:
       dot: 0.9
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 04000000
       mapFilters:
@@ -1516,6 +1544,7 @@ MonoBehaviour:
       dot: 0.9
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 04000000
       mapFilters:
@@ -1533,6 +1562,7 @@ MonoBehaviour:
       dot: 0.9
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 04000000
       mapFilters:
@@ -1550,6 +1580,7 @@ MonoBehaviour:
       dot: 0.8
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 09000000
       mapFilters: []
@@ -1560,6 +1591,7 @@ MonoBehaviour:
       dot: 0.8
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 09000000
       mapFilters: []
@@ -1570,6 +1602,7 @@ MonoBehaviour:
       dot: 0.8
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 02000000
       mapFilters: []
@@ -1580,6 +1613,7 @@ MonoBehaviour:
       dot: 0.8
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 02000000
       mapFilters: []
@@ -1590,6 +1624,7 @@ MonoBehaviour:
       dot: 0.8
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 02000000
       mapFilters: []
@@ -1600,6 +1635,7 @@ MonoBehaviour:
       dot: 0.8
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 02000000
       mapFilters: []
@@ -1610,6 +1646,7 @@ MonoBehaviour:
       dot: 0.8
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 030000000100000006000000
       mapFilters:
@@ -1627,6 +1664,7 @@ MonoBehaviour:
       dot: 0.8
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 030000000100000006000000
       mapFilters:
@@ -1644,6 +1682,7 @@ MonoBehaviour:
       dot: 0.8
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 030000000100000006000000
       mapFilters:
@@ -1661,6 +1700,7 @@ MonoBehaviour:
       dot: 0.8
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 030000000100000006000000
       mapFilters:
@@ -1678,6 +1718,7 @@ MonoBehaviour:
       dot: 0.8
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 0300000004000000
       mapFilters:
@@ -1695,6 +1736,7 @@ MonoBehaviour:
       dot: 0.8
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 0300000004000000
       mapFilters:
@@ -1712,6 +1754,7 @@ MonoBehaviour:
       dot: 0.8
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 0300000004000000
       mapFilters:
@@ -1729,6 +1772,7 @@ MonoBehaviour:
       dot: 0.8
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 0300000004000000
       mapFilters: []
@@ -1739,6 +1783,7 @@ MonoBehaviour:
       dot: 0.8
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 0300000004000000
       mapFilters: []
@@ -1749,6 +1794,7 @@ MonoBehaviour:
       dot: 0.8
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 0300000004000000
       mapFilters: []
@@ -1759,6 +1805,7 @@ MonoBehaviour:
       dot: 0.8
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 0300000004000000
       mapFilters: []
@@ -1769,6 +1816,7 @@ MonoBehaviour:
       dot: 0.8
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 0300000004000000
       mapFilters: []
@@ -1779,6 +1827,7 @@ MonoBehaviour:
       dot: 0.8
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 030000000000000001000000060000000200000007000000
       mapFilters: []
@@ -1789,6 +1838,7 @@ MonoBehaviour:
       dot: 0.8
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 060000000400000000000000
       mapFilters: []
@@ -1799,6 +1849,7 @@ MonoBehaviour:
       dot: 0.8
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 060000000400000000000000
       mapFilters: []
@@ -1809,6 +1860,7 @@ MonoBehaviour:
       dot: 0.8
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 0600000000000000
       mapFilters: []
@@ -1819,6 +1871,7 @@ MonoBehaviour:
       dot: 0.8
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 0000000006000000
       mapFilters: []
@@ -1829,6 +1882,7 @@ MonoBehaviour:
       dot: 0.8
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 0000000006000000
       mapFilters: []
@@ -1839,6 +1893,7 @@ MonoBehaviour:
       dot: 0.8
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 06000000
       mapFilters: []
@@ -1849,6 +1904,7 @@ MonoBehaviour:
       dot: 0.8
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 06000000
       mapFilters: []
@@ -1859,6 +1915,7 @@ MonoBehaviour:
       dot: 0.7
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 0300000004000000
       mapFilters: []
@@ -1869,6 +1926,7 @@ MonoBehaviour:
       dot: 0.7
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 0300000004000000
       mapFilters: []
@@ -1879,6 +1937,7 @@ MonoBehaviour:
       dot: 0.7
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 0300000004000000
       mapFilters: []
@@ -1889,6 +1948,7 @@ MonoBehaviour:
       dot: 0.7
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 0300000004000000
       mapFilters: []
@@ -1899,6 +1959,7 @@ MonoBehaviour:
       dot: 0.7
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 0300000004000000
       mapFilters:
@@ -1916,6 +1977,7 @@ MonoBehaviour:
       dot: 0.7
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 0300000004000000
       mapFilters:
@@ -1933,6 +1995,7 @@ MonoBehaviour:
       dot: 0.7
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 0300000004000000
       mapFilters:
@@ -1950,6 +2013,7 @@ MonoBehaviour:
       dot: 0.7
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 0300000004000000
       mapFilters:
@@ -1967,6 +2031,7 @@ MonoBehaviour:
       dot: 0.7
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 0300000004000000
       mapFilters:
@@ -1984,6 +2049,7 @@ MonoBehaviour:
       dot: 0.5
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 0300000002000000040000000600000001000000
       mapFilters: []
@@ -1994,6 +2060,7 @@ MonoBehaviour:
       dot: 0.7
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 03000000
       mapFilters:
@@ -2011,6 +2078,7 @@ MonoBehaviour:
       dot: 0.7
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 0300000004000000
       mapFilters: []
@@ -2021,6 +2089,7 @@ MonoBehaviour:
       dot: 0.7
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 0300000004000000
       mapFilters: []
@@ -2031,6 +2100,7 @@ MonoBehaviour:
       dot: 0.7
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 0300000002000000
       mapFilters: []
@@ -2041,6 +2111,7 @@ MonoBehaviour:
       dot: 0.7
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 
       mapFilters:
@@ -2058,6 +2129,7 @@ MonoBehaviour:
       dot: 0.7
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 01000000
       mapFilters: []
@@ -2068,6 +2140,7 @@ MonoBehaviour:
       dot: 0.7
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 040000000200000009000000
       mapFilters: []
@@ -2078,6 +2151,7 @@ MonoBehaviour:
       dot: 0.7
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 03000000
       mapFilters: []
@@ -2088,6 +2162,7 @@ MonoBehaviour:
       dot: 0.7
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 0300000009000000
       mapFilters: []
@@ -2098,6 +2173,7 @@ MonoBehaviour:
       dot: 0.7
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 03000000
       mapFilters: []
@@ -2108,6 +2184,7 @@ MonoBehaviour:
       dot: 0.7
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 010000000200000006000000
       mapFilters: []
@@ -2118,6 +2195,7 @@ MonoBehaviour:
       dot: 0.7
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 04000000000000000200000006000000
       mapFilters: []
@@ -2128,6 +2206,7 @@ MonoBehaviour:
       dot: 0.7
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 0200000000000000
       mapFilters: []
@@ -2138,6 +2217,7 @@ MonoBehaviour:
       dot: 0.7
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 0400000000000000
       mapFilters: []
@@ -2148,6 +2228,7 @@ MonoBehaviour:
       dot: 0.7
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 03000000
       mapFilters:
@@ -2165,6 +2246,7 @@ MonoBehaviour:
       dot: 0.7
       offset: 0
       height: 0.5
+      range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters: 0600000000000000
       mapFilters: []
