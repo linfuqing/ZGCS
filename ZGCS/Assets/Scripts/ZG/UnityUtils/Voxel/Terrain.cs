@@ -21,6 +21,18 @@ namespace ZG.Voxel
         }
 
         [Serializable]
+        public struct MaterialFilter
+        {
+            [Index("materialInfos", relativePropertyPath = "index", pathLevel = 2, uniqueLevel = 1)]
+            public string name;
+
+            [Index("materialInfos", pathLevel = 2, uniqueLevel = 1)]
+            public int index;
+
+            public float chanceOffset;
+        }
+
+        [Serializable]
         public struct MapFilter
         {
             public bool isInverce;
@@ -94,20 +106,34 @@ namespace ZG.Voxel
         }
 
         [Serializable]
-        public struct LayerInfo
+        public struct MaterialInfo
         {
 #if UNITY_EDITOR
             public string name;
 #endif
             [Index("materials", pathLevel = 1)]
-            public int materialIndex;
+            [UnityEngine.Serialization.FormerlySerializedAs("materialIndex")]
+            public int index;
+        }
 
+        [Serializable]
+        public struct LayerInfo
+        {
+#if UNITY_EDITOR
+            public string name;
+#endif
+            [Index("materialInfos", relativePropertyPath = "materialIndex", pathLevel = 1)]
+            public string materialName;
+
+            [Index("materialInfos", pathLevel = 1)]
+            public int materialIndex;
+            
             [Index("volumeInfos", emptyName = "无", pathLevel = 1)]
             public int volumeIndex;
-
+            
             [Index("layerInfos", emptyName = "无", pathLevel = 1)]
             public int layer;
-
+            
             public int depth;
 
             public float power;
@@ -133,11 +159,13 @@ namespace ZG.Voxel
 #if UNITY_EDITOR
             public string name;
 #endif
+            [Index("gameObjects", relativePropertyPath = "index", pathLevel = 1, uniqueLevel = 2)]
+            public string objectName;
             
-            public Rotation rotation;
-
             [Index("gameObjects", pathLevel = 1, uniqueLevel = 2)]
             public int index;
+
+            public Rotation rotation;
 
             public float chance;
 
@@ -145,14 +173,17 @@ namespace ZG.Voxel
 
             public float offset;
 
-            public float height;
+            [UnityEngine.Serialization.FormerlySerializedAs("extent")]
+            public float top;
+
+            [UnityEngine.Serialization.FormerlySerializedAs("height")]
+            public float bottom;
 
             public float range;
 
             public Vector3 normal;
             
-            [Index("materials", pathLevel = 1, uniqueLevel = 1)]
-            public int[] materialFilters;
+            public MaterialFilter[] materialFilters;
 
             public MapFilter[] mapFilters;
         }
@@ -163,9 +194,6 @@ namespace ZG.Voxel
 #if UNITY_EDITOR
             public string name;
 #endif
-            [Index("materials", pathLevel = 1)]
-            public int materialIndex;
-
             public float halfWidth;
 
             public float radius;
@@ -224,6 +252,7 @@ namespace ZG.Voxel
                 
                 public void Create(LineInfo[] lineInfos)
                 {
+                    return;
                     int numLineInfos = lineInfos == null ? 0 : lineInfos.Length;
                     if (__lines == null || __lines.Length < numLineInfos)
                         Array.Resize(ref __lines, numLineInfos);
@@ -354,7 +383,6 @@ namespace ZG.Voxel
                             else
                             {
                                 __Do(
-                                    lineInfo.materialIndex,
                                     lineInfo.halfWidth,
                                     lineInfo.radius,
                                     lineInfo.countPerUnit,
@@ -371,7 +399,6 @@ namespace ZG.Voxel
                         }
 
                         __Do(
-                            lineInfo.materialIndex,
                             lineInfo.halfWidth, 
                             lineInfo.radius, 
                             lineInfo.countPerUnit, 
@@ -383,7 +410,6 @@ namespace ZG.Voxel
                 }
 
                 private void __Do(
-                    int materialIndex, 
                     float halfWidth, 
                     float radius, 
                     float pointCount,
@@ -396,9 +422,9 @@ namespace ZG.Voxel
                     if (numPoints < 2 || instantiate == null)
                         return;
 
-                    int segment = 50;
-                    float orginRadius = 30.0f;
-                    float doRadius = 25.0f;
+                    int segment = 10;
+                    float orginRadius = 2.0f;
+                    float doRadius = 1.0f;
 
                     engine.Do(position, doRadius);
                     
@@ -467,12 +493,15 @@ namespace ZG.Voxel
                         }
                     }
 
-                    float anglePerSegment = Mathf.PI * 2.0f / segment, angle = 0.0f;
-                    for(i = 0; i < segment; ++i)
+                    if (segment > 0)
                     {
-                        delaunay.AddPoint(new Vector2(position.x + orginRadius * Mathf.Cos(angle), position.z + orginRadius * Mathf.Sin(angle)));
+                        float anglePerSegment = Mathf.PI * 2.0f / segment, angle = 0.0f;
+                        for (i = 0; i < segment; ++i)
+                        {
+                            delaunay.AddPoint(new Vector2(position.x + orginRadius * Mathf.Cos(angle), position.z + orginRadius * Mathf.Sin(angle)));
 
-                        angle += anglePerSegment;
+                            angle += anglePerSegment;
+                        }
                     }
 
                     if (__triangles != null)
@@ -975,6 +1004,7 @@ namespace ZG.Voxel
 
             private System.Random __random;
             private PerlinNoise3 __noise;
+            private Liner __liner;
             private Drawer __drawer;
             //private float[] __results;
             private float[] __layers;
@@ -988,6 +1018,15 @@ namespace ZG.Voxel
                 __mapSize = mapSize;
 
                 __random = random;
+                
+                PerlinNoise3.RandomValue[] randomValues = new PerlinNoise3.RandomValue[__noiseSize];
+                lock (random)
+                {
+                    for (int i = 0; i < __noiseSize; ++i)
+                        randomValues[i] = new PerlinNoise3.RandomValue((float)__random.NextDouble(), (float)__random.NextDouble());
+                }
+
+                __noise = new PerlinNoise3(randomValues);
             }
 
             public float Get(int volumeIndex, float result, Vector3 point, VolumeInfo[] volumeInfos)
@@ -1015,7 +1054,15 @@ namespace ZG.Voxel
                 return Mathf.Max(volumeInfo.Get(__noise, point.x, point.y, point.z) / volumeInfo.scale.magnitude, result);// Mathf.Clamp(volumeInfo.Get(__noise, point.x, point.y, point.z) / (volumeInfo.scale.y * scale.y), -1.0f, 1.0f);
             }
             
-            public bool Create(float increment, Vector2Int position, MapInfo[] mapInfos, VolumeInfo[] volumeInfos, LayerInfo[] layerInfos, DrawInfo[] drawInfos, Action<Instance> instantiate)
+            public bool Create(
+                float increment, 
+                Vector2Int position, 
+                MapInfo[] mapInfos, 
+                VolumeInfo[] volumeInfos, 
+                LayerInfo[] layerInfos, 
+                LineInfo[] lineInfos, 
+                DrawInfo[] drawInfos, 
+                Action<Instance> instantiate)
             {
                 lock (__chunks)
                 {
@@ -1036,6 +1083,11 @@ namespace ZG.Voxel
                     int numLayerInfos = layerInfos == null ? 0 : layerInfos.Length;
                     if (__layers == null || __layers.Length < numLayerInfos)
                         __layers = new float[numLayerInfos];
+                    
+                    if (__liner == null)
+                        __liner = new Liner(__random);
+
+                    __liner.Create(lineInfos);
 
                     if (__drawer == null)
                         __drawer = new Drawer(__random);
@@ -1291,6 +1343,9 @@ namespace ZG.Voxel
                                 __layers[k] = previous;
                             }
 
+
+                            __liner.Set(index, point.x, point.z, mapInfos);
+
                             __drawer.Set(index, new Vector2Int(position.x + i, position.y + j));
 
                             chunk.count = __blocks.Count - chunk.index;
@@ -1367,6 +1422,10 @@ namespace ZG.Voxel
 
                     if (min <= max)
                     {
+                        BoundsInt bounds = new BoundsInt(new Vector3Int(position.x, min, position.y), new Vector3Int(__mapSize.x, max - min, __mapSize.y));
+
+                        __liner.Do(increment, bounds.position, bounds.size, this, chunks, instantiate);
+
                         if (builder != null)
                             builder.Set(new BoundsInt(new Vector3Int(position.x, min, position.y), new Vector3Int(__mapSize.x, max - min, __mapSize.y)));
                     }
@@ -1487,15 +1546,15 @@ namespace ZG.Voxel
 
         public MapInfo[] mapInfos;
         public VolumeInfo[] volumeInfos;
+        public MaterialInfo[] materialInfos;
         [UnityEngine.Serialization.FormerlySerializedAs("heightInfos")]
         public LayerInfo[] layerInfos;
         public ObjectInfo[] objectInfos;
         public LineInfo[] lineInfos;
         public DrawInfo[] drawInfos;
-
         public Material[] materials;
         public GameObject[] gameObjects;
-
+        
         private System.Random __random;
         private Dictionary<Vector3Int, Node> __nodes = new Dictionary<Vector3Int, Node>();
 
@@ -1511,6 +1570,167 @@ namespace ZG.Voxel
         {
             tileProcessor = __GetMaterialIndex;
         }
+
+#if UNITY_EDITOR
+        public void OnValidate()
+        {
+            int i, j, 
+                numMapInfos = mapInfos == null ? 0 : mapInfos.Length,
+                numVolumeInfos = volumeInfos == null ? 0 : volumeInfos.Length,
+                numMaterialInfos = materialInfos == null ? 0 : materialInfos.Length,
+                numMaterials = materials == null ? 0 : materials.Length,
+                numGameObjects = gameObjects == null ? 0 : gameObjects.Length;
+
+            MaterialInfo materialInfo;
+            Material material;
+            for (i = 0; i < numMaterials; ++i)
+            {
+                materialInfo = materialInfos[i];
+                if(materialInfo.index < 0 || materialInfo.index >= numMaterials)
+                {
+                    if (string.IsNullOrEmpty(materialInfo.name))
+                        continue;
+                }
+                else
+                {
+                    material = materials[materialInfo.index];
+                    if (material == null || material.name == materialInfo.name)
+                        continue;
+                }
+
+                if (string.IsNullOrEmpty(materialInfo.name))
+                    materialInfo.index = -1;
+                else
+                {
+                    for(j = 0; j < numMaterials; ++j)
+                    {
+                        material = materials[j];
+                        if (material != null && material.name == materialInfo.name)
+                        {
+                            materialInfo.index = j;
+
+                            break;
+                        }
+                    }
+                }
+
+                materialInfos[i] = materialInfo;
+            }
+
+            int count = layerInfos == null ? 0 : layerInfos.Length;
+            LayerInfo layerInfo;
+            for (i = 0; i < count; ++i)
+            {
+                layerInfo = layerInfos[i];
+
+                if (layerInfo.materialIndex < 0 || layerInfo.materialIndex >= numMaterialInfos)
+                {
+                    if (string.IsNullOrEmpty(layerInfo.materialName))
+                        continue;
+                }
+                else
+                {
+                    materialInfo = materialInfos[layerInfo.materialIndex];
+                    if (materialInfo.name == layerInfo.materialName)
+                        continue;
+                }
+
+                if (string.IsNullOrEmpty(layerInfo.materialName))
+                    layerInfo.materialIndex = -1;
+                else
+                {
+                    for (j = 0; j < numMaterialInfos; ++j)
+                    {
+                        materialInfo = materialInfos[j];
+                        if (materialInfo.name == layerInfo.materialName)
+                        {
+                            layerInfo.materialIndex = j;
+
+                            break;
+                        }
+                    }
+                }
+
+                layerInfos[i] = layerInfo;
+            }
+
+            count = objectInfos == null ? 0 : objectInfos.Length;
+            int length, k;
+            MaterialFilter materialFilter;
+            ObjectInfo objectInfo;
+            GameObject gameObject;
+            for (i = 0; i < count; ++i)
+            {
+                objectInfo = objectInfos[i];
+                
+                if (objectInfo.index < 0 || objectInfo.index >= numGameObjects)
+                {
+                    if (string.IsNullOrEmpty(objectInfo.objectName))
+                        continue;
+                }
+                else
+                {
+                    gameObject = gameObjects[objectInfo.index];
+                    if (gameObject == null || gameObject.name == objectInfo.objectName)
+                        continue;
+                }
+
+                if (string.IsNullOrEmpty(objectInfo.objectName))
+                    objectInfo.index = -1;
+                else
+                {
+                    for (j = 0; j < numGameObjects; ++j)
+                    {
+                        gameObject = gameObjects[j];
+                        if (gameObject != null && gameObject.name == objectInfo.objectName)
+                        {
+                            objectInfo.index = j;
+
+                            break;
+                        }
+                    }
+                }
+
+                length = objectInfo.materialFilters == null ? 0 : objectInfo.materialFilters.Length;
+                for(j = 0; j < length; ++j)
+                {
+                    materialFilter = objectInfo.materialFilters[j];
+
+                    if (materialFilter.index < 0 || materialFilter.index >= numMaterialInfos)
+                    {
+                        if (string.IsNullOrEmpty(materialFilter.name))
+                            continue;
+                    }
+                    else
+                    {
+                        materialInfo = materialInfos[materialFilter.index];
+                        if (materialInfo.name == materialFilter.name)
+                            continue;
+                    }
+
+                    if (string.IsNullOrEmpty(materialFilter.name))
+                        materialFilter.index = -1;
+                    else
+                    {
+                        for (k = 0; k < numMaterialInfos; ++k)
+                        {
+                            materialInfo = materialInfos[k];
+                            if (materialInfo.name == materialFilter.name)
+                            {
+                                materialFilter.index = k;
+
+                                break;
+                            }
+                        }
+                    }
+
+                    objectInfo.materialFilters[j] = materialFilter;
+                }
+                
+                objectInfos[i] = objectInfo;
+            }
+        }
+#endif
 
         public override DualContouring Create(Vector3Int world, float increment)
         {
@@ -1545,7 +1765,15 @@ namespace ZG.Voxel
                 for (i = min.x; i <= max.x; ++i)
                 {
                     for(j = min.y; j <= max.y; ++j)
-                        engine.Create(increment, new Vector2Int(i, j), mapInfos, volumeInfos, layerInfos, drawInfos, Instantiate);
+                        engine.Create(
+                            increment, 
+                            new Vector2Int(i, j), 
+                            mapInfos, 
+                            volumeInfos, 
+                            layerInfos, 
+                            lineInfos, 
+                            drawInfos, 
+                            Instantiate);
                 }
             }
             
@@ -1629,13 +1857,15 @@ namespace ZG.Voxel
                 return -1;
             }
 
+            int numMaterials = materialInfos == null ? 0 : materialInfos.Length;
+            int result = block.materialIndex >= 0 && block.materialIndex < numMaterials ? materialInfos[block.materialIndex].index : -1;
             if (level > 0)
-                return block.materialIndex;
+                return result;
 
             lock(__nodes)
             {
                 if (__nodes.ContainsKey(offset))
-                    return block.materialIndex;
+                    return result;
 
                 __nodes[offset] = new Node(-1, null);
             }
@@ -1644,153 +1874,170 @@ namespace ZG.Voxel
             {
                 Vector3 point;
                 if (!octree.Get(x, out point))
-                    return block.materialIndex;
+                    return result;
 
                 DualContouring.Block a, b, c, d;
                 if (!octree.Get(x, out a) || !octree.Get(y, out b) || !octree.Get(z, out c) || !octree.Get(w, out d))
-                    return block.materialIndex;
+                    return result;
 
                 lock (__random)
                 {
+                    bool isContains;
                     int numGameObjects = gameObjects == null ? 0 : gameObjects.Length;
-                    float temp;
+                    float chance, temp;
                     Vector3 normal;
                     Plane plane;
                     GameObject gameObject;
                     foreach (ObjectInfo objectInfo in objectInfos)
                     {
-                        if ((objectInfo.materialFilters == null || objectInfo.materialFilters.Length < 1 || Array.IndexOf(objectInfo.materialFilters, block.materialIndex) != -1))
+                        chance = objectInfo.chance;
+                        if (objectInfo.materialFilters != null && objectInfo.materialFilters.Length > 0)
                         {
-                            normal = (a.normal + b.normal + c.normal + d.normal).normalized;
-                            if (Vector3.Dot(normal, objectInfo.normal) > objectInfo.dot &&
-                                __Check(position.x, position.z, mapInfos, objectInfo.mapFilters, out temp) && temp > (float)__random.NextDouble() &&
-                                objectInfo.chance > (float)__random.NextDouble())
+                            isContains = false;
+                            foreach (MaterialFilter materialFilter in objectInfo.materialFilters)
                             {
-                                gameObject = objectInfo.index >= 0 && objectInfo.index < numGameObjects ? gameObjects[objectInfo.index] : null;
-                                if (gameObject == null)
-                                    continue;
-
-                                int index = objectInfo.index;
-
-                                plane = new Plane(normal, point);
-                                temp = objectInfo.range * 2.0f;
-                                Vector3 finalPosition = plane.ClosestPointOnPlane(
-                                    position + new Vector3(
-                                        (float)(__random.NextDouble() * temp - objectInfo.range),
-                                        (float)(__random.NextDouble() * temp - objectInfo.range),
-                                        (float)(__random.NextDouble() * temp - objectInfo.range))) 
-                                    + objectInfo.normal * objectInfo.offset;
-
-                                Quaternion rotation;
-                                switch (objectInfo.rotation)
+                                if (materialFilter.index == block.materialIndex)
                                 {
-                                    case ObjectInfo.Rotation.AixY:
-                                        rotation = Quaternion.Euler(0.0f, (float)(__random.NextDouble() * 360.0), 0.0f);
-                                        break;
-                                    case ObjectInfo.Rotation.NormalUp:
-                                        rotation = Quaternion.FromToRotation(Vector3.up, normal);
-                                        break;
-                                    case ObjectInfo.Rotation.NormalAixY:
-                                        rotation = Quaternion.FromToRotation(Vector3.up, normal) * Quaternion.Euler(0.0f, (float)(__random.NextDouble() * 360.0), 0.0f);
-                                        break;
-                                    case ObjectInfo.Rotation.All:
-                                        rotation = Quaternion.Euler((float)(__random.NextDouble() * 360.0), (float)(__random.NextDouble() * 360.0), (float)(__random.NextDouble() * 360.0));
-                                        break;
-                                    default:
-                                        rotation = Quaternion.identity;
-                                        break;
+                                    chance += materialFilter.chanceOffset;
+
+                                    isContains = true;
+
+                                    break;
                                 }
+                            }
 
-                                //string name = objectInfo.name;
-                                float height = objectInfo.height;
-                                Instantiate(new Instance(gameObject, instance =>
+                            if (!isContains)
+                                continue;
+                        }
+
+                        normal = (a.normal + b.normal + c.normal + d.normal).normalized;
+                        if (Vector3.Dot(normal, objectInfo.normal) > objectInfo.dot &&
+                            __Check(position.x, position.z, mapInfos, objectInfo.mapFilters, out temp) && temp > (float)__random.NextDouble() &&
+                            chance > (float)__random.NextDouble())
+                        {
+                            gameObject = objectInfo.index >= 0 && objectInfo.index < numGameObjects ? gameObjects[objectInfo.index] : null;
+                            if (gameObject == null)
+                                continue;
+
+                            int index = objectInfo.index;
+
+                            plane = new Plane(normal, point);
+                            temp = objectInfo.range * 2.0f;
+                            Vector3 finalPosition = plane.ClosestPointOnPlane(
+                                position + new Vector3(
+                                    (float)(__random.NextDouble() * temp - objectInfo.range),
+                                    (float)(__random.NextDouble() * temp - objectInfo.range),
+                                    (float)(__random.NextDouble() * temp - objectInfo.range)))
+                                + objectInfo.normal * objectInfo.offset;
+
+                            Quaternion rotation;
+                            switch (objectInfo.rotation)
+                            {
+                                case ObjectInfo.Rotation.AixY:
+                                    rotation = Quaternion.Euler(0.0f, (float)(__random.NextDouble() * 360.0), 0.0f);
+                                    break;
+                                case ObjectInfo.Rotation.NormalUp:
+                                    rotation = Quaternion.FromToRotation(Vector3.up, normal);
+                                    break;
+                                case ObjectInfo.Rotation.NormalAixY:
+                                    rotation = Quaternion.FromToRotation(Vector3.up, normal) * Quaternion.Euler(0.0f, (float)(__random.NextDouble() * 360.0), 0.0f);
+                                    break;
+                                case ObjectInfo.Rotation.All:
+                                    rotation = Quaternion.Euler((float)(__random.NextDouble() * 360.0), (float)(__random.NextDouble() * 360.0), (float)(__random.NextDouble() * 360.0));
+                                    break;
+                                default:
+                                    rotation = Quaternion.identity;
+                                    break;
+                            }
+
+                            //string name = objectInfo.name;
+                            float top = objectInfo.top, bottom = objectInfo.bottom;
+                            Instantiate(new Instance(gameObject, instance =>
+                            {
+                                GameObject target = instance as GameObject;
+                                if (target == null)
+                                    return false;
+
+                                Vector3 direction, distance, min, max;
+                                Bounds bounds;
+                                Mesh mesh;
+                                Transform transform;
+                                MeshFilter[] meshFilters = target.GetComponentsInChildren<MeshFilter>(true);
+                                foreach (MeshFilter meshFilter in meshFilters)
                                 {
-                                    GameObject target = instance as GameObject;
-                                    if (target == null)
-                                        return false;
-
-                                    List<MeshFilter> meshFilters = new List<MeshFilter>();
-                                    Mesh mesh;
-                                    Transform transform;
-                                    Matrix4x4 matrix = Matrix4x4.Rotate(rotation);
-                                    Bounds bounds;
-                                    Vector3 min, max;
-                                    float radius, sizeY;
-                                    target.GetComponentsInChildren(true, meshFilters);
-                                    foreach (MeshFilter meshFilter in meshFilters)
+                                    mesh = meshFilter == null ? null : meshFilter.sharedMesh;
+                                    if (mesh != null)
                                     {
-                                        mesh = meshFilter == null ? null : meshFilter.sharedMesh;
-                                        if (mesh != null)
+                                        transform = meshFilter.transform;
+                                        if (transform != null)
                                         {
-                                            transform = meshFilter.transform;
-                                            if (transform != null)
-                                            {
-                                                bounds = (transform.localToWorldMatrix * matrix).Multiply(mesh.bounds);
-                                                max = bounds.max;
-                                                if (max.y < height)
-                                                    continue;
+                                            bounds = mesh.bounds;
+                                            direction = transform.InverseTransformDirection(Vector3.up);
+                                            distance = direction * bottom;
+                                            min = bounds.min;
+                                            max = bounds.max;
+                                            bounds.SetMinMax(Vector3.Max(min, min + distance), Vector3.Min(max, max + distance));
+                                            bounds.Encapsulate(new Bounds(bounds.center + direction * top, bounds.size));
 
-                                                min = bounds.min;
-                                                if (min.y < height)
-                                                    min.y = height;
-
-                                                max += finalPosition;
-                                                min += finalPosition;
-
-                                                radius = Mathf.Max(max.x - min.x, max.z - min.z);
-                                                sizeY = max.y - min.y;
-                                                if (sizeY > radius)
-                                                {
-                                                    radius *= 0.5f;
-
-                                                    min.y += radius;
-                                                    max.y -= radius;
-                                                    if (Physics.CheckCapsule(
-                                                        min,
-                                                        max,
-                                                        radius,
-                                                        Physics.AllLayers))
-                                                        return false;
-                                                }
-                                                else
-                                                {
-                                                    if (Physics.CheckSphere(
-                                                        (min + max) * 0.5f,
-                                                        sizeY * 0.5f,
-                                                        Physics.AllLayers))
-                                                        return false;
-                                                }
-                                            }
+                                            if (Physics.CheckBox(
+                                                    transform.TransformPoint(bounds.center) + finalPosition,
+                                                    Vector3.Scale(bounds.extents, transform.lossyScale),
+                                                    rotation * transform.rotation,
+                                                    Physics.AllLayers))
+                                                return false;
                                         }
                                     }
+                                }
 
-                                    return true;
-                                }, instance =>
+                                SkinnedMeshRenderer[] skinnedMeshRenderers = target.GetComponentsInChildren<SkinnedMeshRenderer>(true);
+                                foreach (SkinnedMeshRenderer skinnedMeshRenderer in skinnedMeshRenderers)
                                 {
-                                    Node node = new Node(index, instance as GameObject);
-
-                                    Transform transform = node.gameObject == null ? null : node.gameObject.transform;
+                                    transform = skinnedMeshRenderer == null ? null : skinnedMeshRenderer.rootBone;
                                     if (transform != null)
                                     {
-                                        transform.position = finalPosition;
-                                        transform.rotation = rotation;
-                                        transform.SetParent(root);
-                                    }
+                                        bounds = skinnedMeshRenderer.localBounds;
+                                        direction = transform.InverseTransformDirection(Vector3.up);
+                                        distance = direction * bottom;
+                                        min = bounds.min;
+                                        max = bounds.max;
+                                        bounds.SetMinMax(Vector3.Max(min, min + distance), Vector3.Min(max, max + distance));
+                                        bounds.Encapsulate(new Bounds(bounds.center + direction * top, bounds.size));
 
-                                    lock (__nodes)
-                                    {
-                                        __nodes[offset] = node;
+                                        if (Physics.CheckBox(
+                                                transform.TransformPoint(bounds.center) + finalPosition,
+                                                Vector3.Scale(bounds.extents, transform.lossyScale),
+                                                rotation * transform.rotation,
+                                                Physics.AllLayers))
+                                            return false;
                                     }
-                                }));
+                                }
 
-                                break;
-                            }
+                                return true;
+                            }, instance =>
+                            {
+                                Node node = new Node(index, instance as GameObject);
+
+                                Transform transform = node.gameObject == null ? null : node.gameObject.transform;
+                                if (transform != null)
+                                {
+                                    transform.position += finalPosition;
+                                    transform.rotation = rotation * transform.rotation;
+                                    transform.SetParent(root);
+                                }
+
+                                lock (__nodes)
+                                {
+                                    __nodes[offset] = node;
+                                }
+                            }));
+
+                            break;
                         }
                     }
                 }
             }
 
-            return block.materialIndex;
+            return result;
         }
 
         private static bool __Check(float x, float y, MapInfo[] mapInfos, MapFilter[] filters, out float result)

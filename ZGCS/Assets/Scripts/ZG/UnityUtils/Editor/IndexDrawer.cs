@@ -102,7 +102,8 @@ namespace ZG
             Rect position, 
             SerializedProperty property, 
             GUIContent label, 
-            string path, 
+            string path,
+            string relativePropertyPath, 
             string emptyName, 
             string nameKey, 
             int pathLevel, 
@@ -116,7 +117,10 @@ namespace ZG
             string targetPath = EditorHelper.GetPropertyPath(property.propertyPath), propertyPath = targetPath;
             if (propertyPath == null)
             {
-                EditorHelper.HelpBox(position, label, "Error Path", MessageType.Error);
+                if (position.Contains(Event.current.mousePosition))
+                    EditorGUI.PropertyField(position, property);
+                else
+                    EditorHelper.HelpBox(position, label, "Error Path", MessageType.Error);
 
                 return;
             }
@@ -131,7 +135,6 @@ namespace ZG
             
             propertyPath = propertyPath.Remove(index + 1);
             propertyPath += path;
-            
             int nameIndex;
             string temp = propertyPath;
             SerializedPropertyType type = property.propertyType;
@@ -140,11 +143,16 @@ namespace ZG
             Dictionary<string, int> source = null, destination = null;
             if (names == null)
             {
-                temp = propertyPath.Remove(propertyPath.IndexOf(temp));
-                if (string.IsNullOrEmpty(temp))
-                    EditorHelper.HelpBox(position, label, targetObject.GetName() + "." + propertyPath + " is not a IList", MessageType.Error);
+                if (position.Contains(Event.current.mousePosition))
+                    EditorGUI.PropertyField(position, property);
                 else
-                    EditorHelper.HelpBox(position, label, targetObject.GetName() + "." + temp + " is null", MessageType.Warning);
+                {
+                    temp = propertyPath.Remove(propertyPath.IndexOf(temp));
+                    if (string.IsNullOrEmpty(temp))
+                        EditorHelper.HelpBox(position, label, targetObject.GetName() + "." + propertyPath + " is not a IList", MessageType.Error);
+                    else
+                        EditorHelper.HelpBox(position, label, targetObject.GetName() + "." + temp + " is null", MessageType.Warning);
+                }
 
                 return;
             }
@@ -162,9 +170,17 @@ namespace ZG
                     }
                     catch
                     {
-                        EditorHelper.HelpBox(position, label, targetObject.GetName() + "." + propertyPath + " is have the same name", MessageType.Error);
+                        if (type == SerializedPropertyType.String)
+                        {
+                            if (position.Contains(Event.current.mousePosition))
+                                EditorGUI.PropertyField(position, property);
+                            else
+                                EditorHelper.HelpBox(position, label, targetObject.GetName() + "." + propertyPath + " is have the same name", MessageType.Error);
 
-                        return;
+                            return;
+                        }
+                        else
+                            source.Add(NameHelper.MakeUnique(targetName, source.Keys), index);
                     }
 
                     ++index;
@@ -199,9 +215,17 @@ namespace ZG
                                 }
                                 catch
                                 {
-                                    EditorHelper.HelpBox(position, label, target.name + "." + propertyPath + " is have same name", MessageType.Error);
+                                    if (type == SerializedPropertyType.String)
+                                    {
+                                        if (position.Contains(Event.current.mousePosition))
+                                            EditorGUI.PropertyField(position, property);
+                                        else
+                                            EditorHelper.HelpBox(position, label, target.name + "." + propertyPath + " is have same name", MessageType.Error);
 
-                                    return;
+                                        return;
+                                    }
+                                    else
+                                        destination.Add(NameHelper.MakeUnique(targetName, destination.Keys), index);
                                 }
                             }
 
@@ -218,7 +242,12 @@ namespace ZG
             }
 
             if (source == null || source.Count < 1)
-                EditorHelper.HelpBox(position, label, "No Element", MessageType.Warning);
+            {
+                if (position.Contains(Event.current.mousePosition))
+                    EditorGUI.PropertyField(position, property);
+                else
+                    EditorHelper.HelpBox(position, label, "No Element", MessageType.Warning);
+            }
             else
             {
                 bool isShowMixedValue = EditorGUI.showMixedValue;
@@ -226,102 +255,115 @@ namespace ZG
 
                 if (type == SerializedPropertyType.Integer)
                 {
-                    ICollection<string> keyCollection = source == null ? null : source.Keys;
-                    string[] options;
+                    ICollection<string> keyCollection = source.Keys;
                     if (keyCollection == null)
                     {
-                        EditorHelper.HelpBox(position, label, "No keys", MessageType.Error);
+                        if (position.Contains(Event.current.mousePosition))
+                            EditorGUI.PropertyField(position, property);
+                        else
+                            EditorHelper.HelpBox(position, label, "No keys", MessageType.Error);
 
                         return;
                     }
-                    else if (string.IsNullOrEmpty(emptyName))
-                    {
-                        options = new string[keyCollection.Count];
-                        keyCollection.CopyTo(options, 0);
-                    }
-                    else
-                    {
-                        options = new string[keyCollection.Count + 1];
-                        options[0] = emptyName;
-                        keyCollection.CopyTo(options, 1);
-                    }
 
-                    Dictionary<string, int>.ValueCollection valueCollection = source.Values;
-                    int[] values;
-                    if (valueCollection == null)
-                    {
-                        EditorHelper.HelpBox(position, label, "No Values", MessageType.Error);
-
-                        return;
-                    }
-                    else if (string.IsNullOrEmpty(emptyName))
-                    {
-                        values = new int[valueCollection.Count];
-                        valueCollection.CopyTo(values, 0);
-                    }
-                    else
-                    {
-                        values = new int[valueCollection.Count + 1];
-                        values[0] = -1;
-                        valueCollection.CopyTo(values, 1);
-                    }
-
-                    index = Array.IndexOf(values, property.intValue);
-                    string option = index == -1 ? string.Empty : options[index];
+                    bool isEmptyName = !string.IsNullOrEmpty(emptyName);
+                    int count = keyCollection.Count;
+                    string[] options;
                     if (uniqueLevel > 0)
                     {
+                        options = new string[count];
+                        keyCollection.CopyTo(options, 0);
+
                         bool isRemove = false;
-                        foreach(SerializedProperty sibling in property.GetSiblings(uniqueLevel))
+                        foreach (SerializedProperty sibling in property.GetSiblings(uniqueLevel))
                         {
-                            if(sibling != null)
+                            if (sibling != null)
                             {
-                                index = Array.IndexOf(values, sibling.intValue);
-                                isRemove = source.Remove(index == -1 ? string.Empty : options[index]) || isRemove;
+                                index = sibling.intValue;
+
+                                if (index >= 0 && index < count)
+                                    isRemove = source.Remove(options[index]) || isRemove;
                             }
                         }
 
-                        if(isRemove)
+                        if (isRemove)
                         {
-                            if (string.IsNullOrEmpty(emptyName))
-                            {
-                                options = new string[keyCollection.Count];
-                                keyCollection.CopyTo(options, 0);
-                            }
-                            else
-                            {
-                                options = new string[keyCollection.Count + 1];
-                                options[0] = emptyName;
-                                keyCollection.CopyTo(options, 1);
-                            }
+                            keyCollection = source.Keys;
+                            count = keyCollection == null ? 0 : keyCollection.Count;
 
-                            if (string.IsNullOrEmpty(emptyName))
-                            {
-                                values = new int[valueCollection.Count];
-                                valueCollection.CopyTo(values, 0);
-                            }
-                            else
-                            {
-                                values = new int[valueCollection.Count + 1];
-                                values[0] = -1;
-                                valueCollection.CopyTo(values, 1);
-                            }
+                            options = null;
+                        }
+                        else if (isEmptyName)
+                            options = null;
+                    }
+                    else
+                        options = null;
+
+                    index = -1;
+                    Dictionary<string, int>.ValueCollection values = source.Values;
+                    if (values != null)
+                    {
+                        int result = property.intValue;
+                        foreach (int value in values)
+                        {
+                            if (value == result)
+                                break;
+                            
+                            ++index;
+                        }
+
+                        if (index < count - 1)
+                            ++index;
+                        else
+                            index = -1;
+                    }
+
+                    if (options == null)
+                    {
+                        if (isEmptyName)
+                        {
+                            options = new string[count + 1];
+                            options[0] = emptyName;
+                            keyCollection.CopyTo(options, 1);
+                            
+                            ++index;
+                        }
+                        else
+                        { 
+                            options = new string[count];
+                            keyCollection.CopyTo(options, 0);
                         }
                     }
 
-                    if (!source.TryGetValue(option, out index))
-                        index = -1;
-                    
                     EditorGUI.BeginChangeCheck();
-                    index = EditorGUI.IntPopup(
+                    index = EditorGUI.Popup(
                         position,
                         label == null ? null : label.text,
                         index,
-                        options,
-                        values);
-                    
+                        options);
+
                     if (EditorGUI.EndChangeCheck())
+                    {
+                        string name = index >= 0 && index < count ? options[index] : string.Empty;
+                        index = !isEmptyName || index > 0 ? source[name] : -1;
                         property.intValue = index;
-                    else if(fieldInfo != null)
+
+                        property = property.GetParent();
+                        property = property == null ? null : property.FindPropertyRelative(relativePropertyPath);
+                        if(property != null)
+                        {
+                            switch(property.propertyType)
+                            {
+                                case SerializedPropertyType.Integer:
+                                    property.intValue = index;
+                                    break;
+                                case SerializedPropertyType.String:
+                                    property.stringValue = name;
+                                    break;
+                            }
+                        }
+                    }
+                    else if (fieldInfo != null)
                     {
                         Event current = Event.current;
                         if (current != null && current.type == EventType.ContextClick && position.Contains(current.mousePosition))
@@ -329,7 +371,7 @@ namespace ZG
                             GenericMenu genericMenu = new GenericMenu();
                             genericMenu.AddItem(new GUIContent("Reset"), false, delegate ()
                             {
-                                int numOptions = Mathf.Min(options == null ? 0 : options.Length, values == null ? 0 : values.Length);//, nameLength, count, i;
+                                int numOptions = Mathf.Min(options == null ? 0 : options.Length);//, nameLength, count, i;
                                 Type targetType;
                                 object instance;
                                 //string name;
@@ -343,7 +385,7 @@ namespace ZG
                                         index = target.name.Approximately(options);
                                         if (index >= 0 && index < numOptions)
                                         {
-                                            fieldInfo.SetValue(target, Convert.ChangeType(values[index], targetType));
+                                            fieldInfo.SetValue(target, Convert.ChangeType(isEmptyName ? index - 1 : index, targetType));
 
                                             EditorUtility.SetDirty(target);
                                         }
@@ -412,11 +454,12 @@ namespace ZG
                         }
                     }
 
-                    ICollection<string> keyCollection = source == null ? null : source.Keys;
+                    bool isEmptyName = !string.IsNullOrEmpty(emptyName);
                     string[] options;
+                    ICollection<string> keyCollection = source == null ? null : source.Keys;
                     if (keyCollection == null)
                         options = null;
-                    else if (string.IsNullOrEmpty(emptyName))
+                    else if (isEmptyName)
                     {
                         options = new string[keyCollection.Count];
                         keyCollection.CopyTo(options, 0);
@@ -432,8 +475,29 @@ namespace ZG
                     EditorGUI.BeginChangeCheck();
                     index = EditorGUI.Popup(position, label == null ? null : label.text, index, options);
                     if (EditorGUI.EndChangeCheck() && index >= 0 && index < options.Length)
-                        property.stringValue = options[index];
+                    {
+                        string name = options[index];
+                        index = !isEmptyName || index > 0 ? source[name] : -1;
+                        property.stringValue = name;
+
+                        property = property.GetParent();
+                        property = property == null ? null : property.FindPropertyRelative(relativePropertyPath);
+                        if (property != null)
+                        {
+                            switch (property.propertyType)
+                            {
+                                case SerializedPropertyType.Integer:
+                                    property.intValue = index;
+                                    break;
+                                case SerializedPropertyType.String:
+                                    property.stringValue = name;
+                                    break;
+                            }
+                        }
+                    }
                 }
+                else if (position.Contains(Event.current.mousePosition))
+                    EditorGUI.PropertyField(position, property);
                 else
                     EditorHelper.HelpBox(position, label, "Error type(Must be int Or string)", MessageType.Error);
 
@@ -446,9 +510,9 @@ namespace ZG
             IndexAttribute attribute = this.attribute as IndexAttribute;
             label = EditorGUI.BeginProperty(position, label, property);
             if (attribute == null)
-                Draw(position, property, label, null, null, null, 0, 0, fieldInfo);
+                Draw(position, property, label, null, null, null, null, 0, 0, fieldInfo);
             else
-                Draw(position, property, label, attribute.path, attribute.emptyName, attribute.nameKey, attribute.pathLevel, attribute.uniqueLevel, fieldInfo);
+                Draw(position, property, label, attribute.path, attribute.relativePropertyPath, attribute.emptyName, attribute.nameKey, attribute.pathLevel, attribute.uniqueLevel, fieldInfo);
             EditorGUI.EndProperty();
         }
     }
