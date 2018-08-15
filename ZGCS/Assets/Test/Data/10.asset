@@ -1023,12 +1023,16 @@ MonoBehaviour:
     - name: "\u6811"
       objectName: Tree_01
       index: 0
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
-      chance: 0.0005
-      dot: 0.9
+      chance: 0.002
+      dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -1046,12 +1050,16 @@ MonoBehaviour:
     - name: "\u6811"
       objectName: Tree_02
       index: 1
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
-      chance: 0.0005
-      dot: 0.9
+      chance: 0.002
+      dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -1069,12 +1077,16 @@ MonoBehaviour:
     - name: "\u6811"
       objectName: Tree_03
       index: 2
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
-      chance: 0.0005
-      dot: 0.9
+      chance: 0.002
+      dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -1092,12 +1104,16 @@ MonoBehaviour:
     - name: "\u82F9\u679C\u6811\uFF08\u65E0\u679C\uFF09"
       objectName: Tree_04
       index: 3
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
-      chance: 0.001
-      dot: 0.9
+      chance: 0.005
+      dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -1122,12 +1138,16 @@ MonoBehaviour:
     - name: "\u82F9\u679C\u6811\uFF08\u65E0\u679C\uFF09"
       objectName: Tree_05
       index: 4
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
-      chance: 0.002
+      chance: 0.01
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -1152,12 +1172,16 @@ MonoBehaviour:
     - name: "\u82F9\u679C\u6811\uFF08\u65E0\u679C\uFF09"
       objectName: Tree_06
       index: 5
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
-      chance: 0.005
+      chance: 0.02
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -1182,12 +1206,16 @@ MonoBehaviour:
     - name: "\u82F9\u679C\u6811\uFF08\u6709\u679C\uFF09"
       objectName: Tree_07
       index: 6
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
-      chance: 0.002
+      chance: 0.01
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -1212,12 +1240,16 @@ MonoBehaviour:
     - name: "\u82F9\u679C\u6811\uFF08\u6709\u679C\uFF09"
       objectName: Tree_08
       index: 7
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
-      chance: 0.001
+      chance: 0.005
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -1242,12 +1274,16 @@ MonoBehaviour:
     - name: "\u82F9\u679C\u6811\uFF08\u6709\u679C\uFF09"
       objectName: Tree_09
       index: 8
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
-      chance: 0.0005
+      chance: 0.002
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -1272,12 +1308,16 @@ MonoBehaviour:
     - name: "\u6A61\u6811"
       objectName: Tree_10
       index: 9
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
-      chance: 0.001
-      dot: 0.9
+      chance: 0.01
+      dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -1295,12 +1335,16 @@ MonoBehaviour:
     - name: "\u6A61\u6811"
       objectName: Tree_11
       index: 10
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
-      chance: 0.002
-      dot: 0.9
+      chance: 0.02
+      dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -1318,12 +1362,16 @@ MonoBehaviour:
     - name: "\u6A61\u6811"
       objectName: Tree_12
       index: 11
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
-      chance: 0.001
-      dot: 0.9
+      chance: 0.01
+      dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -1341,12 +1389,16 @@ MonoBehaviour:
     - name: "\u677E\u6811"
       objectName: Tree_13
       index: 12
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
-      chance: 0.004
+      chance: 0.02
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -1364,12 +1416,16 @@ MonoBehaviour:
     - name: "\u677E\u6811"
       objectName: Tree_14
       index: 13
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
-      chance: 0.01
+      chance: 0.05
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -1387,12 +1443,16 @@ MonoBehaviour:
     - name: "\u677E\u6811"
       objectName: Tree_15
       index: 14
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
-      chance: 0.002
+      chance: 0.01
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -1410,12 +1470,16 @@ MonoBehaviour:
     - name: "\u5408\u6B22\u6811"
       objectName: Tree_25
       index: 24
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
-      chance: 0.0001
+      chance: 0.0005
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -1433,12 +1497,16 @@ MonoBehaviour:
     - name: "\u5408\u6B22\u6811"
       objectName: Tree_26
       index: 25
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
-      chance: 0.0002
+      chance: 0.001
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -1456,12 +1524,16 @@ MonoBehaviour:
     - name: "\u5408\u6B22\u6811"
       objectName: Tree_27
       index: 26
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
-      chance: 0.001
+      chance: 0.005
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -1479,12 +1551,16 @@ MonoBehaviour:
     - name: "\u5408\u6B22\u6811"
       objectName: Tree_28
       index: 27
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
-      chance: 0.005
+      chance: 0.02
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -1502,12 +1578,16 @@ MonoBehaviour:
     - name: "\u5408\u6B22\u6811"
       objectName: Tree_29
       index: 28
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
-      chance: 0.001
+      chance: 0.005
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -1525,12 +1605,16 @@ MonoBehaviour:
     - name: "\u5408\u6B22\u6811"
       objectName: Tree_30
       index: 29
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
-      chance: 0.0002
+      chance: 0.001
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -1548,12 +1632,16 @@ MonoBehaviour:
     - name: "\u96EA\u677E"
       objectName: Tree_16
       index: 15
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
-      chance: 0.002
+      chance: 0.01
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -1571,12 +1659,16 @@ MonoBehaviour:
     - name: "\u96EA\u677E"
       objectName: Tree_17
       index: 16
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
-      chance: 0.01
+      chance: 0.05
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -1594,12 +1686,16 @@ MonoBehaviour:
     - name: "\u96EA\u677E"
       objectName: Tree_18
       index: 17
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
-      chance: 0.001
+      chance: 0.005
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -1617,12 +1713,16 @@ MonoBehaviour:
     - name: "\u7EA2\u6811"
       objectName: Tree_19
       index: 18
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
-      chance: 0.001
+      chance: 0.005
       dot: 0.9
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -1640,12 +1740,16 @@ MonoBehaviour:
     - name: "\u7EA2\u6811"
       objectName: Tree_20
       index: 19
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
-      chance: 0.001
+      chance: 0.005
       dot: 0.9
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -1663,12 +1767,16 @@ MonoBehaviour:
     - name: "\u7EA2\u6811"
       objectName: Tree_21
       index: 20
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
-      chance: 0.001
+      chance: 0.005
       dot: 0.9
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -1686,12 +1794,16 @@ MonoBehaviour:
     - name: "\u7EA2\u6811"
       objectName: Tree_22
       index: 21
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
-      chance: 0.001
+      chance: 0.005
       dot: 0.9
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -1709,12 +1821,16 @@ MonoBehaviour:
     - name: "\u7EA2\u6811"
       objectName: Tree_23
       index: 22
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
-      chance: 0.001
+      chance: 0.005
       dot: 0.9
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -1732,12 +1848,16 @@ MonoBehaviour:
     - name: "\u7EA2\u6811"
       objectName: Tree_24
       index: 23
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
-      chance: 0.001
+      chance: 0.005
       dot: 0.9
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -1755,12 +1875,16 @@ MonoBehaviour:
     - name: "\u6930\u5B50\u6811"
       objectName: Tree_31
       index: 30
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
-      chance: 0.01
+      chance: 0.02
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -1771,12 +1895,16 @@ MonoBehaviour:
     - name: "\u6930\u5B50\u6811"
       objectName: Tree_32
       index: 31
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
-      chance: 0.01
+      chance: 0.02
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -1787,12 +1915,16 @@ MonoBehaviour:
     - name: "\u4ED9\u4EBA\u638C"
       objectName: Tree_37
       index: 36
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
-      chance: 0.002
+      chance: 0.005
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -1803,12 +1935,16 @@ MonoBehaviour:
     - name: "\u4ED9\u4EBA\u638C"
       objectName: Tree_38
       index: 37
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
-      chance: 0.005
+      chance: 0.01
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -1819,12 +1955,16 @@ MonoBehaviour:
     - name: "\u4ED9\u4EBA\u638C"
       objectName: Tree_39
       index: 38
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
-      chance: 0.005
+      chance: 0.01
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -1835,12 +1975,16 @@ MonoBehaviour:
     - name: "\u4ED9\u4EBA\u638C"
       objectName: Tree_40
       index: 39
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
-      chance: 0.002
+      chance: 0.005
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -1851,134 +1995,335 @@ MonoBehaviour:
     - name: "\u6811\u5E72"
       objectName: Tree_33
       index: 32
-      rotation: 1
-      chance: 0.0001
-      dot: 0.8
-      offset: 0
-      height: 0.5
-      extent: 1
-      range: 0
-      normal: {x: 0, y: 1, z: 0}
-      materialFilters:
-      - name: "\u8349\u539F"
-        index: 3
-        chanceOffset: 0
-      - name: "\u6CE5\u5730"
-        index: 5
-        chanceOffset: 0
-      - name: "\u5730\u5E54"
-        index: 7
-        chanceOffset: 0
-      mapFilters:
-      - isInverce: 1
-        index: 2
-        min: 0
-        max: 1
-        center: 0.5
-        scale: 2
-        offset: 0
-    - name: "\u6811\u5E72"
-      objectName: Tree_34
-      index: 33
-      rotation: 1
-      chance: 0.0005
-      dot: 0.8
-      offset: 0
-      height: 0.5
-      extent: 1
-      range: 0
-      normal: {x: 0, y: 1, z: 0}
-      materialFilters:
-      - name: "\u8349\u539F"
-        index: 3
-        chanceOffset: 0
-      - name: "\u6CE5\u5730"
-        index: 5
-        chanceOffset: 0
-      - name: "\u5730\u5E54"
-        index: 7
-        chanceOffset: 0
-      mapFilters:
-      - isInverce: 1
-        index: 2
-        min: 0
-        max: 1
-        center: 0.5
-        scale: 2
-        offset: 0
-    - name: "\u6811\u5E72"
-      objectName: Tree_35
-      index: 34
-      rotation: 1
-      chance: 0.0002
-      dot: 0.8
-      offset: 0
-      height: 0.5
-      extent: 1
-      range: 0
-      normal: {x: 0, y: 1, z: 0}
-      materialFilters:
-      - name: "\u8349\u539F"
-        index: 3
-        chanceOffset: 0
-      - name: "\u6CE5\u5730"
-        index: 5
-        chanceOffset: 0
-      - name: "\u5730\u5E54"
-        index: 7
-        chanceOffset: 0
-      mapFilters:
-      - isInverce: 1
-        index: 2
-        min: 0
-        max: 1
-        center: 0.5
-        scale: 2
-        offset: 0
-    - name: "\u6811\u5E72"
-      objectName: Tree_36
-      index: 35
-      rotation: 1
-      chance: 0.0001
-      dot: 0.8
-      offset: 0
-      height: 0.5
-      extent: 1
-      range: 0
-      normal: {x: 0, y: 1, z: 0}
-      materialFilters:
-      - name: "\u8349\u539F"
-        index: 3
-        chanceOffset: 0
-      - name: "\u6CE5\u5730"
-        index: 5
-        chanceOffset: 0
-      - name: "\u5730\u5E54"
-        index: 7
-        chanceOffset: 0
-      mapFilters:
-      - isInverce: 1
-        index: 2
-        min: 0
-        max: 1
-        center: 0.5
-        scale: 2
-        offset: 0
-    - name: "\u6D46\u679C\u4E1B"
-      objectName: jiangguocong1
-      index: 40
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
       chance: 0.002
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
       - name: "\u8349\u539F"
         index: 3
         chanceOffset: 0
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      - name: "\u5730\u5E54"
+        index: 7
+        chanceOffset: 0.01
+      mapFilters:
+      - isInverce: 0
+        index: 1
+        min: 0
+        max: 1
+        center: 0
+        scale: 1
+        offset: 0
+    - name: "\u6811\u5E72"
+      objectName: Tree_34
+      index: 33
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.001
+      dot: 0.8
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      - name: "\u5730\u5E54"
+        index: 7
+        chanceOffset: 0.005
+      mapFilters:
+      - isInverce: 0
+        index: 1
+        min: 0
+        max: 1
+        center: 0
+        scale: 1
+        offset: 0
+    - name: "\u6811\u5E72"
+      objectName: Tree_35
+      index: 34
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.002
+      dot: 0.8
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      - name: "\u5730\u5E54"
+        index: 7
+        chanceOffset: 0.01
+      mapFilters:
+      - isInverce: 0
+        index: 1
+        min: 0
+        max: 1
+        center: 0
+        scale: 1
+        offset: 0
+    - name: "\u6811\u5E72"
+      objectName: Tree_36
+      index: 35
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.001
+      dot: 0.8
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      - name: "\u5730\u5E54"
+        index: 7
+        chanceOffset: 0.005
+      mapFilters:
+      - isInverce: 0
+        index: 1
+        min: 0
+        max: 1
+        center: 0
+        scale: 1
+        offset: 0
+    - name: "\u5730\u4E0B\u706F"
+      objectName: SM_Env_Mushroom_Giant_01
+      index: 40
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.001
+      dot: 0.8
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u5730\u4E0B"
+        index: 4
+        chanceOffset: 0
+      - name: "\u5730\u5E95"
+        index: 0
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u5730\u4E0B\u706F"
+      objectName: SM_Env_Mushroom_Giant_02
+      index: 41
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.003
+      dot: 0.8
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u5730\u4E0B"
+        index: 4
+        chanceOffset: 0
+      - name: "\u5730\u5E95"
+        index: 0
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u5730\u4E0B\u706F"
+      objectName: SM_Env_Mushroom_Giant_06
+      index: 42
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.005
+      dot: 0.8
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u5730\u4E0B"
+        index: 4
+        chanceOffset: 0
+      - name: "\u5730\u5E95"
+        index: 0
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u5730\u4E0B\u706F"
+      objectName: SM_Env_Mushroom_Giant_03
+      index: 43
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.01
+      dot: 0.8
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u5730\u4E0B"
+        index: 4
+        chanceOffset: 0
+      - name: "\u5730\u5E95"
+        index: 0
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u5730\u4E0B\u706F"
+      objectName: SM_Env_Mushroom_Giant_04
+      index: 44
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.01
+      dot: 0.8
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u5730\u4E0B"
+        index: 4
+        chanceOffset: 0
+      - name: "\u5730\u5E95"
+        index: 0
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u5B9D\u7BB1"
+      objectName: baoxiang1
+      index: 45
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 3
+      chance: 0.002
+      dot: 0.8
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u5730\u4E0B"
+        index: 4
+        chanceOffset: 0
+      - name: "\u5730\u5E95"
+        index: 0
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u5B9D\u7BB1"
+      objectName: baoxiang2
+      index: 46
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 3
+      chance: 0.001
+      dot: 0.8
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u5730\u4E0B"
+        index: 4
+        chanceOffset: 0
+      - name: "\u5730\u5E95"
+        index: 0
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u5B9D\u7BB1"
+      objectName: baoxiang3
+      index: 47
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 3
+      chance: 0.0002
+      dot: 0.8
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u5730\u5E95"
+        index: 0
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u6D46\u679C\u4E1B"
+      objectName: jiangguocong1
+      index: 48
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.002
+      dot: 0.8
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0.001
       - name: "\u6CE5\u5730"
         index: 5
         chanceOffset: 0
@@ -1992,19 +2337,23 @@ MonoBehaviour:
         offset: 0
     - name: "\u6D46\u679C\u4E1B"
       objectName: jiangguocong2
-      index: 41
+      index: 49
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
       chance: 0.002
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
       - name: "\u8349\u539F"
         index: 3
-        chanceOffset: 0
+        chanceOffset: 0.001
       - name: "\u6CE5\u5730"
         index: 5
         chanceOffset: 0
@@ -2018,19 +2367,23 @@ MonoBehaviour:
         offset: 0
     - name: "\u6D46\u679C\u4E1B"
       objectName: jiangguocong3
-      index: 42
+      index: 50
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
       chance: 0.002
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
       - name: "\u8349\u539F"
         index: 3
-        chanceOffset: 0
+        chanceOffset: 0.001
       - name: "\u6CE5\u5730"
         index: 5
         chanceOffset: 0
@@ -2044,13 +2397,17 @@ MonoBehaviour:
         offset: 0
     - name: "\u82B1\u82D7"
       objectName: hua1
-      index: 43
+      index: 51
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 3
       chance: 0.005
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 1
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -2063,13 +2420,17 @@ MonoBehaviour:
       mapFilters: []
     - name: "\u82B1\u82D7"
       objectName: hua2
-      index: 44
+      index: 52
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 3
       chance: 0.005
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 1
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -2082,13 +2443,17 @@ MonoBehaviour:
       mapFilters: []
     - name: "\u82B1\u82D7"
       objectName: hua3
-      index: 45
+      index: 53
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 3
       chance: 0.005
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 1
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -2101,13 +2466,17 @@ MonoBehaviour:
       mapFilters: []
     - name: "\u82B1\u82D7"
       objectName: hua4
-      index: 46
+      index: 54
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 3
       chance: 0.005
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 1
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -2120,13 +2489,17 @@ MonoBehaviour:
       mapFilters: []
     - name: "\u6811\u82D7"
       objectName: shumiao
-      index: 47
+      index: 55
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 3
       chance: 0.01
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 1
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -2139,13 +2512,17 @@ MonoBehaviour:
       mapFilters: []
     - name: "\u77F3\u77FF"
       objectName: shikuang1
-      index: 48
+      index: 56
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
       chance: 0.001
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -2161,13 +2538,17 @@ MonoBehaviour:
       mapFilters: []
     - name: "\u77F3\u77FF"
       objectName: shikuang2
-      index: 49
+      index: 57
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
       chance: 0.001
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -2183,13 +2564,17 @@ MonoBehaviour:
       mapFilters: []
     - name: "\u77F3\u77FF"
       objectName: shikuang3
-      index: 50
+      index: 58
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
       chance: 0.001
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -2205,13 +2590,17 @@ MonoBehaviour:
       mapFilters: []
     - name: "\u77F3\u77FF"
       objectName: shikuang4
-      index: 51
+      index: 59
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
       chance: 0.001
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -2227,13 +2616,17 @@ MonoBehaviour:
       mapFilters: []
     - name: "\u77F3\u77FF"
       objectName: shikuang5
-      index: 52
+      index: 60
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
       chance: 0.001
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -2249,13 +2642,17 @@ MonoBehaviour:
       mapFilters: []
     - name: "\u77F3\u77FF"
       objectName: shikuang6
-      index: 53
+      index: 61
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
       chance: 0.001
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -2271,13 +2668,17 @@ MonoBehaviour:
       mapFilters: []
     - name: "\u94C1\u77FF"
       objectName: tiekuang1
-      index: 54
+      index: 62
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
       chance: 0.001
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -2290,13 +2691,17 @@ MonoBehaviour:
       mapFilters: []
     - name: "\u94C1\u77FF"
       objectName: tiekuang2
-      index: 55
+      index: 63
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
       chance: 0.001
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -2309,13 +2714,17 @@ MonoBehaviour:
       mapFilters: []
     - name: "\u94C1\u77FF"
       objectName: tiekuang3
-      index: 56
+      index: 64
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
       chance: 0.001
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -2328,13 +2737,17 @@ MonoBehaviour:
       mapFilters: []
     - name: "\u94C1\u77FF"
       objectName: tiekuang4
-      index: 57
+      index: 65
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
       chance: 0.001
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -2347,13 +2760,17 @@ MonoBehaviour:
       mapFilters: []
     - name: "\u94C1\u77FF"
       objectName: tiekuang5
-      index: 58
+      index: 66
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
       chance: 0.001
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -2366,13 +2783,17 @@ MonoBehaviour:
       mapFilters: []
     - name: "\u94C1\u77FF"
       objectName: tiekuang6
-      index: 59
+      index: 67
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
       chance: 0.001
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -2385,13 +2806,17 @@ MonoBehaviour:
       mapFilters: []
     - name: "\u6C34\u6676\u77FF"
       objectName: shuijingkuang1
-      index: 60
+      index: 68
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
       chance: 0.01
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -2407,13 +2832,17 @@ MonoBehaviour:
       mapFilters: []
     - name: "\u6C34\u6676\u77FF"
       objectName: shuijingkuang2
-      index: 61
+      index: 69
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
       chance: 0.005
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -2429,13 +2858,17 @@ MonoBehaviour:
       mapFilters: []
     - name: "\u6C34\u6676\u77FF"
       objectName: shuijingkuang3
-      index: 62
+      index: 70
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
       chance: 0.005
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -2451,21 +2884,22 @@ MonoBehaviour:
       mapFilters: []
     - name: "\u706B\u5C71\u5CA9"
       objectName: huoshanyan1
-      index: 63
+      index: 71
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
       chance: 0.008
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
       - name: "\u5730\u5E95"
         index: 0
-        chanceOffset: 0
-      - name: "\u5730\u4E0B"
-        index: 4
         chanceOffset: 0
       - name: "\u7194\u5CA9"
         index: 11
@@ -2473,21 +2907,22 @@ MonoBehaviour:
       mapFilters: []
     - name: "\u706B\u5C71\u5CA9"
       objectName: huoshanyan2
-      index: 64
+      index: 72
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
       chance: 0.008
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
       - name: "\u5730\u5E95"
         index: 0
-        chanceOffset: 0
-      - name: "\u5730\u4E0B"
-        index: 4
         chanceOffset: 0
       - name: "\u7194\u5CA9"
         index: 11
@@ -2495,89 +2930,109 @@ MonoBehaviour:
       mapFilters: []
     - name: "\u8349"
       objectName: cao1
-      index: 65
+      index: 73
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 3
       chance: 0.01
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 1
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
       - name: "\u8349\u539F"
         index: 3
-        chanceOffset: 0
+        chanceOffset: 0.01
       - name: "\u6CE5\u5730"
         index: 5
         chanceOffset: 0
       mapFilters: []
     - name: "\u8349"
       objectName: cao2
-      index: 66
+      index: 74
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 3
       chance: 0.02
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 1
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
       - name: "\u8349\u539F"
         index: 3
-        chanceOffset: 0
+        chanceOffset: 0.01
       - name: "\u6CE5\u5730"
         index: 5
         chanceOffset: 0
       mapFilters: []
     - name: "\u8349"
       objectName: cao3
-      index: 67
+      index: 75
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 3
       chance: 0.01
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 1
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
       - name: "\u8349\u539F"
         index: 3
-        chanceOffset: 0
+        chanceOffset: 0.01
       - name: "\u6CE5\u5730"
         index: 5
         chanceOffset: 0
       mapFilters: []
     - name: "\u8349"
       objectName: cao4
-      index: 68
+      index: 76
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 3
       chance: 0.01
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 1
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
       - name: "\u8349\u539F"
         index: 3
-        chanceOffset: 0
+        chanceOffset: 0.01
       - name: "\u6CE5\u5730"
         index: 5
         chanceOffset: 0
       mapFilters: []
     - name: "\u8611\u83C7"
       objectName: mogu1
-      index: 69
+      index: 77
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 3
       chance: 0.003
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 1
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -2586,7 +3041,10 @@ MonoBehaviour:
         chanceOffset: 0
       - name: "\u5730\u4E0B"
         index: 4
-        chanceOffset: 0
+        chanceOffset: 0.01
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0.01
       - name: "\u8349\u539F"
         index: 3
         chanceOffset: 0
@@ -2600,13 +3058,17 @@ MonoBehaviour:
         offset: 0
     - name: "\u8611\u83C7"
       objectName: mogu2
-      index: 70
+      index: 78
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 3
       chance: 0.003
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 1
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -2615,7 +3077,10 @@ MonoBehaviour:
         chanceOffset: 0
       - name: "\u5730\u4E0B"
         index: 4
-        chanceOffset: 0
+        chanceOffset: 0.01
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0.01
       - name: "\u8349\u539F"
         index: 3
         chanceOffset: 0
@@ -2629,13 +3094,17 @@ MonoBehaviour:
         offset: 0
     - name: "\u8611\u83C7"
       objectName: mogu3
-      index: 71
+      index: 79
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 3
       chance: 0.003
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 1
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -2644,7 +3113,10 @@ MonoBehaviour:
         chanceOffset: 0
       - name: "\u5730\u4E0B"
         index: 4
-        chanceOffset: 0
+        chanceOffset: 0.01
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0.01
       - name: "\u8349\u539F"
         index: 3
         chanceOffset: 0
@@ -2658,13 +3130,17 @@ MonoBehaviour:
         offset: 0
     - name: "\u8611\u83C7"
       objectName: mogu4
-      index: 72
+      index: 80
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 3
       chance: 0.003
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 1
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -2673,7 +3149,10 @@ MonoBehaviour:
         chanceOffset: 0
       - name: "\u5730\u4E0B"
         index: 4
-        chanceOffset: 0
+        chanceOffset: 0.01
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0.01
       - name: "\u8349\u539F"
         index: 3
         chanceOffset: 0
@@ -2687,13 +3166,17 @@ MonoBehaviour:
         offset: 0
     - name: "\u8611\u83C7"
       objectName: mogu5
-      index: 73
+      index: 81
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 3
       chance: 0.003
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 1
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -2702,7 +3185,10 @@ MonoBehaviour:
         chanceOffset: 0
       - name: "\u5730\u4E0B"
         index: 4
-        chanceOffset: 0
+        chanceOffset: 0.01
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0.01
       - name: "\u8349\u539F"
         index: 3
         chanceOffset: 0
@@ -2716,13 +3202,17 @@ MonoBehaviour:
         offset: 0
     - name: "\u77F3\u5934"
       objectName: shitou1
-      index: 74
+      index: 82
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 4
       chance: 0.02
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 1
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -2744,13 +3234,17 @@ MonoBehaviour:
       mapFilters: []
     - name: "\u841D\u535C"
       objectName: luobo1
-      index: 75
+      index: 83
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
       chance: 0.005
       dot: 0.8
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 1
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -2767,13 +3261,17 @@ MonoBehaviour:
         offset: 0
     - name: "\u5154\u5B50"
       objectName: tuzi1
-      index: 76
+      index: 84
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
       chance: 0.005
       dot: 0.7
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -2789,13 +3287,17 @@ MonoBehaviour:
       mapFilters: []
     - name: "\u677E\u9F20"
       objectName: songshu1
-      index: 77
+      index: 85
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
       chance: 0.002
       dot: 0.7
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -2808,13 +3310,17 @@ MonoBehaviour:
       mapFilters: []
     - name: "\u72D0\u72F8"
       objectName: huli1
-      index: 78
+      index: 86
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
       chance: 0.001
       dot: 0.7
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -2827,13 +3333,17 @@ MonoBehaviour:
       mapFilters: []
     - name: "\u5C71\u7F8A"
       objectName: yang1
-      index: 79
+      index: 87
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
       chance: 0.0005
       dot: 0.7
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -2856,13 +3366,17 @@ MonoBehaviour:
         offset: 0
     - name: "\u4F01\u9E45"
       objectName: qie1
-      index: 80
+      index: 88
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
       chance: 0.008
       dot: 0.7
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -2872,13 +3386,17 @@ MonoBehaviour:
       mapFilters: []
     - name: "\u9E35\u9E1F"
       objectName: tuoniao1
-      index: 81
+      index: 89
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
       chance: 0.001
       dot: 0.7
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -2891,13 +3409,17 @@ MonoBehaviour:
       mapFilters: []
     - name: "\u9E7F"
       objectName: lu1
-      index: 89
+      index: 97
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
       chance: 0.0005
       dot: 0.7
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -2907,13 +3429,17 @@ MonoBehaviour:
       mapFilters: []
     - name: "\u7266\u725B"
       objectName: niu2
-      index: 82
+      index: 90
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
       chance: 0.0005
       dot: 0.7
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -2926,13 +3452,17 @@ MonoBehaviour:
       mapFilters: []
     - name: "\u8C61"
       objectName: xiang1
-      index: 83
+      index: 91
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
       chance: 0.0002
       dot: 0.7
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 1
+      distance: 3
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -2942,13 +3472,17 @@ MonoBehaviour:
       mapFilters: []
     - name: "\u72FC"
       objectName: lang1
-      index: 84
+      index: 92
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
       chance: 0.001
       dot: 0.7
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -2970,13 +3504,17 @@ MonoBehaviour:
       mapFilters: []
     - name: "\u8718\u86DB"
       objectName: zhizhu1
-      index: 85
+      index: 93
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
       chance: 0.005
       dot: 0.7
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -2992,13 +3530,17 @@ MonoBehaviour:
       mapFilters: []
     - name: "\u7532\u866B"
       objectName: jiachong1
-      index: 86
+      index: 94
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
       chance: 0.002
       dot: 0.7
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -3011,13 +3553,17 @@ MonoBehaviour:
       mapFilters: []
     - name: "\u6C99\u866B"
       objectName: shachong1
-      index: 87
+      index: 95
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
       chance: 0.001
       dot: 0.7
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -3030,13 +3576,17 @@ MonoBehaviour:
       mapFilters: []
     - name: "\u8001\u864E"
       objectName: hu1
-      index: 88
+      index: 96
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
       chance: 0.0002
       dot: 0.7
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 0.5
+      distance: 2.5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -3056,32 +3606,40 @@ MonoBehaviour:
         offset: 0
     - name: "\u9738\u738B\u9F99"
       objectName: bawanglong
-      index: 90
+      index: 98
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
-      chance: 0.0001
+      chance: 0.001
       dot: 0.7
       offset: 0
-      height: 0.5
-      extent: 1
+      top: 1
+      bottom: 3
+      distance: 5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
       - name: "\u5730\u5E95"
         index: 0
-        chanceOffset: 0.0005
+        chanceOffset: 0.001
       - name: "\u5730\u5E54"
         index: 7
         chanceOffset: 0
       mapFilters: []
     - name: "\u5730\u5E54\u5DE8\u5CA9"
       objectName: Rocks_Sharp_l_01
-      index: 91
+      index: 99
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
-      chance: 0.003
+      chance: 0.01
       dot: 0.7
       offset: -0.5
-      height: 1
-      extent: 1
+      top: 2
+      bottom: 3
+      distance: 5
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -3091,13 +3649,17 @@ MonoBehaviour:
       mapFilters: []
     - name: "\u5730\u5E54\u5DE8\u5CA9"
       objectName: Rocks_Sharp_l_02
-      index: 92
+      index: 100
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
-      chance: 0.003
+      chance: 0.01
       dot: 0.7
       offset: -0.5
-      height: 1
-      extent: 1
+      top: 1
+      bottom: 2
+      distance: 4
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -3107,13 +3669,17 @@ MonoBehaviour:
       mapFilters: []
     - name: "\u8349\u539F\u62F1\u6865"
       objectName: Rock_Arch_04
-      index: 93
+      index: 101
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
       chance: 0.01
       dot: 0.7
       offset: -0.5
-      height: 1
-      extent: 1
+      top: 1
+      bottom: 1
+      distance: 3
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
@@ -3131,24 +3697,31 @@ MonoBehaviour:
       - isInverce: 0
         index: 1
         min: -0.1
-        max: 0.45
+        max: 0.49
         center: 0
         scale: 1
         offset: 0
     - name: "\u8349\u539F\u6B8B\u58C1"
       objectName: Rock_Wall_01
-      index: 94
+      index: 102
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
       chance: 0.01
       dot: 0.7
       offset: -0.5
-      height: 1
-      extent: 1
+      top: 1
+      bottom: 1
+      distance: 3
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
       - name: "\u8349\u539F"
         index: 3
+        chanceOffset: 0
+      - name: "\u6C99\u6EE9"
+        index: 10
         chanceOffset: 0
       mapFilters:
       - isInverce: 0
@@ -3161,24 +3734,31 @@ MonoBehaviour:
       - isInverce: 0
         index: 1
         min: -0.1
-        max: 0.49
+        max: 0.5
         center: 0
         scale: 2
         offset: 0
     - name: "\u8349\u539F\u6B8B\u58C1"
       objectName: Rock_Wall_02
-      index: 95
+      index: 103
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
       chance: 0.01
       dot: 0.7
       offset: -0.5
-      height: 1
-      extent: 1
+      top: 1
+      bottom: 1
+      distance: 3
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
       - name: "\u8349\u539F"
         index: 3
+        chanceOffset: 0
+      - name: "\u6C99\u6EE9"
+        index: 10
         chanceOffset: 0
       mapFilters:
       - isInverce: 0
@@ -3191,24 +3771,31 @@ MonoBehaviour:
       - isInverce: 0
         index: 1
         min: -0.1
-        max: 0.49
+        max: 0.5
         center: 0
         scale: 2
         offset: 0
     - name: "\u8349\u539F\u6B8B\u58C1"
       objectName: Rock_Wall_03
-      index: 96
+      index: 104
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
       chance: 0.01
       dot: 0.7
       offset: -0.5
-      height: 1
-      extent: 1
+      top: 1
+      bottom: 1
+      distance: 3
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
       - name: "\u8349\u539F"
         index: 3
+        chanceOffset: 0
+      - name: "\u6C99\u6EE9"
+        index: 10
         chanceOffset: 0
       mapFilters:
       - isInverce: 0
@@ -3221,24 +3808,31 @@ MonoBehaviour:
       - isInverce: 0
         index: 1
         min: -0.1
-        max: 0.49
+        max: 0.5
         center: 0
         scale: 2
         offset: 0
     - name: "\u8349\u539F\u6B8B\u58C1"
       objectName: Rock_Wall_04
-      index: 97
+      index: 105
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
       chance: 0.01
       dot: 0.7
       offset: -0.5
-      height: 1
-      extent: 1
+      top: 1
+      bottom: 1
+      distance: 3
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
       - name: "\u8349\u539F"
         index: 3
+        chanceOffset: 0
+      - name: "\u6C99\u6EE9"
+        index: 10
         chanceOffset: 0
       mapFilters:
       - isInverce: 0
@@ -3251,24 +3845,31 @@ MonoBehaviour:
       - isInverce: 0
         index: 1
         min: -0.1
-        max: 0.49
+        max: 0.5
         center: 0
         scale: 2
         offset: 0
     - name: "\u8349\u539F\u6B8B\u58C1"
       objectName: Rock_Wall_05
-      index: 98
+      index: 106
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
       chance: 0.01
       dot: 0.7
       offset: -0.5
-      height: 1
-      extent: 1
+      top: 1
+      bottom: 1
+      distance: 3
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
       - name: "\u8349\u539F"
         index: 3
+        chanceOffset: 0
+      - name: "\u6C99\u6EE9"
+        index: 10
         chanceOffset: 0
       mapFilters:
       - isInverce: 0
@@ -3281,24 +3882,31 @@ MonoBehaviour:
       - isInverce: 0
         index: 1
         min: -0.1
-        max: 0.49
+        max: 0.5
         center: 0
         scale: 2
         offset: 0
     - name: "\u8349\u539F\u6B8B\u58C1"
       objectName: Rock_Wall_06
-      index: 99
+      index: 107
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
       chance: 0.01
       dot: 0.7
       offset: -0.5
-      height: 1
-      extent: 1
+      top: 1
+      bottom: 1
+      distance: 3
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
       - name: "\u8349\u539F"
         index: 3
+        chanceOffset: 0
+      - name: "\u6C99\u6EE9"
+        index: 10
         chanceOffset: 0
       mapFilters:
       - isInverce: 0
@@ -3311,24 +3919,31 @@ MonoBehaviour:
       - isInverce: 0
         index: 1
         min: -0.1
-        max: 0.49
+        max: 0.5
         center: 0
         scale: 2
         offset: 0
     - name: "\u8349\u539F\u6B8B\u58C1"
       objectName: Rock_Wall_07
-      index: 100
+      index: 108
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
       chance: 0.01
       dot: 0.7
       offset: -0.5
-      height: 1
-      extent: 1
+      top: 1
+      bottom: 1
+      distance: 3
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
       - name: "\u8349\u539F"
         index: 3
+        chanceOffset: 0
+      - name: "\u6C99\u6EE9"
+        index: 10
         chanceOffset: 0
       mapFilters:
       - isInverce: 0
@@ -3341,24 +3956,31 @@ MonoBehaviour:
       - isInverce: 0
         index: 1
         min: -0.1
-        max: 0.49
+        max: 0.5
         center: 0
         scale: 2
         offset: 0
     - name: "\u8349\u539F\u9057\u8FF9"
       objectName: Stonehenge_01
-      index: 101
+      index: 109
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
       chance: 0.01
       dot: 0.7
       offset: -0.5
-      height: 1
-      extent: 1
+      top: 1
+      bottom: 1
+      distance: 3
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
       - name: "\u8349\u539F"
         index: 3
+        chanceOffset: 0
+      - name: "\u6C99\u6EE9"
+        index: 10
         chanceOffset: 0
       mapFilters:
       - isInverce: 0
@@ -3371,24 +3993,31 @@ MonoBehaviour:
       - isInverce: 0
         index: 1
         min: -0.1
-        max: 0.49
+        max: 0.5
         center: 0
         scale: 2
         offset: 0
     - name: "\u8349\u539F\u9057\u8FF9"
       objectName: Stonehenge_02
-      index: 102
+      index: 110
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
       chance: 0.01
       dot: 0.7
       offset: -0.5
-      height: 1
-      extent: 1
+      top: 1
+      bottom: 1
+      distance: 3
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
       - name: "\u8349\u539F"
         index: 3
+        chanceOffset: 0
+      - name: "\u6C99\u6EE9"
+        index: 10
         chanceOffset: 0
       mapFilters:
       - isInverce: 0
@@ -3401,24 +4030,31 @@ MonoBehaviour:
       - isInverce: 0
         index: 1
         min: -0.1
-        max: 0.49
+        max: 0.5
         center: 0
         scale: 2
         offset: 0
     - name: "\u8349\u539F\u9057\u8FF9"
       objectName: Stonehenge_03
-      index: 103
+      index: 111
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
       chance: 0.01
       dot: 0.7
       offset: -0.5
-      height: 1
-      extent: 1
+      top: 1
+      bottom: 1
+      distance: 3
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
       - name: "\u8349\u539F"
         index: 3
+        chanceOffset: 0
+      - name: "\u6C99\u6EE9"
+        index: 10
         chanceOffset: 0
       mapFilters:
       - isInverce: 0
@@ -3431,24 +4067,31 @@ MonoBehaviour:
       - isInverce: 0
         index: 1
         min: -0.1
-        max: 0.49
+        max: 0.5
         center: 0
         scale: 2
         offset: 0
     - name: "\u8349\u539F\u9057\u8FF9"
       objectName: Stonehenge_04
-      index: 104
+      index: 112
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
       chance: 0.01
       dot: 0.7
       offset: -0.5
-      height: 1
-      extent: 1
+      top: 1
+      bottom: 1
+      distance: 3
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
       - name: "\u8349\u539F"
         index: 3
+        chanceOffset: 0
+      - name: "\u6C99\u6EE9"
+        index: 10
         chanceOffset: 0
       mapFilters:
       - isInverce: 0
@@ -3461,24 +4104,31 @@ MonoBehaviour:
       - isInverce: 0
         index: 1
         min: -0.1
-        max: 0.49
+        max: 0.5
         center: 0
         scale: 2
         offset: 0
     - name: "\u8349\u539F\u9057\u8FF9"
       objectName: Stonehenge_05
-      index: 105
+      index: 113
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
       chance: 0.01
       dot: 0.7
       offset: -0.5
-      height: 1
-      extent: 1
+      top: 1
+      bottom: 1
+      distance: 3
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
       - name: "\u8349\u539F"
         index: 3
+        chanceOffset: 0
+      - name: "\u6C99\u6EE9"
+        index: 10
         chanceOffset: 0
       mapFilters:
       - isInverce: 0
@@ -3491,24 +4141,31 @@ MonoBehaviour:
       - isInverce: 0
         index: 1
         min: -0.1
-        max: 0.49
+        max: 0.5
         center: 0
         scale: 2
         offset: 0
     - name: "\u8349\u539F\u9057\u8FF9"
       objectName: Stonehenge_06
-      index: 106
+      index: 114
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
       chance: 0.01
       dot: 0.7
       offset: -0.5
-      height: 1
-      extent: 1
+      top: 1
+      bottom: 1
+      distance: 3
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
       - name: "\u8349\u539F"
         index: 3
+        chanceOffset: 0
+      - name: "\u6C99\u6EE9"
+        index: 10
         chanceOffset: 0
       mapFilters:
       - isInverce: 0
@@ -3521,24 +4178,31 @@ MonoBehaviour:
       - isInverce: 0
         index: 1
         min: -0.1
-        max: 0.49
+        max: 0.5
         center: 0
         scale: 2
         offset: 0
     - name: "\u8349\u539F\u9057\u8FF9"
       objectName: Stonehenge_07
-      index: 107
+      index: 115
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
       rotation: 1
       chance: 0.01
       dot: 0.7
       offset: -0.5
-      height: 1
-      extent: 1
+      top: 1
+      bottom: 1
+      distance: 3
       range: 0
       normal: {x: 0, y: 1, z: 0}
       materialFilters:
       - name: "\u8349\u539F"
         index: 3
+        chanceOffset: 0
+      - name: "\u6C99\u6EE9"
+        index: 10
         chanceOffset: 0
       mapFilters:
       - isInverce: 0
@@ -3551,10 +4215,190 @@ MonoBehaviour:
       - isInverce: 0
         index: 1
         min: -0.1
-        max: 0.49
+        max: 0.5
         center: 0
         scale: 2
         offset: 0
+    - name: "\u6CE5\u5730\u62F1\u6865"
+      objectName: Rock_Arch_01
+      index: 116
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.001
+      dot: 0.7
+      offset: -0.5
+      top: 1
+      bottom: 1
+      distance: 3
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u6CE5\u5730\u62F1\u6865"
+      objectName: Rock_Arch_02
+      index: 117
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.001
+      dot: 0.7
+      offset: -0.5
+      top: 1
+      bottom: 1
+      distance: 3
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u6CE5\u5730\u62F1\u6865"
+      objectName: Rock_Arch_03
+      index: 118
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.001
+      dot: 0.7
+      offset: -0.5
+      top: 1
+      bottom: 1
+      distance: 3
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u6CE5\u5730\u98CE\u5CA9"
+      objectName: Rock_Flat_l_01
+      index: 119
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 16
+      rotation: 1
+      chance: 0.003
+      dot: 0.7
+      offset: -0.5
+      top: 1
+      bottom: 1
+      distance: 3
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u6CE5\u5730\u98CE\u5CA9"
+      objectName: Rock_Flat_l_02
+      index: 120
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 16
+      rotation: 1
+      chance: 0.003
+      dot: 0.7
+      offset: -0.5
+      top: 1
+      bottom: 1
+      distance: 3
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u6CE5\u5730\u98CE\u5CA9"
+      objectName: Rock_Flat_l_03
+      index: 121
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 16
+      rotation: 1
+      chance: 0.003
+      dot: 0.7
+      offset: -0.5
+      top: 1
+      bottom: 1
+      distance: 3
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u6CE5\u5730\u98CE\u5CA9"
+      objectName: Rock_Flat_l_04
+      index: 122
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 16
+      rotation: 1
+      chance: 0.003
+      dot: 0.7
+      offset: -0.5
+      top: 1
+      bottom: 1
+      distance: 3
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u6CE5\u5730\u98CE\u5CA9"
+      objectName: Rock_Flat_l_05
+      index: 123
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 16
+      rotation: 1
+      chance: 0.003
+      dot: 0.7
+      offset: -0.5
+      top: 1
+      bottom: 1
+      distance: 3
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u6CE5\u5730\u98CE\u5CA9"
+      objectName: Rock_Flat_l_06
+      index: 124
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 16
+      rotation: 1
+      chance: 0.003
+      dot: 0.7
+      offset: -0.5
+      top: 1
+      bottom: 1
+      distance: 3
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      mapFilters: []
     lineInfos:
     - name: "\u6CB3\u6D41"
       halfWidth: 1.5
@@ -3729,6 +4573,14 @@ MonoBehaviour:
     - {fileID: 1444171601942632, guid: d7fee42a4ba6b3b4e8b0b9a607bf8ba3, type: 2}
     - {fileID: 1383055336398550, guid: 70a646a2adc329c489e7283248bd001a, type: 2}
     - {fileID: 1041062233352300, guid: 90c1296cd1f736a4a9dcef8415eee730, type: 2}
+    - {fileID: 1300909788063680, guid: c03af1582e6ce864a96c6fce0e07bfca, type: 2}
+    - {fileID: 1182415313621412, guid: 7e3e833de00ca7d43997eaee409b890f, type: 2}
+    - {fileID: 1012601741671040, guid: 9f2ff68a8708c9e4386ea16ada35656e, type: 2}
+    - {fileID: 1772751125710500, guid: ffb86d10a84a36445a92e002c4468714, type: 2}
+    - {fileID: 1855023113373502, guid: c3b074ddca53ce04aa65aac918736ce9, type: 2}
+    - {fileID: 1384731429772940, guid: b9519f5c54211cf45ae82d553789cccc, type: 2}
+    - {fileID: 1587034344306238, guid: d52d9da84ae8d394283a005313a52d6f, type: 2}
+    - {fileID: 1305844697535936, guid: d2bbe5471cc5d8741a743dfc499326d0, type: 2}
     - {fileID: 1004347633206692, guid: 6c333c5474860df4aaf8c074eead77e9, type: 2}
     - {fileID: 1507178085340418, guid: 76af7d9c45529834496f59d59690dcf4, type: 2}
     - {fileID: 1544185759365406, guid: 7663baf65c031f34383f0cbce6dfbd67, type: 2}
@@ -3797,3 +4649,12 @@ MonoBehaviour:
     - {fileID: 1245948365008806, guid: 33a7d06b107decd489ef583abfb02b60, type: 2}
     - {fileID: 1861974682420074, guid: eeeb52a843f6e7a4989d619748f5812f, type: 2}
     - {fileID: 1258441901345662, guid: 6a0c936a77dbeff4087da5112b73d388, type: 2}
+    - {fileID: 1634835452095608, guid: 63ffdadf2c4767d4a966673b122d7b0f, type: 2}
+    - {fileID: 1222521956734258, guid: 62fb77b041de61a45ab2c4bf6027b0a6, type: 2}
+    - {fileID: 1801229968626546, guid: 1c872d71d25d6b74cad5940706874c64, type: 2}
+    - {fileID: 1467760135936032, guid: ba04f6c442260ea4ca2230bb04c6fac7, type: 2}
+    - {fileID: 1453475787225632, guid: 6b8c9ce1423747342a28d44338d73aaf, type: 2}
+    - {fileID: 1698627370440462, guid: 18937cc1c230dcf4daa4340f68e6384b, type: 2}
+    - {fileID: 1284173178581266, guid: 86889b65a96adf84fb259ce7c1239929, type: 2}
+    - {fileID: 1191664232372924, guid: fbaa2dad779a3604d802918ad3cf6381, type: 2}
+    - {fileID: 1011084915054526, guid: 2b92970dd20443742a8e3b48de7bbe21, type: 2}
