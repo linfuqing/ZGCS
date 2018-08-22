@@ -31,14 +31,45 @@ namespace ZG
             return new Vector3(Mathf.Abs(v.x), Mathf.Abs(v.y), Mathf.Abs(v.z));
         }
 
-        public static Bounds Multiply(this Matrix4x4 mat, Bounds bounds)
+        public static Bounds Multiply(this Matrix4x4 matrix, Bounds bounds)
         {
-            var absAxisX = Abs(mat.MultiplyVector(Vector3.right));
-            var absAxisY = Abs(mat.MultiplyVector(Vector3.up));
-            var absAxisZ = Abs(mat.MultiplyVector(Vector3.forward));
-            var worldPosition = mat.MultiplyPoint(bounds.center);
-            var worldSize = absAxisX * bounds.size.x + absAxisY * bounds.size.y + absAxisZ * bounds.size.z;
-            return new Bounds(worldPosition, worldSize);
+            Vector3 absAxisX = Abs(matrix.MultiplyVector(Vector3.right)),
+                    absAxisY = Abs(matrix.MultiplyVector(Vector3.up)),
+                    absAxisZ = Abs(matrix.MultiplyVector(Vector3.forward)),
+                    size = bounds.size;
+            return new Bounds(
+                matrix.MultiplyPoint(bounds.center),
+                absAxisX * size.x + absAxisY * size.y + absAxisZ * size.z);
+        }
+
+
+        public static void GetCorners(
+            this Bounds bounds, 
+            Matrix4x4 matrix, 
+            out Vector3 leftUpForward,
+            out Vector3 leftDownForward,
+            out Vector3 rightUpForward,
+            out Vector3 rightDownForward,
+
+            out Vector3 leftUpBackward,
+            out Vector3 leftDownBackward,
+            out Vector3 rightUpBackward,
+            out Vector3 rightDownBackward)
+        {
+            Vector3 center = matrix.MultiplyPoint(bounds.center),
+                extents = bounds.extents,
+                right = matrix.MultiplyVector(Vector3.right) * extents.x,
+                up = matrix.MultiplyVector(Vector3.up) * extents.y,
+                forward = matrix.MultiplyVector(Vector3.forward) * extents.z;
+            leftUpForward = center - right + up + forward;
+            leftDownForward = center - right - up + forward;
+            rightUpForward = center + right + up + forward;
+            rightDownForward = center + right - up + forward;
+
+            leftUpBackward = center - right + up - forward;
+            leftDownBackward = center - right - up - forward;
+            rightUpBackward = center + right + up - forward;
+            rightDownBackward = center + right - up - forward;
         }
 
     }

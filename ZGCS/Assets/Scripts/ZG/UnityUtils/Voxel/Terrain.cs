@@ -79,13 +79,13 @@ namespace ZG.Voxel
                             amplitude *= persistence;
                         }
 
-                        result += Mathf.PerlinNoise(x * frequency, y * frequency) * amplitude;
+                        result += Unity.Mathematics.noise.cnoise(new Unity.Mathematics.float2(x * frequency, y * frequency)) * amplitude;
                     }
 
-                    return result / octaveCount;
+                    return ((result / octaveCount) + 1.0f) * 0.5f;
                 }
                 
-                return Mathf.PerlinNoise(x, y);
+                return Unity.Mathematics.noise.srnoise(new Unity.Mathematics.float2(x, y)) * 0.5f + 0.5f;
             }
         }
 
@@ -101,7 +101,7 @@ namespace ZG.Voxel
             
             public float Get(PerlinNoise3 noise, float x, float y, float z)
             {
-                return noise == null ? 0.0f : noise.Get(x * scale.x + offset.x, y * scale.y + offset.y, z * scale.z + offset.z);
+                return Unity.Mathematics.noise.cnoise(new Unity.Mathematics.float3(x * scale.x + offset.x, y * scale.y + offset.y, z * scale.z + offset.z));// noise == null ? 0.0f : noise.Get(x * scale.x + offset.x, y * scale.y + offset.y, z * scale.z + offset.z);
             }
         }
 
@@ -158,12 +158,16 @@ namespace ZG.Voxel
             }
 #if UNITY_EDITOR
             public string name;
+
+            public string guid;
 #endif
             [Index("gameObjects", relativePropertyPath = "index", pathLevel = 1, uniqueLevel = 2)]
             public string objectName;
             
             [Index("gameObjects", pathLevel = 1, uniqueLevel = 2)]
             public int index;
+
+            public LayerMask ignoreMask;
 
             public Rotation rotation;
 
@@ -178,6 +182,8 @@ namespace ZG.Voxel
 
             [UnityEngine.Serialization.FormerlySerializedAs("height")]
             public float bottom;
+
+            public float distance;
 
             public float range;
 
@@ -1547,7 +1553,6 @@ namespace ZG.Voxel
         public MapInfo[] mapInfos;
         public VolumeInfo[] volumeInfos;
         public MaterialInfo[] materialInfos;
-        [UnityEngine.Serialization.FormerlySerializedAs("heightInfos")]
         public LayerInfo[] layerInfos;
         public ObjectInfo[] objectInfos;
         public LineInfo[] lineInfos;
@@ -1583,7 +1588,7 @@ namespace ZG.Voxel
 
             MaterialInfo materialInfo;
             Material material;
-            for (i = 0; i < numMaterials; ++i)
+            for (i = 0; i < numMaterialInfos; ++i)
             {
                 materialInfo = materialInfos[i];
                 if(materialInfo.index < 0 || materialInfo.index >= numMaterials)
@@ -1653,7 +1658,7 @@ namespace ZG.Voxel
 
                 layerInfos[i] = layerInfo;
             }
-
+            
             count = objectInfos == null ? 0 : objectInfos.Length;
             int length, k;
             MaterialFilter materialFilter;
@@ -1662,7 +1667,7 @@ namespace ZG.Voxel
             for (i = 0; i < count; ++i)
             {
                 objectInfo = objectInfos[i];
-                
+
                 if (objectInfo.index < 0 || objectInfo.index >= numGameObjects)
                 {
                     if (string.IsNullOrEmpty(objectInfo.objectName))
@@ -1883,13 +1888,16 @@ namespace ZG.Voxel
                 lock (__random)
                 {
                     bool isContains;
-                    int numGameObjects = gameObjects == null ? 0 : gameObjects.Length;
+                    int numObjectInfos = objectInfos == null ? 0 : objectInfos.Length, numGameObjects = gameObjects == null ? 0 : gameObjects.Length;
                     float chance, temp;
                     Vector3 normal;
                     Plane plane;
+                    ObjectInfo objectInfo;
                     GameObject gameObject;
-                    foreach (ObjectInfo objectInfo in objectInfos)
+                    for(int i = 0; i < numObjectInfos; ++i)
                     {
+                        objectInfo = objectInfos[i];
+
                         chance = objectInfo.chance;
                         if (objectInfo.materialFilters != null && objectInfo.materialFilters.Length > 0)
                         {
@@ -1918,8 +1926,6 @@ namespace ZG.Voxel
                             gameObject = objectInfo.index >= 0 && objectInfo.index < numGameObjects ? gameObjects[objectInfo.index] : null;
                             if (gameObject == null)
                                 continue;
-
-                            int index = objectInfo.index;
 
                             plane = new Plane(normal, point);
                             temp = objectInfo.range * 2.0f;
@@ -1950,19 +1956,24 @@ namespace ZG.Voxel
                                     break;
                             }
 
-                            //string name = objectInfo.name;
-                            float top = objectInfo.top, bottom = objectInfo.bottom;
+                            int index = i, layerMask = ~objectInfo.ignoreMask;
+                            float top = objectInfo.top, bottom = objectInfo.bottom, maxDistance = objectInfo.distance;
+                            Matrix4x4 matrix = Matrix4x4.TRS(finalPosition, rotation, Vector3.one);
                             Instantiate(new Instance(gameObject, instance =>
                             {
                                 GameObject target = instance as GameObject;
                                 if (target == null)
                                     return false;
-
-                                Vector3 direction, distance, min, max;
+                                
+                                Vector3 direction, 
+                                distance, 
+                                min, 
+                                max;
                                 Bounds bounds;
                                 Mesh mesh;
                                 Transform transform;
                                 MeshFilter[] meshFilters = target.GetComponentsInChildren<MeshFilter>(true);
+                                Vector3[] vertices = new Vector3[8];
                                 foreach (MeshFilter meshFilter in meshFilters)
                                 {
                                     mesh = meshFilter == null ? null : meshFilter.sharedMesh;
@@ -1972,7 +1983,7 @@ namespace ZG.Voxel
                                         if (transform != null)
                                         {
                                             bounds = mesh.bounds;
-                                            direction = transform.InverseTransformDirection(Vector3.up);
+                                            direction = transform.InverseTransformVector(Vector3.up);
                                             distance = direction * bottom;
                                             min = bounds.min;
                                             max = bounds.max;
@@ -1982,8 +1993,25 @@ namespace ZG.Voxel
                                             if (Physics.CheckBox(
                                                     transform.TransformPoint(bounds.center) + finalPosition,
                                                     Vector3.Scale(bounds.extents, transform.lossyScale),
-                                                    rotation * transform.rotation,
-                                                    Physics.AllLayers))
+                                                    rotation * transform.rotation, 
+                                                    layerMask))
+                                                return false;
+                                            
+                                            bounds.GetCorners((matrix * transform.localToWorldMatrix),
+                                                out vertices[0],
+                                                out vertices[1],
+                                                out vertices[2],
+                                                out vertices[3],
+                                                out vertices[4],
+                                                out vertices[5],
+                                                out vertices[6],
+                                                out vertices[7]);
+
+                                            Array.Sort(vertices, __Compare);
+
+                                            if (!Physics.Raycast(vertices[0], Vector3.down, maxDistance, layerMask) ||
+                                                !Physics.Raycast(vertices[1], Vector3.down, maxDistance, layerMask) ||
+                                                !Physics.Raycast(vertices[2], Vector3.down, maxDistance, layerMask))
                                                 return false;
                                         }
                                     }
@@ -1996,18 +2024,35 @@ namespace ZG.Voxel
                                     if (transform != null)
                                     {
                                         bounds = skinnedMeshRenderer.localBounds;
-                                        direction = transform.InverseTransformDirection(Vector3.up);
+                                        direction = transform.InverseTransformVector(Vector3.up);
                                         distance = direction * bottom;
                                         min = bounds.min;
                                         max = bounds.max;
                                         bounds.SetMinMax(Vector3.Max(min, min + distance), Vector3.Min(max, max + distance));
                                         bounds.Encapsulate(new Bounds(bounds.center + direction * top, bounds.size));
-
+                                        
                                         if (Physics.CheckBox(
                                                 transform.TransformPoint(bounds.center) + finalPosition,
                                                 Vector3.Scale(bounds.extents, transform.lossyScale),
                                                 rotation * transform.rotation,
-                                                Physics.AllLayers))
+                                                layerMask))
+                                            return false;
+
+                                        bounds.GetCorners((matrix * transform.localToWorldMatrix),
+                                                out vertices[0],
+                                                out vertices[1],
+                                                out vertices[2],
+                                                out vertices[3],
+                                                out vertices[4],
+                                                out vertices[5],
+                                                out vertices[6],
+                                                out vertices[7]);
+
+                                        Array.Sort(vertices, __Compare);
+
+                                        if (!Physics.Raycast(vertices[0], Vector3.down, maxDistance, layerMask) ||
+                                            !Physics.Raycast(vertices[1], Vector3.down, maxDistance, layerMask) ||
+                                            !Physics.Raycast(vertices[2], Vector3.down, maxDistance, layerMask))
                                             return false;
                                     }
                                 }
@@ -2038,6 +2083,11 @@ namespace ZG.Voxel
             }
 
             return result;
+        }
+
+        private static int __Compare(Vector3 x, Vector3 y)
+        {
+            return Mathf.RoundToInt(x.y - y.y);
         }
 
         private static bool __Check(float x, float y, MapInfo[] mapInfos, MapFilter[] filters, out float result)
