@@ -1,0 +1,5719 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 659397731b724cf49a1c3c13d2c8bfe8, type: 3}
+  m_Name: 11
+  m_EditorClassIdentifier: 
+  terrain:
+    _depth: 5
+    _increment: 0.0625
+    _segments: {x: 1, y: 1, z: 1}
+    _size: {x: 64, y: 64, z: 64}
+    _levelInfos:
+    - distance: 10000
+      levels:
+      - flag: -1
+        qefSweeps: 5
+        minCollapseDegree: 0
+        maxCollapseDegree: 16
+        maxIterations: 10
+        targetPecentage: 0
+        edgeFraction: 1
+        minAngleCosine: 0.9
+        maxEdgeSize: 10
+        maxError: 1
+        threshold: 0.1
+        screenRelativeTransitionHeight: 1
+        fadeTransitionWidth: 0
+      - flag: 3
+        qefSweeps: 5
+        minCollapseDegree: 10
+        maxCollapseDegree: 16
+        maxIterations: 10
+        targetPecentage: 0
+        edgeFraction: 1
+        minAngleCosine: 0.9
+        maxEdgeSize: 10
+        maxError: 1
+        threshold: -1000
+        screenRelativeTransitionHeight: 0.5
+        fadeTransitionWidth: 0
+      - flag: 3
+        qefSweeps: 5
+        minCollapseDegree: 0
+        maxCollapseDegree: 32
+        maxIterations: 100
+        targetPecentage: 0
+        edgeFraction: 1
+        minAngleCosine: 0.8
+        maxEdgeSize: 100
+        maxError: 10
+        threshold: -1000
+        screenRelativeTransitionHeight: 0
+        fadeTransitionWidth: 0
+    seed: 168
+    noiseSize: 256
+    mapSize: {x: 64, y: 64}
+    root: {fileID: 0}
+    mapInfos:
+    - name: "\u5BC6\u5EA6"
+      octaveCount: 0
+      frequency: 0
+      persistence: 0
+      offset: {x: 256, y: 262.2}
+      scale: {x: 0.001, y: 0.001}
+    - name: "\u6E7F\u5EA6"
+      octaveCount: 0
+      frequency: 0
+      persistence: 0
+      offset: {x: 89, y: 346.2}
+      scale: {x: 0.003, y: 0.008}
+    - name: "\u6E29\u5EA6"
+      octaveCount: 0
+      frequency: 0
+      persistence: 0
+      offset: {x: 16.3, y: 12.5}
+      scale: {x: 0.001, y: 0.001}
+    - name: "\u98CE\u529B"
+      octaveCount: 0
+      frequency: 0
+      persistence: 0
+      offset: {x: 256.6, y: 446.2}
+      scale: {x: 0.01, y: 0.01}
+    - name: "\u5730\u58F3"
+      octaveCount: 0
+      frequency: 0
+      persistence: 0
+      offset: {x: 124.5, y: 234.4}
+      scale: {x: 0.0001, y: 0.0001}
+    - name: "\u6D1E\u7A74"
+      octaveCount: 0
+      frequency: 0
+      persistence: 0
+      offset: {x: 35, y: 4623}
+      scale: {x: 0.0001, y: 0.0001}
+    - name: "\u4E18\u9675"
+      octaveCount: 0
+      frequency: 0
+      persistence: 0
+      offset: {x: 352.6, y: 6.23}
+      scale: {x: 0.03, y: 0.03}
+    - name: "\u5E73\u539F"
+      octaveCount: 0
+      frequency: 0
+      persistence: 0
+      offset: {x: 23.5, y: 46.5}
+      scale: {x: 0.02, y: 0.02}
+    - name: "\u6C99\u6F20"
+      octaveCount: 0
+      frequency: 0
+      persistence: 0
+      offset: {x: 523, y: 213}
+      scale: {x: 0.001, y: 0.001}
+    - name: "\u6C99\u4E18"
+      octaveCount: 5
+      frequency: 2
+      persistence: 1
+      offset: {x: 235, y: 326}
+      scale: {x: 0.02, y: 0.02}
+    - name: "\u5730\u5E54"
+      octaveCount: 4
+      frequency: 2
+      persistence: 1
+      offset: {x: 34, y: 23}
+      scale: {x: 0.01, y: 0.01}
+    - name: "\u5C71\u8109"
+      octaveCount: 6
+      frequency: 2
+      persistence: 0.75
+      offset: {x: 56, y: 62}
+      scale: {x: 0.005, y: 0.005}
+    - name: "\u6E56\u5E95"
+      octaveCount: 0
+      frequency: 0
+      persistence: 0
+      offset: {x: 232, y: 252}
+      scale: {x: 0.01, y: 0.01}
+    - name: "\u5206\u5E03"
+      octaveCount: 0
+      frequency: 0
+      persistence: 0
+      offset: {x: 2135, y: 345}
+      scale: {x: 0.005, y: 0.005}
+    volumeInfos:
+    - name: "\u5730\u4E0B"
+      offset: {x: 0, y: 0, z: 0}
+      scale: {x: 0.01, y: 0.05, z: 0.01}
+    - name: "\u5730\u4E0A"
+      offset: {x: 215, y: 123, z: 212}
+      scale: {x: 0.05, y: 0.05, z: 0.05}
+    materialInfos:
+    - name: "\u5730\u5E95"
+      index: 0
+    - name: "\u96EA\u5730"
+      index: 1
+    - name: "\u6C99\u6F20"
+      index: 2
+    - name: "\u8349\u539F"
+      index: 3
+    - name: "\u5730\u4E0B"
+      index: 4
+    - name: "\u6CE5\u5730"
+      index: 4
+    - name: "\u5C71\u5CF0"
+      index: 5
+    - name: "\u5730\u5E54"
+      index: 6
+    - name: "\u96EA\u5C71"
+      index: 7
+    - name: "\u77F3\u7A9F"
+      index: 8
+    - name: "\u6C99\u6EE9"
+      index: 9
+    - name: "\u7194\u5CA9"
+      index: 10
+    - name: "\u5CA9\u77F3"
+      index: 11
+    - name: "\u7EFF\u6D32"
+      index: 3
+    - name: "\u9ED1\u6F20"
+      index: 6
+    layerInfos:
+    - name: "\u5730\u58F3"
+      materialName: "\u5730\u5E95"
+      materialIndex: 0
+      volumeIndex: -1
+      layer: -1
+      depth: 0
+      power: 0
+      scale: 50
+      offset: 0
+      max: 0
+      filters:
+      - isInverce: 0
+        index: 4
+        min: -0.1
+        max: 1.1
+        center: 1
+        scale: 1
+        offset: 0
+    - name: "\u6D1E\u7A74"
+      materialName: "\u5730\u4E0B"
+      materialIndex: 4
+      volumeIndex: 0
+      layer: 0
+      depth: 0
+      power: 0
+      scale: 100
+      offset: 0
+      max: 0
+      filters:
+      - isInverce: 0
+        index: 5
+        min: -0.1
+        max: 1.1
+        center: 1
+        scale: 1
+        offset: 0
+    - name: "\u6CE5\u571F"
+      materialName: "\u6CE5\u5730"
+      materialIndex: 5
+      volumeIndex: 0
+      layer: 1
+      depth: 0
+      power: 0
+      scale: 6
+      offset: 5
+      max: 0
+      filters:
+      - isInverce: 0
+        index: 0
+        min: -0.1
+        max: 0.3
+        center: 1
+        scale: 0
+        offset: 0
+      - isInverce: 0
+        index: 1
+        min: 0
+        max: 0.5
+        center: 1
+        scale: 0
+        offset: 0
+      - isInverce: 0
+        index: 7
+        min: -0.1
+        max: 1.1
+        center: 1
+        scale: 1
+        offset: 0
+    - name: "\u8F6F\u6CE5"
+      materialName: "\u6CE5\u5730"
+      materialIndex: 5
+      volumeIndex: -1
+      layer: 1
+      depth: 0
+      power: 0
+      scale: 6
+      offset: 5
+      max: 0
+      filters:
+      - isInverce: 0
+        index: 0
+        min: -0.1
+        max: 0.3
+        center: 1
+        scale: 0
+        offset: 0
+      - isInverce: 0
+        index: 1
+        min: 0.5
+        max: 0.7
+        center: 1
+        scale: 0
+        offset: 0
+      - isInverce: 0
+        index: 7
+        min: -0.1
+        max: 1.1
+        center: 1
+        scale: 1
+        offset: 0
+    - name: "\u6E7F\u6CE5"
+      materialName: "\u6CE5\u5730"
+      materialIndex: 5
+      volumeIndex: -1
+      layer: 1
+      depth: 0
+      power: 0
+      scale: 6
+      offset: 5
+      max: 0
+      filters:
+      - isInverce: 0
+        index: 0
+        min: -0.1
+        max: 0.3
+        center: 1
+        scale: 0
+        offset: 0
+      - isInverce: 0
+        index: 1
+        min: 0.7
+        max: 1.1
+        center: 1
+        scale: 0
+        offset: 0
+      - isInverce: 0
+        index: 2
+        min: 0.8
+        max: 1.1
+        center: 1
+        scale: 0
+        offset: 0
+      - isInverce: 0
+        index: 7
+        min: -0.1
+        max: 1.1
+        center: 1
+        scale: 1
+        offset: 0
+    - name: "\u6C34\u6E20"
+      materialName: "\u6C99\u6EE9"
+      materialIndex: 10
+      volumeIndex: -1
+      layer: 1
+      depth: 0
+      power: 0
+      scale: 5
+      offset: 3
+      max: 0
+      filters:
+      - isInverce: 0
+        index: 0
+        min: -0.1
+        max: 0.3
+        center: 0
+        scale: 0
+        offset: 0
+      - isInverce: 1
+        index: 1
+        min: 0.7
+        max: 1.1
+        center: 1
+        scale: 3
+        offset: 0
+      - isInverce: 0
+        index: 2
+        min: -0.1
+        max: 0.8
+        center: 0
+        scale: 0
+        offset: 0
+      - isInverce: 0
+        index: 12
+        min: -0.1
+        max: 1.1
+        center: 1
+        scale: 1
+        offset: 0
+    - name: "\u8349\u539F"
+      materialName: "\u8349\u539F"
+      materialIndex: 3
+      volumeIndex: -1
+      layer: 1
+      depth: 0
+      power: 0
+      scale: 5
+      offset: 5
+      max: 0
+      filters:
+      - isInverce: 0
+        index: 0
+        min: 0.3
+        max: 0.7
+        center: 1
+        scale: 0
+        offset: 0
+      - isInverce: 0
+        index: 1
+        min: -0.1
+        max: 0.7
+        center: 1
+        scale: 0
+        offset: 0
+      - isInverce: 0
+        index: 2
+        min: 0.2
+        max: 0.8
+        center: 1
+        scale: 0
+        offset: 0
+      - isInverce: 0
+        index: 7
+        min: -0.1
+        max: 1.1
+        center: 1
+        scale: 1
+        offset: 0
+    - name: "\u6E7F\u5730"
+      materialName: "\u8349\u539F"
+      materialIndex: 3
+      volumeIndex: -1
+      layer: 1
+      depth: 0
+      power: 0
+      scale: 5
+      offset: 5
+      max: 0
+      filters:
+      - isInverce: 0
+        index: 0
+        min: 0.3
+        max: 0.7
+        center: 0
+        scale: 0
+        offset: 0
+      - isInverce: 0
+        index: 1
+        min: 0.7
+        max: 1.1
+        center: 0
+        scale: 0
+        offset: 0
+      - isInverce: 0
+        index: 2
+        min: 0.7
+        max: 0.8
+        center: 0
+        scale: 0
+        offset: 0
+      - isInverce: 0
+        index: 7
+        min: 0
+        max: 1.1
+        center: 1
+        scale: 1
+        offset: 0
+    - name: "\u955C\u6E56"
+      materialName: "\u6C99\u6EE9"
+      materialIndex: 10
+      volumeIndex: -1
+      layer: 1
+      depth: 0
+      power: 0
+      scale: 5
+      offset: 3
+      max: 0
+      filters:
+      - isInverce: 0
+        index: 0
+        min: 0.3
+        max: 0.7
+        center: 0
+        scale: 0
+        offset: 0
+      - isInverce: 1
+        index: 1
+        min: 0.7
+        max: 1.1
+        center: 1
+        scale: 1
+        offset: 0
+      - isInverce: 0
+        index: 2
+        min: 0.2
+        max: 0.7
+        center: 0
+        scale: 0
+        offset: 0
+      - isInverce: 0
+        index: 12
+        min: 0
+        max: 1.1
+        center: 1
+        scale: 1
+        offset: 0
+    - name: "\u96EA\u5730"
+      materialName: "\u96EA\u5730"
+      materialIndex: 1
+      volumeIndex: -1
+      layer: 1
+      depth: 0
+      power: 0
+      scale: 8
+      offset: 5
+      max: 0
+      filters:
+      - isInverce: 0
+        index: 0
+        min: 0.3
+        max: 0.7
+        center: 1
+        scale: 0
+        offset: 0
+      - isInverce: 0
+        index: 1
+        min: -0.1
+        max: 0.7
+        center: 1
+        scale: 0
+        offset: 0
+      - isInverce: 0
+        index: 2
+        min: -0.1
+        max: 0.2
+        center: 1
+        scale: 0
+        offset: 0
+      - isInverce: 0
+        index: 7
+        min: -0.1
+        max: 1.1
+        center: 1
+        scale: 1
+        offset: 0
+    - name: "\u51B0\u6CB3"
+      materialName: "\u6C99\u6EE9"
+      materialIndex: 10
+      volumeIndex: -1
+      layer: 1
+      depth: 0
+      power: 0
+      scale: 6
+      offset: 3
+      max: 0
+      filters:
+      - isInverce: 0
+        index: 0
+        min: 0.3
+        max: 0.7
+        center: 0
+        scale: 0
+        offset: 0
+      - isInverce: 1
+        index: 1
+        min: 0.7
+        max: 1.1
+        center: 1
+        scale: 3
+        offset: 0
+      - isInverce: 0
+        index: 2
+        min: -0.1
+        max: 0.2
+        center: 0
+        scale: 0
+        offset: 0
+      - isInverce: 0
+        index: 12
+        min: -0.1
+        max: 1.1
+        center: 1
+        scale: 1
+        offset: 0
+    - name: "\u4E18\u9675"
+      materialName: "\u5CA9\u77F3"
+      materialIndex: 12
+      volumeIndex: -1
+      layer: 1
+      depth: 0
+      power: 0
+      scale: 12
+      offset: 3
+      max: 0
+      filters:
+      - isInverce: 0
+        index: 0
+        min: 0.35
+        max: 0.65
+        center: 1
+        scale: 0
+        offset: 0
+      - isInverce: 0
+        index: 2
+        min: -0.1
+        max: 0.75
+        center: 1
+        scale: 0
+        offset: 0
+      - isInverce: 0
+        index: 3
+        min: 0.5
+        max: 1.1
+        center: 1
+        scale: 0.03
+        offset: 0
+      - isInverce: 0
+        index: 6
+        min: -0.1
+        max: 1.1
+        center: 1
+        scale: 1
+        offset: 0
+    - name: "\u9AD8\u539F"
+      materialName: "\u8349\u539F"
+      materialIndex: 3
+      volumeIndex: -1
+      layer: 1
+      depth: 2
+      power: 0
+      scale: 12
+      offset: 3
+      max: 0
+      filters:
+      - isInverce: 0
+        index: 0
+        min: 0.348
+        max: 0.652
+        center: 1
+        scale: 0
+        offset: 0
+      - isInverce: 0
+        index: 2
+        min: 0.2
+        max: 0.752
+        center: 1
+        scale: 0
+        offset: 0
+      - isInverce: 0
+        index: 3
+        min: 0.48
+        max: 1.1
+        center: 1
+        scale: 0.03
+        offset: 0
+      - isInverce: 0
+        index: 6
+        min: -0.1
+        max: 1.1
+        center: 1
+        scale: 1
+        offset: 0
+    - name: "\u96EA\u539F"
+      materialName: "\u96EA\u5730"
+      materialIndex: 1
+      volumeIndex: -1
+      layer: 1
+      depth: 2
+      power: 0
+      scale: 15
+      offset: 3
+      max: 0
+      filters:
+      - isInverce: 0
+        index: 0
+        min: 0.348
+        max: 0.652
+        center: 1
+        scale: 0
+        offset: 0
+      - isInverce: 0
+        index: 2
+        min: -0.1
+        max: 0.2
+        center: 1
+        scale: 0
+        offset: 0
+      - isInverce: 0
+        index: 3
+        min: 0.48
+        max: 1.1
+        center: 1
+        scale: 0.03
+        offset: 0
+      - isInverce: 0
+        index: 6
+        min: -0.1
+        max: 1.1
+        center: 1
+        scale: 1
+        offset: 0
+    - name: "\u6C99\u6F20"
+      materialName: "\u6C99\u6F20"
+      materialIndex: 2
+      volumeIndex: -1
+      layer: 1
+      depth: 0
+      power: 1.2
+      scale: 15
+      offset: 5
+      max: 0
+      filters:
+      - isInverce: 0
+        index: 0
+        min: 0.7
+        max: 0.9
+        center: 0.85
+        scale: 3
+        offset: 0
+      - isInverce: 0
+        index: 2
+        min: 0.2
+        max: 0.8
+        center: 0
+        scale: 0
+        offset: 0
+      - isInverce: 0
+        index: 3
+        min: -0.1
+        max: 1.1
+        center: 0.5
+        scale: 2
+        offset: 0
+      - isInverce: 0
+        index: 8
+        min: -0.1
+        max: 1.1
+        center: 1
+        scale: 1
+        offset: 0
+    - name: "\u51B0\u6F20"
+      materialName: "\u96EA\u5730"
+      materialIndex: 1
+      volumeIndex: -1
+      layer: 1
+      depth: 0
+      power: 1.2
+      scale: 20
+      offset: 5
+      max: 0
+      filters:
+      - isInverce: 0
+        index: 0
+        min: 0.7
+        max: 0.9
+        center: 0.85
+        scale: 3
+        offset: 0
+      - isInverce: 0
+        index: 2
+        min: -0.1
+        max: 0.2
+        center: 0
+        scale: 0
+        offset: 0
+      - isInverce: 0
+        index: 3
+        min: -0.1
+        max: 1.1
+        center: 0.5
+        scale: 2
+        offset: 0
+      - isInverce: 0
+        index: 8
+        min: -0.1
+        max: 1.1
+        center: 1
+        scale: 1
+        offset: 0
+    - name: "\u9ED1\u6F20"
+      materialName: "\u5730\u5E54"
+      materialIndex: 7
+      volumeIndex: -1
+      layer: 1
+      depth: 0
+      power: 1.2
+      scale: 20
+      offset: 5
+      max: 0
+      filters:
+      - isInverce: 0
+        index: 0
+        min: 0.7
+        max: 0.9
+        center: 0.85
+        scale: 3
+        offset: 0
+      - isInverce: 0
+        index: 2
+        min: 0.8
+        max: 1.1
+        center: 0
+        scale: 0
+        offset: 0
+      - isInverce: 0
+        index: 3
+        min: -0.1
+        max: 1.1
+        center: 0.5
+        scale: 2
+        offset: 0
+      - isInverce: 0
+        index: 8
+        min: -0.1
+        max: 1.1
+        center: 1
+        scale: 1
+        offset: 0
+    - name: "\u7EFF\u6D32"
+      materialName: "\u8349\u539F"
+      materialIndex: 3
+      volumeIndex: -1
+      layer: 1
+      depth: 0
+      power: 0
+      scale: 3
+      offset: 8
+      max: 0
+      filters:
+      - isInverce: 0
+        index: 0
+        min: 0.9
+        max: 0.905
+        center: 0
+        scale: 0
+        offset: 0
+      - isInverce: 0
+        index: 8
+        min: -0.1
+        max: 1.1
+        center: 1
+        scale: 1
+        offset: 0
+    - name: "\u6C99\u6D32"
+      materialName: "\u8349\u539F"
+      materialIndex: 3
+      volumeIndex: -1
+      layer: 1
+      depth: 0
+      power: 0
+      scale: 3
+      offset: 8
+      max: 0
+      filters:
+      - isInverce: 0
+        index: 0
+        min: 0.905
+        max: 1.1
+        center: 0
+        scale: 0
+        offset: 0
+      - isInverce: 0
+        index: 1
+        min: -0.1
+        max: 0.5
+        center: 0
+        scale: 0
+        offset: 0
+      - isInverce: 0
+        index: 8
+        min: -0.1
+        max: 1.1
+        center: 1
+        scale: 1
+        offset: 0
+    - name: "\u76D0\u6E56"
+      materialName: "\u6C99\u6EE9"
+      materialIndex: 10
+      volumeIndex: -1
+      layer: 1
+      depth: 0
+      power: 0
+      scale: 10
+      offset: 3
+      max: 0
+      filters:
+      - isInverce: 0
+        index: 0
+        min: 0.905
+        max: 1.1
+        center: 0
+        scale: 0
+        offset: 0
+      - isInverce: 1
+        index: 1
+        min: 0.5
+        max: 1.1
+        center: 1
+        scale: 2
+        offset: 0
+      - isInverce: 0
+        index: 12
+        min: -0.1
+        max: 1.1
+        center: 1
+        scale: 1
+        offset: 0
+    - name: "\u6C99\u4E18"
+      materialName: "\u77F3\u7A9F"
+      materialIndex: 9
+      volumeIndex: -1
+      layer: 1
+      depth: 0
+      power: 0
+      scale: 100
+      offset: -30
+      max: 0
+      filters:
+      - isInverce: 0
+        index: 0
+        min: 0.8
+        max: 1.1
+        center: 0
+        scale: 0
+        offset: 0
+      - isInverce: 0
+        index: 13
+        min: 0
+        max: 0.5
+        center: 0
+        scale: 1.5
+        offset: 0
+      - isInverce: 0
+        index: 6
+        min: 0.5
+        max: 1.1
+        center: 1
+        scale: 1
+        offset: 0
+      - isInverce: 0
+        index: 9
+        min: -0.1
+        max: 1.1
+        center: 1
+        scale: 1
+        offset: 0
+    - name: "\u8352\u539F"
+      materialName: "\u5730\u5E54"
+      materialIndex: 7
+      volumeIndex: -1
+      layer: 1
+      depth: 0
+      power: 0
+      scale: 10
+      offset: 5
+      max: 0
+      filters:
+      - isInverce: 0
+        index: 0
+        min: 0.3
+        max: 0.7
+        center: 1
+        scale: 0
+        offset: 0
+      - isInverce: 0
+        index: 2
+        min: 0.8
+        max: 0.9
+        center: 1
+        scale: 0
+        offset: 0
+      - isInverce: 0
+        index: 10
+        min: -0.1
+        max: 1.1
+        center: 1
+        scale: 1
+        offset: 0
+    - name: "\u5730\u5E54"
+      materialName: "\u5730\u5E54"
+      materialIndex: 7
+      volumeIndex: -1
+      layer: 1
+      depth: 0
+      power: 0
+      scale: 10
+      offset: 5
+      max: 0
+      filters:
+      - isInverce: 0
+        index: 0
+        min: 0.3
+        max: 0.7
+        center: 1
+        scale: 0
+        offset: 0
+      - isInverce: 0
+        index: 2
+        min: 0.85
+        max: 1.1
+        center: 1
+        scale: 0
+        offset: 0
+      - isInverce: 0
+        index: 1
+        min: -0.1
+        max: 0.5
+        center: 1
+        scale: 0
+        offset: 0
+      - isInverce: 0
+        index: 10
+        min: -0.1
+        max: 1.1
+        center: 1
+        scale: 1
+        offset: 0
+    - name: "\u7194\u5CA9"
+      materialName: "\u7194\u5CA9"
+      materialIndex: 11
+      volumeIndex: -1
+      layer: 1
+      depth: 0
+      power: 0
+      scale: 5
+      offset: 6
+      max: 0
+      filters:
+      - isInverce: 0
+        index: 0
+        min: 0.3
+        max: 0.7
+        center: 1
+        scale: 0
+        offset: 0
+      - isInverce: 0
+        index: 2
+        min: 0.85
+        max: 1.1
+        center: 1
+        scale: 0
+        offset: 0
+      - isInverce: 0
+        index: 1
+        min: 0.5
+        max: 1.1
+        center: 1
+        scale: 0
+        offset: 0
+      - isInverce: 0
+        index: 12
+        min: -0.1
+        max: 1.1
+        center: 1
+        scale: 1
+        offset: 0
+    - name: "\u5C71\u8109"
+      materialName: "\u5C71\u5CF0"
+      materialIndex: 6
+      volumeIndex: -1
+      layer: 1
+      depth: 0
+      power: 0
+      scale: 200
+      offset: -60
+      max: 120
+      filters:
+      - isInverce: 0
+        index: 0
+        min: 0.3
+        max: 0.7
+        center: 0.5
+        scale: 3
+        offset: 0
+      - isInverce: 0
+        index: 13
+        min: 0
+        max: 0.5
+        center: 0
+        scale: 1.5
+        offset: 0
+      - isInverce: 0
+        index: 11
+        min: -0.1
+        max: 1.1
+        center: 1
+        scale: 1
+        offset: 0
+    - name: "\u96EA\u5C71"
+      materialName: "\u96EA\u5C71"
+      materialIndex: 8
+      volumeIndex: -1
+      layer: 1
+      depth: 0
+      power: 0
+      scale: 200
+      offset: -60
+      max: 0
+      filters:
+      - isInverce: 0
+        index: 0
+        min: 0.3
+        max: 0.7
+        center: 0.5
+        scale: 3
+        offset: 0
+      - isInverce: 0
+        index: 13
+        min: 0
+        max: 0.5
+        center: 0
+        scale: 1.5
+        offset: 0
+      - isInverce: 0
+        index: 11
+        min: -0.1
+        max: 1.1
+        center: 1
+        scale: 1
+        offset: 0
+    objectInfos:
+    - name: "\u6811"
+      guid: 1204BDDB0F274D3EAC1DA5FBD34DD5D4
+      objectName: Tree_01
+      index: 0
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.002
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 1
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 0
+        index: 3
+        min: 0
+        max: 0.5
+        center: 0
+        scale: 2
+        offset: 0
+    - name: "\u6811"
+      guid: 62369E18FB7843DEB46150523988CA05
+      objectName: Tree_02
+      index: 1
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.002
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 1
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 0
+        index: 3
+        min: 0
+        max: 0.5
+        center: 0
+        scale: 2
+        offset: 0
+    - name: "\u6811"
+      guid: C25D37FDDFA94D92BCE13CD242E21AD8
+      objectName: Tree_03
+      index: 2
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.002
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 1
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 0
+        index: 3
+        min: 0
+        max: 0.5
+        center: 0
+        scale: 2
+        offset: 0
+    - name: "\u82F9\u679C\u6811\uFF08\u65E0\u679C\uFF09"
+      guid: A175B76240F04F9B89B2A71354E502A3
+      objectName: Tree_04
+      index: 3
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.005
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 1
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 0
+        index: 2
+        min: 0.2
+        max: 0.8
+        center: 0.5
+        scale: 3
+        offset: 0
+      - isInverce: 0
+        index: 3
+        min: 0.5
+        max: 1
+        center: 1
+        scale: 1
+        offset: 0
+    - name: "\u82F9\u679C\u6811\uFF08\u65E0\u679C\uFF09"
+      guid: B44775E1D57D4C7FBA31C6359011132A
+      objectName: Tree_05
+      index: 4
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.01
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 1
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 0
+        index: 2
+        min: 0.2
+        max: 0.8
+        center: 0.5
+        scale: 3
+        offset: 0
+      - isInverce: 0
+        index: 3
+        min: 0.5
+        max: 1
+        center: 1
+        scale: 1
+        offset: 0
+    - name: "\u82F9\u679C\u6811\uFF08\u65E0\u679C\uFF09"
+      guid: A04BB96E3B314B64A1AF5D7ACC597EF4
+      objectName: Tree_06
+      index: 5
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.02
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 1
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 0
+        index: 2
+        min: 0.2
+        max: 0.8
+        center: 0.5
+        scale: 3
+        offset: 0
+      - isInverce: 0
+        index: 3
+        min: 0.5
+        max: 1
+        center: 1
+        scale: 1
+        offset: 0
+    - name: "\u82F9\u679C\u6811\uFF08\u6709\u679C\uFF09"
+      guid: 64F9BEBE0DEA4EB888994F411F59F9F5
+      objectName: Tree_07
+      index: 6
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.01
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 1
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 0
+        index: 2
+        min: 0.2
+        max: 0.8
+        center: 0.5
+        scale: 3
+        offset: 0
+      - isInverce: 0
+        index: 3
+        min: 0.5
+        max: 1
+        center: 1
+        scale: 1
+        offset: 0
+    - name: "\u82F9\u679C\u6811\uFF08\u6709\u679C\uFF09"
+      guid: 790A8D3D1EDB4C7797EECD83B7323CFE
+      objectName: Tree_08
+      index: 7
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.005
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 1
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 0
+        index: 2
+        min: 0.2
+        max: 0.8
+        center: 0.5
+        scale: 3
+        offset: 0
+      - isInverce: 0
+        index: 0
+        min: 0.5
+        max: 1
+        center: 1
+        scale: 1
+        offset: 0
+    - name: "\u82F9\u679C\u6811\uFF08\u6709\u679C\uFF09"
+      guid: 738CAFCBA31F49A8BB30323C277570DF
+      objectName: Tree_09
+      index: 8
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.002
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 1
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 0
+        index: 2
+        min: 0.2
+        max: 0.8
+        center: 0.5
+        scale: 3
+        offset: 0
+      - isInverce: 0
+        index: 3
+        min: 0.5
+        max: 1
+        center: 1
+        scale: 1
+        offset: 0
+    - name: "\u6A61\u6811"
+      guid: 35453DA9A77C447899DFB4DF512DD5D5
+      objectName: Tree_10
+      index: 9
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.01
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 1
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 0
+        index: 1
+        min: 0.5
+        max: 1
+        center: 1
+        scale: 2
+        offset: 0
+    - name: "\u6A61\u6811"
+      guid: C4E7F5F5DABC4806ACC0178162D4340F
+      objectName: Tree_11
+      index: 10
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.02
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 1
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 0
+        index: 1
+        min: 0.5
+        max: 1
+        center: 1
+        scale: 2
+        offset: 0
+    - name: "\u6A61\u6811"
+      guid: DBFCC4E56DB24D92BDF7764DBDE15E92
+      objectName: Tree_12
+      index: 11
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.01
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 1
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 0
+        index: 1
+        min: 0.5
+        max: 1
+        center: 1
+        scale: 2
+        offset: 0
+    - name: "\u677E\u6811"
+      guid: 183B7FE1D8A84EE5A7AA70EEB109DF11
+      objectName: Tree_13
+      index: 12
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.02
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 1
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 0
+        index: 2
+        min: 0.2
+        max: 0.5
+        center: 0.2
+        scale: 3
+        offset: 0
+    - name: "\u677E\u6811"
+      guid: 841F9275C1C34E54B848C1BC8D7DA64F
+      objectName: Tree_14
+      index: 13
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.05
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 1
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 0
+        index: 2
+        min: 0.2
+        max: 0.5
+        center: 0.2
+        scale: 3
+        offset: 0
+    - name: "\u677E\u6811"
+      guid: 70C38B2E7ABF400D888E3EDA94191E16
+      objectName: Tree_15
+      index: 14
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.01
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 1
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 0
+        index: 2
+        min: 0.2
+        max: 0.5
+        center: 0.2
+        scale: 3
+        offset: 0
+    - name: "\u5408\u6B22\u6811"
+      guid: 2EE069EEF7164D8FB1342C6E52320F59
+      objectName: Tree_25
+      index: 24
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.0005
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 1
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 0
+        index: 2
+        min: 0.5
+        max: 0.8
+        center: 0.8
+        scale: 3
+        offset: 0
+    - name: "\u5408\u6B22\u6811"
+      guid: E9803AA643C44E04821FFD3170E3D1B1
+      objectName: Tree_26
+      index: 25
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.001
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 1
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 0
+        index: 2
+        min: 0.5
+        max: 0.8
+        center: 0.8
+        scale: 3
+        offset: 0
+    - name: "\u5408\u6B22\u6811"
+      guid: 99A4472F62A74309AC5CE8DC65722660
+      objectName: Tree_27
+      index: 26
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.005
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 1
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 0
+        index: 2
+        min: 0.5
+        max: 0.8
+        center: 0.8
+        scale: 3
+        offset: 0
+    - name: "\u5408\u6B22\u6811"
+      guid: 8422945200864D2FABDA63BC2874B950
+      objectName: Tree_28
+      index: 27
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.02
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 1
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 0
+        index: 2
+        min: 0.5
+        max: 0.8
+        center: 0.8
+        scale: 3
+        offset: 0
+    - name: "\u5408\u6B22\u6811"
+      guid: BBC94536E37F400492113E8033A43F8B
+      objectName: Tree_29
+      index: 28
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.005
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 1
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 0
+        index: 2
+        min: 0.5
+        max: 0.8
+        center: 0.8
+        scale: 3
+        offset: 0
+    - name: "\u5408\u6B22\u6811"
+      guid: 6116202ACFC6401A826DAEB3F62C84B4
+      objectName: Tree_30
+      index: 29
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.001
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 1
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 0
+        index: 2
+        min: 0.5
+        max: 0.8
+        center: 0.8
+        scale: 3
+        offset: 0
+    - name: "\u96EA\u677E"
+      guid: F753D01FBC644B329E66A1B61BD353B4
+      objectName: Tree_16
+      index: 15
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.02
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 1
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u96EA\u5730"
+        index: 1
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 0
+        index: 2
+        min: 0
+        max: 0.2
+        center: 0.2
+        scale: 5
+        offset: 0
+    - name: "\u96EA\u677E"
+      guid: C2BA380965E94A38886B1D9BBF62CE4E
+      objectName: Tree_17
+      index: 16
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.05
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 1
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u96EA\u5730"
+        index: 1
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 0
+        index: 2
+        min: 0
+        max: 0.2
+        center: 0.2
+        scale: 5
+        offset: 0
+    - name: "\u96EA\u677E"
+      guid: BE83A6154D6548DA9474AC46AF6102F1
+      objectName: Tree_18
+      index: 17
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.01
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 1
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u96EA\u5730"
+        index: 1
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 0
+        index: 2
+        min: 0
+        max: 0.2
+        center: 0.2
+        scale: 5
+        offset: 0
+    - name: "\u6866\u6811"
+      guid: 
+      objectName: Tree_41
+      index: 40
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.08
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 1
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u96EA\u5730"
+        index: 1
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 0
+        index: 2
+        min: 0
+        max: 0.2
+        center: 0
+        scale: 5
+        offset: 0
+    - name: "\u6866\u6811"
+      guid: 
+      objectName: Tree_42
+      index: 41
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.02
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 1
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u96EA\u5730"
+        index: 1
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 0
+        index: 2
+        min: 0
+        max: 0.2
+        center: 0
+        scale: 5
+        offset: 0
+    - name: "\u6866\u6811"
+      guid: 
+      objectName: Tree_43
+      index: 42
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.005
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 1
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u96EA\u5730"
+        index: 1
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 0
+        index: 2
+        min: 0
+        max: 0.2
+        center: 0
+        scale: 5
+        offset: 0
+    - name: "\u7EA2\u6811"
+      guid: 5782910FDE1D4AFDA448EFDF3A3D0665
+      objectName: Tree_19
+      index: 18
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.005
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 1
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 0
+        index: 13
+        min: 0
+        max: 1
+        center: 1
+        scale: 1
+        offset: 0
+    - name: "\u7EA2\u6811"
+      guid: E7B3463851D94B6DBDA69F899A97002C
+      objectName: Tree_20
+      index: 19
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.005
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 1
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 0
+        index: 13
+        min: 0
+        max: 1
+        center: 1
+        scale: 1
+        offset: 0
+    - name: "\u7EA2\u6811"
+      guid: F018D61F004B428287984E024CD91DB9
+      objectName: Tree_21
+      index: 20
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.005
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 1
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 0
+        index: 13
+        min: 0
+        max: 1
+        center: 1
+        scale: 1
+        offset: 0
+    - name: "\u7EA2\u6811"
+      guid: C043C7DBDA434A0DAB02FD7FAED6AF4E
+      objectName: Tree_22
+      index: 21
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.005
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 1
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 0
+        index: 13
+        min: 0
+        max: 1
+        center: 1
+        scale: 1
+        offset: 0
+    - name: "\u7EA2\u6811"
+      guid: 013F9AAD4DDC4875B868F4CA469FA309
+      objectName: Tree_23
+      index: 22
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.005
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 1
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 0
+        index: 13
+        min: 0
+        max: 1
+        center: 1
+        scale: 1
+        offset: 0
+    - name: "\u7EA2\u6811"
+      guid: 4B0F00F5D0E745DC87C8A94922765BA7
+      objectName: Tree_24
+      index: 23
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.005
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 1
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 0
+        index: 13
+        min: 0
+        max: 1
+        center: 1
+        scale: 1
+        offset: 0
+    - name: "\u6930\u5B50\u6811"
+      guid: 02CA7FA21EA042F5B6B58E2B07D8F3D4
+      objectName: Tree_31
+      index: 30
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.02
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 1
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u6C99\u6EE9"
+        index: 10
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u6930\u5B50\u6811"
+      guid: E2BE455EC688443BBE658872F8D4583F
+      objectName: Tree_32
+      index: 31
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.02
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 1
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u6C99\u6EE9"
+        index: 10
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u4ED9\u4EBA\u638C"
+      guid: 9AC35F7AAB4E437EA50EB024A1E76E0D
+      objectName: Tree_37
+      index: 36
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.005
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 1
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u6C99\u6F20"
+        index: 2
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u4ED9\u4EBA\u638C"
+      guid: FF02D785E7084665B0082F7C04D5085D
+      objectName: Tree_38
+      index: 37
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.01
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 1
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u6C99\u6F20"
+        index: 2
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u4ED9\u4EBA\u638C"
+      guid: EB35DF44145C4F6BA804FAABB36C174F
+      objectName: Tree_39
+      index: 38
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.01
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 1
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u6C99\u6F20"
+        index: 2
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u4ED9\u4EBA\u638C"
+      guid: D589CFBFB6E6457981BEC1BF95DC291C
+      objectName: Tree_40
+      index: 39
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.005
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 1
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u6C99\u6F20"
+        index: 2
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u6811\u5E72"
+      guid: CA4591AF521644CEABFE292A45236AEB
+      objectName: Tree_33
+      index: 32
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.002
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 1
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      - name: "\u5730\u5E54"
+        index: 7
+        chanceOffset: 0.01
+      mapFilters:
+      - isInverce: 0
+        index: 1
+        min: 0
+        max: 1
+        center: 0
+        scale: 1
+        offset: 0
+    - name: "\u6811\u5E72"
+      guid: A17F5FA52D5F43AE8E09BF692B9FA1DA
+      objectName: Tree_34
+      index: 33
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.001
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 1
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      - name: "\u5730\u5E54"
+        index: 7
+        chanceOffset: 0.005
+      mapFilters:
+      - isInverce: 0
+        index: 1
+        min: 0
+        max: 1
+        center: 0
+        scale: 1
+        offset: 0
+    - name: "\u6811\u5E72"
+      guid: 96325D6847DA49A49CD518EABB504B8E
+      objectName: Tree_35
+      index: 34
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.002
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 1
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      - name: "\u5730\u5E54"
+        index: 7
+        chanceOffset: 0.01
+      mapFilters:
+      - isInverce: 0
+        index: 1
+        min: 0
+        max: 1
+        center: 0
+        scale: 1
+        offset: 0
+    - name: "\u6811\u5E72"
+      guid: 36E7EBD49DBA44768007753C6A44518E
+      objectName: Tree_36
+      index: 35
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.001
+      dot: 0.8
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      - name: "\u5730\u5E54"
+        index: 7
+        chanceOffset: 0.005
+      mapFilters:
+      - isInverce: 0
+        index: 1
+        min: 0
+        max: 1
+        center: 0
+        scale: 1
+        offset: 0
+    - name: "\u5DE8\u8611\u83C7"
+      guid: 
+      objectName: SM_Env_Mushroom_Giant_01
+      index: 43
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.003
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u5730\u4E0B"
+        index: 4
+        chanceOffset: 0
+      - name: "\u5730\u5E95"
+        index: 0
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u5DE8\u8611\u83C7"
+      guid: 
+      objectName: SM_Env_Mushroom_Giant_02
+      index: 44
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.003
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u5730\u4E0B"
+        index: 4
+        chanceOffset: 0
+      - name: "\u5730\u5E95"
+        index: 0
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u5DE8\u8611\u83C7"
+      guid: 
+      objectName: SM_Env_Mushroom_Giant_06
+      index: 45
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.003
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u5730\u4E0B"
+        index: 4
+        chanceOffset: 0
+      - name: "\u5730\u5E95"
+        index: 0
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u5DE8\u8611\u83C7"
+      guid: 
+      objectName: SM_Env_Mushroom_Giant_03
+      index: 46
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.003
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u5730\u4E0B"
+        index: 4
+        chanceOffset: 0
+      - name: "\u5730\u5E95"
+        index: 0
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u5DE8\u8611\u83C7"
+      guid: 
+      objectName: SM_Env_Mushroom_Giant_04
+      index: 47
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.003
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u5730\u4E0B"
+        index: 4
+        chanceOffset: 0
+      - name: "\u5730\u5E95"
+        index: 0
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u5B9D\u7BB1"
+      guid: 370B889CAE1048B3A6F643F2AC22C691
+      objectName: baoxiang1
+      index: 48
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 3
+      chance: 0.002
+      dot: 0.8
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u5730\u4E0B"
+        index: 4
+        chanceOffset: 0
+      - name: "\u5730\u5E95"
+        index: 0
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u5B9D\u7BB1"
+      guid: 94D07269634F49D38B213537631F0C95
+      objectName: baoxiang2
+      index: 49
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 3
+      chance: 0.001
+      dot: 0.8
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u5730\u4E0B"
+        index: 4
+        chanceOffset: 0
+      - name: "\u5730\u5E95"
+        index: 0
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u5B9D\u7BB1"
+      guid: 50427E35038646EF9878EFE68288A023
+      objectName: baoxiang3
+      index: 50
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 3
+      chance: 0.0002
+      dot: 0.8
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u5730\u5E95"
+        index: 0
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u6D46\u679C\u4E1B"
+      guid: 0923EC678D5F4105AA059C709ADB23C5
+      objectName: jiangguocong1
+      index: 51
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 3
+      chance: 0.002
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0.001
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 0
+        index: 3
+        min: 0
+        max: 1
+        center: 0.5
+        scale: 2
+        offset: 0
+    - name: "\u6D46\u679C\u4E1B"
+      guid: 24DF1EAFAAC649199A4B410D086D2CB3
+      objectName: jiangguocong2
+      index: 52
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 3
+      chance: 0.002
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0.001
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 0
+        index: 3
+        min: 0
+        max: 1
+        center: 0.5
+        scale: 2
+        offset: 0
+    - name: "\u6D46\u679C\u4E1B"
+      guid: 2DAF3123F6254438BE1E310ED0D2C0CF
+      objectName: jiangguocong3
+      index: 53
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 3
+      chance: 0.002
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0.001
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 0
+        index: 3
+        min: 0
+        max: 1
+        center: 0.5
+        scale: 2
+        offset: 0
+    - name: "\u82B1\u82D7"
+      guid: 7DF0CD89A8B6497882270E58C138C016
+      objectName: hua1
+      index: 54
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 3
+      chance: 0.005
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 1
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u82B1\u82D7"
+      guid: 94A66EEFC81F4DD8AC193316AF7AC002
+      objectName: hua2
+      index: 55
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 3
+      chance: 0.005
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 1
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u82B1\u82D7"
+      guid: F9061F132E4A4F98841C867D98B43D75
+      objectName: hua3
+      index: 56
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 3
+      chance: 0.005
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 1
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u82B1\u82D7"
+      guid: 64085AD3D1A24751BEF10105022343EC
+      objectName: hua4
+      index: 57
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 3
+      chance: 0.005
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 1
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u6811\u82D7"
+      guid: 656EF67383554BA492BFE7167BFC208D
+      objectName: shumiao
+      index: 58
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 3
+      chance: 0.01
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 1
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u77F3\u77FF"
+      guid: B3D18A62E19A4F9F8C27A34DE87FED67
+      objectName: shikuang1
+      index: 59
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.001
+      dot: 0.8
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      - name: "\u5730\u4E0B"
+        index: 4
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u77F3\u77FF"
+      guid: 32E9AC00C6B44482B1E79A02F02FAAD5
+      objectName: shikuang2
+      index: 60
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.001
+      dot: 0.8
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      - name: "\u5730\u4E0B"
+        index: 4
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u77F3\u77FF"
+      guid: D5F275AA8944481587ED1BE583E2076C
+      objectName: shikuang3
+      index: 61
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.001
+      dot: 0.8
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      - name: "\u5730\u4E0B"
+        index: 4
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u77F3\u77FF"
+      guid: 301A16DF0F944FDBA7BDF4669999D3B5
+      objectName: shikuang4
+      index: 62
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.001
+      dot: 0.8
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      - name: "\u5730\u4E0B"
+        index: 4
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u77F3\u77FF"
+      guid: 8E4E18B0B63F4A338173E38F28B4E9C1
+      objectName: shikuang5
+      index: 63
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.001
+      dot: 0.8
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      - name: "\u5730\u4E0B"
+        index: 4
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u77F3\u77FF"
+      guid: E8650D803AA446D88AA5163535DDE6B7
+      objectName: shikuang6
+      index: 64
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.001
+      dot: 0.8
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      - name: "\u5730\u4E0B"
+        index: 4
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u94C1\u77FF"
+      guid: 529BC35644174B439C3F441CA01D8932
+      objectName: tiekuang1
+      index: 65
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.001
+      dot: 0.8
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u5730\u4E0B"
+        index: 4
+        chanceOffset: 0
+      - name: "\u5730\u5E54"
+        index: 7
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u94C1\u77FF"
+      guid: 2ACED554CA024423BB2348E364A2B97A
+      objectName: tiekuang2
+      index: 66
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.001
+      dot: 0.8
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u5730\u4E0B"
+        index: 4
+        chanceOffset: 0
+      - name: "\u5730\u5E54"
+        index: 7
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u94C1\u77FF"
+      guid: 4B57D9530ECC4D11AC3D8363313E2284
+      objectName: tiekuang3
+      index: 67
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.001
+      dot: 0.8
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u5730\u4E0B"
+        index: 4
+        chanceOffset: 0
+      - name: "\u5730\u5E54"
+        index: 7
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u94C1\u77FF"
+      guid: 2083E63AFFC547DC8146A756A2995C74
+      objectName: tiekuang4
+      index: 68
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.001
+      dot: 0.8
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u5730\u4E0B"
+        index: 4
+        chanceOffset: 0
+      - name: "\u5730\u5E54"
+        index: 7
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u94C1\u77FF"
+      guid: 8560291D5186441D86A1B17584D8F0D4
+      objectName: tiekuang5
+      index: 69
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.001
+      dot: 0.8
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u5730\u4E0B"
+        index: 4
+        chanceOffset: 0
+      - name: "\u5730\u5E54"
+        index: 7
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u94C1\u77FF"
+      guid: CE76E8E448854913A2F954428D064C98
+      objectName: tiekuang6
+      index: 70
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.001
+      dot: 0.8
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u5730\u4E0B"
+        index: 4
+        chanceOffset: 0
+      - name: "\u5730\u5E54"
+        index: 7
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u6C34\u6676\u77FF"
+      guid: 8A608ACE3D3544DEAC29973DA010E090
+      objectName: shuijingkuang1
+      index: 71
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.01
+      dot: 0.8
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u5730\u5E95"
+        index: 0
+        chanceOffset: 0
+      - name: "\u7194\u5CA9"
+        index: 11
+        chanceOffset: 0
+      - name: "\u9ED1\u6F20"
+        index: 14
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u6C34\u6676\u77FF"
+      guid: 3A1CEBB63DB94E938D570818003FC573
+      objectName: shuijingkuang2
+      index: 72
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.005
+      dot: 0.8
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u5730\u5E95"
+        index: 0
+        chanceOffset: 0
+      - name: "\u7194\u5CA9"
+        index: 11
+        chanceOffset: 0
+      - name: "\u9ED1\u6F20"
+        index: 14
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u6C34\u6676\u77FF"
+      guid: CF5E359C31F0465F9D6B8D52DA66AE6B
+      objectName: shuijingkuang3
+      index: 73
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.005
+      dot: 0.8
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u5730\u5E95"
+        index: 0
+        chanceOffset: 0
+      - name: "\u7194\u5CA9"
+        index: 11
+        chanceOffset: 0
+      - name: "\u9ED1\u6F20"
+        index: 14
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u51B0\u77FF"
+      guid: AD7450DA5D834CBCAFBE489BDE3134E3
+      objectName: bingkuang1
+      index: 74
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.005
+      dot: 0.8
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u96EA\u5730"
+        index: 1
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u51B0\u77FF"
+      guid: 0224681D52E748348CF6686669D1D679
+      objectName: bingkuang3
+      index: 76
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.005
+      dot: 0.8
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u96EA\u5730"
+        index: 1
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u51B0\u77FF"
+      guid: 10908C3E5EBF4B6586F2C7F01F8624E8
+      objectName: bingkuang2
+      index: 75
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.005
+      dot: 0.8
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u96EA\u5730"
+        index: 1
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u51B0\u77FF"
+      guid: 
+      objectName: bingkuang4
+      index: 77
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.005
+      dot: 0.8
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u96EA\u5730"
+        index: 1
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u51B0\u77FF"
+      guid: 
+      objectName: bingkuang5
+      index: 78
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.005
+      dot: 0.8
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u96EA\u5730"
+        index: 1
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u51B0\u77FF"
+      guid: 
+      objectName: bingkuang6
+      index: 79
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.005
+      dot: 0.8
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u96EA\u5730"
+        index: 1
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u706B\u5C71\u5CA9"
+      guid: 9956A2BC0E2B4A2D9C181242B2848D5D
+      objectName: huoshanyan1
+      index: 80
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.008
+      dot: 0.8
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u5730\u5E95"
+        index: 0
+        chanceOffset: 0
+      - name: "\u7194\u5CA9"
+        index: 11
+        chanceOffset: 0.003
+      mapFilters: []
+    - name: "\u706B\u5C71\u5CA9"
+      guid: D298636AF6AB49E1B8CA87F36CECF9E6
+      objectName: huoshanyan2
+      index: 81
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.008
+      dot: 0.8
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u5730\u5E95"
+        index: 0
+        chanceOffset: 0
+      - name: "\u7194\u5CA9"
+        index: 11
+        chanceOffset: 0.003
+      mapFilters: []
+    - name: "\u8349"
+      guid: 2B7838551C534640806157D1102813BD
+      objectName: cao1
+      index: 82
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 3
+      chance: 0.01
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 1
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0.01
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u8349"
+      guid: 6D6627A5577A428DAF3442893762986E
+      objectName: cao2
+      index: 83
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 3
+      chance: 0.02
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 1
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0.01
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u8349"
+      guid: 99ADC95EF3DD46BA8058EA6F0B1D8C0C
+      objectName: cao3
+      index: 84
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 3
+      chance: 0.01
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 1
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0.01
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u8349"
+      guid: 1901A65BFA4D45EEAF93AB9ACBC2A49E
+      objectName: cao4
+      index: 85
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 3
+      chance: 0.01
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 1
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0.01
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u8611\u83C7"
+      guid: 00D8CA6811B4479CA43A39B999C9A0F7
+      objectName: mogu1
+      index: 86
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 3
+      chance: 0.003
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 1
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0.01
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 0
+        index: 3
+        min: 0
+        max: 1
+        center: 0.5
+        scale: 2
+        offset: 0
+    - name: "\u8611\u83C7"
+      guid: 607FBEB1F6C94886825129FC86864032
+      objectName: mogu2
+      index: 87
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 3
+      chance: 0.003
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 1
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0.01
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 0
+        index: 3
+        min: 0
+        max: 1
+        center: 0.5
+        scale: 2
+        offset: 0
+    - name: "\u8611\u83C7"
+      guid: 05F74EB46F1D4F43BC974271A3340F42
+      objectName: mogu3
+      index: 88
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 3
+      chance: 0.003
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 1
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0.01
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 0
+        index: 3
+        min: 0
+        max: 1
+        center: 0.5
+        scale: 2
+        offset: 0
+    - name: "\u8611\u83C7"
+      guid: 5F8EA36CE688403A9F9D8A84723F7E55
+      objectName: mogu4
+      index: 89
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 3
+      chance: 0.003
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 1
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0.01
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 0
+        index: 3
+        min: 0
+        max: 1
+        center: 0.5
+        scale: 2
+        offset: 0
+    - name: "\u8611\u83C7"
+      guid: F0C72D50C93549C59EEF12C881FAFBBC
+      objectName: mogu5
+      index: 90
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 3
+      chance: 0.003
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 1
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0.01
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 0
+        index: 3
+        min: 0
+        max: 1
+        center: 0.5
+        scale: 2
+        offset: 0
+    - name: "\u77F3\u5934"
+      guid: 6F77B710DA5D4FE6B3880A6880071868
+      objectName: shitou1
+      index: 91
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 4
+      chance: 0.02
+      dot: 0.8
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 1
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u5730\u5E95"
+        index: 0
+        chanceOffset: 0
+      - name: "\u5730\u4E0B"
+        index: 4
+        chanceOffset: 0
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      - name: "\u96EA\u5730"
+        index: 1
+        chanceOffset: 0
+      - name: "\u6C99\u6F20"
+        index: 2
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u841D\u535C"
+      guid: 02C7E2658B3349348B739C890A8F4195
+      objectName: luobo1
+      index: 92
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.005
+      dot: 0.8
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 1
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 0
+        index: 13
+        min: 0
+        max: 1
+        center: 1
+        scale: 1
+        offset: 0
+    - name: "\u5154\u5B50"
+      guid: C26C39DBB753487D901E70E87F805522
+      objectName: tuzi1
+      index: 93
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.005
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0.005
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      - name: "\u96EA\u5730"
+        index: 1
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u677E\u9F20"
+      guid: 0E228B0E1BDA46B2850FF3B896047D53
+      objectName: songshu1
+      index: 94
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.002
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u72D0\u72F8"
+      guid: 7B933050758147E0A689E1733CC15D5C
+      objectName: huli1
+      index: 95
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.001
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      - name: "\u96EA\u5730"
+        index: 1
+        chanceOffset: 0.001
+      mapFilters: []
+    - name: "\u5C71\u7F8A"
+      guid: E4309F110EE047F8A1E94E50EE267EE8
+      objectName: yang1
+      index: 96
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.0005
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0.0003
+      - name: "\u96EA\u5730"
+        index: 1
+        chanceOffset: 0
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 0
+        index: 2
+        min: 0
+        max: 1
+        center: 0.3
+        scale: 1
+        offset: 0
+    - name: "\u4F01\u9E45"
+      guid: 0439F6133222488B90E088900700273B
+      objectName: qie1
+      index: 97
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.008
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u96EA\u5730"
+        index: 1
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u9E35\u9E1F"
+      guid: A2E5BF2A9DE5461984F4C2511A1C7ADC
+      objectName: tuoniao1
+      index: 98
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.001
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      - name: "\u7EFF\u6D32"
+        index: 13
+        chanceOffset: 0.003
+      mapFilters: []
+    - name: "\u9E7F"
+      guid: 01468C2FAD9F4383A85336A951389BC2
+      objectName: lu1
+      index: 106
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.0005
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u7266\u725B"
+      guid: 51C6F193EB3F447F8016AB61243DCBD9
+      objectName: niu2
+      index: 99
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.0005
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0.001
+      - name: "\u96EA\u5730"
+        index: 1
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u8C61"
+      guid: 7EE34A9B54F048F29296BFAFD15B9CDE
+      objectName: xiang1
+      index: 100
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.0002
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 1
+      distance: 3
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u72FC"
+      guid: A99D3647518B4D6299D987F676BFFF3B
+      objectName: lang1
+      index: 101
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.001
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u96EA\u5730"
+        index: 1
+        chanceOffset: 0.002
+      - name: "\u6C99\u6F20"
+        index: 2
+        chanceOffset: 0.003
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0.001
+      - name: "\u5730\u5E54"
+        index: 7
+        chanceOffset: 0.005
+      mapFilters: []
+    - name: "\u8718\u86DB"
+      guid: 3BE34084527248D3A39DA0BE4E1A3744
+      objectName: zhizhu1
+      index: 102
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.005
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u5730\u4E0B"
+        index: 4
+        chanceOffset: 0.001
+      - name: "\u6C99\u6F20"
+        index: 2
+        chanceOffset: 0
+      - name: "\u5730\u5E54"
+        index: 7
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u7532\u866B"
+      guid: 5E24ACF3E75E4ED288D7086649767B83
+      objectName: jiachong1
+      index: 103
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.002
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u5730\u4E0B"
+        index: 4
+        chanceOffset: 0
+      - name: "\u5730\u5E95"
+        index: 0
+        chanceOffset: 0.001
+      mapFilters: []
+    - name: "\u6C99\u866B"
+      guid: 8215A56938D140FB9F373937BF43AB83
+      objectName: shachong1
+      index: 104
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.001
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u5730\u5E95"
+        index: 0
+        chanceOffset: 0
+      - name: "\u5730\u4E0B"
+        index: 4
+        chanceOffset: 0.001
+      mapFilters: []
+    - name: "\u8001\u864E"
+      guid: 4B7A4C10E47E458B8852185A099932A8
+      objectName: hu1
+      index: 105
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.0002
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 0.5
+      distance: 2.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 0
+        index: 3
+        min: 0
+        max: 1
+        center: 1
+        scale: 1
+        offset: 0
+    - name: "\u9738\u738B\u9F99"
+      guid: 14857202AF1B429697F7028EA6AFC365
+      objectName: bawanglong
+      index: 107
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.001
+      dot: 0.7
+      offset: 0
+      top: 1
+      bottom: 3
+      distance: 5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u5730\u5E95"
+        index: 0
+        chanceOffset: 0.001
+      - name: "\u5730\u5E54"
+        index: 7
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u5730\u5E54\u5DE8\u5CA9"
+      guid: 
+      objectName: Rocks_Sharp_l_01
+      index: 108
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.01
+      dot: 0.7
+      offset: -0.5
+      top: 2
+      bottom: 3
+      distance: 5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u5730\u5E54"
+        index: 7
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u5730\u5E54\u5DE8\u5CA9"
+      guid: 
+      objectName: Rocks_Sharp_l_02
+      index: 109
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.01
+      dot: 0.7
+      offset: -0.5
+      top: 1
+      bottom: 2
+      distance: 4
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u5730\u5E54"
+        index: 7
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u8349\u539F\u62F1\u6865"
+      guid: 
+      objectName: Rock_Arch_04
+      index: 110
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.01
+      dot: 0.7
+      offset: -0.5
+      top: 1
+      bottom: 1
+      distance: 3
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 0
+        index: 3
+        min: -0.1
+        max: 0.5
+        center: 0
+        scale: 0
+        offset: 0
+      - isInverce: 0
+        index: 1
+        min: -0.1
+        max: 0.49
+        center: 0
+        scale: 1
+        offset: 0
+    - name: "\u8349\u539F\u6B8B\u58C1"
+      guid: 
+      objectName: Rock_Wall_01
+      index: 111
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.01
+      dot: 0.7
+      offset: -0.5
+      top: 1
+      bottom: 1
+      distance: 3
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      - name: "\u6C99\u6EE9"
+        index: 10
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 1
+        index: 3
+        min: -0.1
+        max: 1.1
+        center: 0.5
+        scale: 2
+        offset: 0
+      - isInverce: 0
+        index: 1
+        min: -0.1
+        max: 0.5
+        center: 0
+        scale: 2
+        offset: 0
+    - name: "\u8349\u539F\u6B8B\u58C1"
+      guid: 
+      objectName: Rock_Wall_02
+      index: 112
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.01
+      dot: 0.7
+      offset: -0.5
+      top: 1
+      bottom: 1
+      distance: 3
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      - name: "\u6C99\u6EE9"
+        index: 10
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 1
+        index: 3
+        min: -0.1
+        max: 1.1
+        center: 0.5
+        scale: 2
+        offset: 0
+      - isInverce: 0
+        index: 1
+        min: -0.1
+        max: 0.5
+        center: 0
+        scale: 2
+        offset: 0
+    - name: "\u8349\u539F\u6B8B\u58C1"
+      guid: 
+      objectName: Rock_Wall_03
+      index: 113
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.01
+      dot: 0.7
+      offset: -0.5
+      top: 1
+      bottom: 1
+      distance: 3
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      - name: "\u6C99\u6EE9"
+        index: 10
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 1
+        index: 3
+        min: -0.1
+        max: 1.1
+        center: 0.5
+        scale: 2
+        offset: 0
+      - isInverce: 0
+        index: 1
+        min: -0.1
+        max: 0.5
+        center: 0
+        scale: 2
+        offset: 0
+    - name: "\u8349\u539F\u6B8B\u58C1"
+      guid: 
+      objectName: Rock_Wall_04
+      index: 114
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.01
+      dot: 0.7
+      offset: -0.5
+      top: 1
+      bottom: 1
+      distance: 3
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      - name: "\u6C99\u6EE9"
+        index: 10
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 1
+        index: 3
+        min: -0.1
+        max: 1.1
+        center: 0.5
+        scale: 2
+        offset: 0
+      - isInverce: 0
+        index: 1
+        min: -0.1
+        max: 0.5
+        center: 0
+        scale: 2
+        offset: 0
+    - name: "\u8349\u539F\u6B8B\u58C1"
+      guid: 
+      objectName: Rock_Wall_05
+      index: 115
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.01
+      dot: 0.7
+      offset: -0.5
+      top: 1
+      bottom: 1
+      distance: 3
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      - name: "\u6C99\u6EE9"
+        index: 10
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 1
+        index: 3
+        min: -0.1
+        max: 1.1
+        center: 0.5
+        scale: 2
+        offset: 0
+      - isInverce: 0
+        index: 1
+        min: -0.1
+        max: 0.5
+        center: 0
+        scale: 2
+        offset: 0
+    - name: "\u8349\u539F\u6B8B\u58C1"
+      guid: 
+      objectName: Rock_Wall_06
+      index: 116
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.01
+      dot: 0.7
+      offset: -0.5
+      top: 1
+      bottom: 1
+      distance: 3
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      - name: "\u6C99\u6EE9"
+        index: 10
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 1
+        index: 3
+        min: -0.1
+        max: 1.1
+        center: 0.5
+        scale: 2
+        offset: 0
+      - isInverce: 0
+        index: 1
+        min: -0.1
+        max: 0.5
+        center: 0
+        scale: 2
+        offset: 0
+    - name: "\u8349\u539F\u6B8B\u58C1"
+      guid: 
+      objectName: Rock_Wall_07
+      index: 117
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.01
+      dot: 0.7
+      offset: -0.5
+      top: 1
+      bottom: 1
+      distance: 3
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      - name: "\u6C99\u6EE9"
+        index: 10
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 1
+        index: 3
+        min: -0.1
+        max: 1.1
+        center: 0.5
+        scale: 2
+        offset: 0
+      - isInverce: 0
+        index: 1
+        min: -0.1
+        max: 0.5
+        center: 0
+        scale: 2
+        offset: 0
+    - name: "\u8349\u539F\u9057\u8FF9"
+      guid: 
+      objectName: Stonehenge_01
+      index: 118
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.01
+      dot: 0.7
+      offset: -0.5
+      top: 1
+      bottom: 1
+      distance: 3
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      - name: "\u6C99\u6EE9"
+        index: 10
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 1
+        index: 3
+        min: -0.1
+        max: 1.1
+        center: 0.5
+        scale: 2
+        offset: 0
+      - isInverce: 0
+        index: 1
+        min: -0.1
+        max: 0.5
+        center: 0
+        scale: 2
+        offset: 0
+    - name: "\u8349\u539F\u9057\u8FF9"
+      guid: 
+      objectName: Stonehenge_02
+      index: 119
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.01
+      dot: 0.7
+      offset: -0.5
+      top: 1
+      bottom: 1
+      distance: 3
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      - name: "\u6C99\u6EE9"
+        index: 10
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 1
+        index: 3
+        min: -0.1
+        max: 1.1
+        center: 0.5
+        scale: 2
+        offset: 0
+      - isInverce: 0
+        index: 1
+        min: -0.1
+        max: 0.5
+        center: 0
+        scale: 2
+        offset: 0
+    - name: "\u8349\u539F\u9057\u8FF9"
+      guid: 
+      objectName: Stonehenge_03
+      index: 120
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.01
+      dot: 0.7
+      offset: -0.5
+      top: 1
+      bottom: 1
+      distance: 3
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      - name: "\u6C99\u6EE9"
+        index: 10
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 1
+        index: 3
+        min: -0.1
+        max: 1.1
+        center: 0.5
+        scale: 2
+        offset: 0
+      - isInverce: 0
+        index: 1
+        min: -0.1
+        max: 0.5
+        center: 0
+        scale: 2
+        offset: 0
+    - name: "\u8349\u539F\u9057\u8FF9"
+      guid: 
+      objectName: Stonehenge_04
+      index: 121
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.01
+      dot: 0.7
+      offset: -0.5
+      top: 1
+      bottom: 1
+      distance: 3
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      - name: "\u6C99\u6EE9"
+        index: 10
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 1
+        index: 3
+        min: -0.1
+        max: 1.1
+        center: 0.5
+        scale: 2
+        offset: 0
+      - isInverce: 0
+        index: 1
+        min: -0.1
+        max: 0.5
+        center: 0
+        scale: 2
+        offset: 0
+    - name: "\u8349\u539F\u9057\u8FF9"
+      guid: 
+      objectName: Stonehenge_05
+      index: 122
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.01
+      dot: 0.7
+      offset: -0.5
+      top: 1
+      bottom: 1
+      distance: 3
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      - name: "\u6C99\u6EE9"
+        index: 10
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 1
+        index: 3
+        min: -0.1
+        max: 1.1
+        center: 0.5
+        scale: 2
+        offset: 0
+      - isInverce: 0
+        index: 1
+        min: -0.1
+        max: 0.5
+        center: 0
+        scale: 2
+        offset: 0
+    - name: "\u8349\u539F\u9057\u8FF9"
+      guid: 
+      objectName: Stonehenge_06
+      index: 123
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.01
+      dot: 0.7
+      offset: -0.5
+      top: 1
+      bottom: 1
+      distance: 3
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      - name: "\u6C99\u6EE9"
+        index: 10
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 1
+        index: 3
+        min: -0.1
+        max: 1.1
+        center: 0.5
+        scale: 2
+        offset: 0
+      - isInverce: 0
+        index: 1
+        min: -0.1
+        max: 0.5
+        center: 0
+        scale: 2
+        offset: 0
+    - name: "\u8349\u539F\u9057\u8FF9"
+      guid: 
+      objectName: Stonehenge_07
+      index: 124
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.01
+      dot: 0.7
+      offset: -0.5
+      top: 1
+      bottom: 1
+      distance: 3
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u8349\u539F"
+        index: 3
+        chanceOffset: 0
+      - name: "\u6C99\u6EE9"
+        index: 10
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 1
+        index: 3
+        min: -0.1
+        max: 1.1
+        center: 0.5
+        scale: 2
+        offset: 0
+      - isInverce: 0
+        index: 1
+        min: -0.1
+        max: 0.5
+        center: 0
+        scale: 2
+        offset: 0
+    - name: "\u6CE5\u5730\u62F1\u6865"
+      guid: 
+      objectName: Rock_Arch_01
+      index: 125
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.001
+      dot: 0.7
+      offset: -0.5
+      top: 1
+      bottom: 1
+      distance: 3
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u6CE5\u5730\u62F1\u6865"
+      guid: 
+      objectName: Rock_Arch_02
+      index: 126
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.002
+      dot: 0.7
+      offset: -0.5
+      top: 1
+      bottom: 1
+      distance: 3
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u6CE5\u5730\u62F1\u6865"
+      guid: 
+      objectName: Rock_Arch_03
+      index: 127
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 0
+      rotation: 1
+      chance: 0.002
+      dot: 0.7
+      offset: -0.5
+      top: 1
+      bottom: 1
+      distance: 3
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u6CE5\u5730\u98CE\u5CA9"
+      guid: 
+      objectName: Rock_Flat_l_01
+      index: 128
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 16
+      rotation: 1
+      chance: 0.005
+      dot: 0.7
+      offset: -0.5
+      top: 1
+      bottom: 1
+      distance: 3
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u6CE5\u5730\u98CE\u5CA9"
+      guid: 
+      objectName: Rock_Flat_l_02
+      index: 129
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 16
+      rotation: 1
+      chance: 0.005
+      dot: 0.7
+      offset: -0.5
+      top: 1
+      bottom: 1
+      distance: 3
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u6CE5\u5730\u98CE\u5CA9"
+      guid: 
+      objectName: Rock_Flat_l_03
+      index: 130
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 16
+      rotation: 1
+      chance: 0.005
+      dot: 0.7
+      offset: -0.5
+      top: 1
+      bottom: 1
+      distance: 3
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u6CE5\u5730\u98CE\u5CA9"
+      guid: 
+      objectName: Rock_Flat_l_04
+      index: 131
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 16
+      rotation: 1
+      chance: 0.005
+      dot: 0.7
+      offset: -0.5
+      top: 1
+      bottom: 1
+      distance: 3
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u6CE5\u5730\u98CE\u5CA9"
+      guid: 
+      objectName: Rock_Flat_l_05
+      index: 132
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 16
+      rotation: 1
+      chance: 0.005
+      dot: 0.7
+      offset: -0.5
+      top: 1
+      bottom: 1
+      distance: 3
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u6CE5\u5730\u98CE\u5CA9"
+      guid: 
+      objectName: Rock_Flat_l_06
+      index: 133
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 16
+      rotation: 1
+      chance: 0.005
+      dot: 0.7
+      offset: -0.5
+      top: 1
+      bottom: 1
+      distance: 3
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u51B0\u5DDD\u9057\u8FF9"
+      guid: 
+      objectName: Stonehenge_2C_01
+      index: 134
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 16
+      rotation: 1
+      chance: 0.01
+      dot: 0.85
+      offset: -0.5
+      top: 1
+      bottom: 3
+      distance: 5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u96EA\u5730"
+        index: 1
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 1
+        index: 3
+        min: -0.1
+        max: 1.1
+        center: 0.5
+        scale: 2
+        offset: 0
+      - isInverce: 0
+        index: 1
+        min: -0.1
+        max: 0.5
+        center: 0
+        scale: 2
+        offset: 0
+    - name: "\u51B0\u5DDD\u9057\u8FF9"
+      guid: 
+      objectName: Stonehenge_2C_02
+      index: 135
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 16
+      rotation: 1
+      chance: 0.01
+      dot: 0.85
+      offset: -0.5
+      top: 1
+      bottom: 3
+      distance: 5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u96EA\u5730"
+        index: 1
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 1
+        index: 3
+        min: -0.1
+        max: 1.1
+        center: 0.5
+        scale: 2
+        offset: 0
+      - isInverce: 0
+        index: 1
+        min: -0.1
+        max: 0.5
+        center: 0
+        scale: 2
+        offset: 0
+    - name: "\u51B0\u5DDD\u9057\u8FF9"
+      guid: 
+      objectName: Stonehenge_2C_03
+      index: 136
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 16
+      rotation: 1
+      chance: 0.01
+      dot: 0.85
+      offset: -0.5
+      top: 1
+      bottom: 3
+      distance: 5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u96EA\u5730"
+        index: 1
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 1
+        index: 3
+        min: -0.1
+        max: 1.1
+        center: 0.5
+        scale: 2
+        offset: 0
+      - isInverce: 0
+        index: 1
+        min: -0.1
+        max: 0.5
+        center: 0
+        scale: 2
+        offset: 0
+    - name: "\u51B0\u5DDD\u9057\u8FF9"
+      guid: 
+      objectName: Stonehenge_2C_04
+      index: 137
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 16
+      rotation: 1
+      chance: 0.01
+      dot: 0.85
+      offset: -0.5
+      top: 1
+      bottom: 3
+      distance: 5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u96EA\u5730"
+        index: 1
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 1
+        index: 3
+        min: -0.1
+        max: 1.1
+        center: 0.5
+        scale: 2
+        offset: 0
+      - isInverce: 0
+        index: 1
+        min: -0.1
+        max: 0.5
+        center: 0
+        scale: 2
+        offset: 0
+    - name: "\u51B0\u5DDD\u9057\u8FF9"
+      guid: 
+      objectName: Stonehenge_2C_05
+      index: 138
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 16
+      rotation: 1
+      chance: 0.01
+      dot: 0.85
+      offset: -0.5
+      top: 1
+      bottom: 1
+      distance: 1.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u96EA\u5730"
+        index: 1
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 1
+        index: 3
+        min: -0.1
+        max: 1.1
+        center: 0.5
+        scale: 2
+        offset: 0
+      - isInverce: 0
+        index: 1
+        min: -0.1
+        max: 0.5
+        center: 0
+        scale: 2
+        offset: 0
+    - name: "\u51B0\u5DDD\u9057\u8FF9"
+      guid: 
+      objectName: Stonehenge_2C_06
+      index: 139
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 16
+      rotation: 1
+      chance: 0.01
+      dot: 0.85
+      offset: -0.5
+      top: 1
+      bottom: 1
+      distance: 1.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u96EA\u5730"
+        index: 1
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 1
+        index: 3
+        min: -0.1
+        max: 1.1
+        center: 0.5
+        scale: 2
+        offset: 0
+      - isInverce: 0
+        index: 1
+        min: -0.1
+        max: 0.5
+        center: 0
+        scale: 2
+        offset: 0
+    - name: "\u51B0\u5DDD\u9057\u8FF9"
+      guid: 
+      objectName: Stonehenge_2C_07
+      index: 140
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 16
+      rotation: 1
+      chance: 0.01
+      dot: 0.85
+      offset: -0.5
+      top: 1
+      bottom: 1
+      distance: 1.5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u96EA\u5730"
+        index: 1
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 1
+        index: 3
+        min: -0.1
+        max: 1.1
+        center: 0.5
+        scale: 2
+        offset: 0
+      - isInverce: 0
+        index: 1
+        min: -0.1
+        max: 0.5
+        center: 0
+        scale: 2
+        offset: 0
+    - name: "\u51B0\u5DDD\u6B8B\u58C1"
+      guid: 
+      objectName: Rock_Wall_2C_01
+      index: 141
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 16
+      rotation: 1
+      chance: 0.01
+      dot: 0.7
+      offset: -0.5
+      top: 1
+      bottom: 1
+      distance: 3
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u96EA\u5730"
+        index: 1
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 1
+        index: 3
+        min: -0.1
+        max: 1.1
+        center: 0.5
+        scale: 2
+        offset: 0
+      - isInverce: 0
+        index: 1
+        min: -0.1
+        max: 0.5
+        center: 0
+        scale: 2
+        offset: 0
+    - name: "\u51B0\u5DDD\u6B8B\u58C1"
+      guid: 
+      objectName: Rock_Wall_2C_02
+      index: 142
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 16
+      rotation: 1
+      chance: 0.01
+      dot: 0.7
+      offset: -0.5
+      top: 1
+      bottom: 1
+      distance: 3
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u96EA\u5730"
+        index: 1
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 1
+        index: 3
+        min: -0.1
+        max: 1.1
+        center: 0.5
+        scale: 2
+        offset: 0
+      - isInverce: 0
+        index: 1
+        min: -0.1
+        max: 0.5
+        center: 0
+        scale: 2
+        offset: 0
+    - name: "\u51B0\u5DDD\u6B8B\u58C1"
+      guid: 
+      objectName: Rock_Wall_2C_03
+      index: 143
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 16
+      rotation: 1
+      chance: 0.01
+      dot: 0.7
+      offset: -0.5
+      top: 1
+      bottom: 1
+      distance: 3
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u96EA\u5730"
+        index: 1
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 1
+        index: 3
+        min: -0.1
+        max: 1.1
+        center: 0.5
+        scale: 2
+        offset: 0
+      - isInverce: 0
+        index: 1
+        min: -0.1
+        max: 0.5
+        center: 0
+        scale: 2
+        offset: 0
+    - name: "\u51B0\u5DDD\u6B8B\u58C1"
+      guid: 
+      objectName: Rock_Wall_2C_04
+      index: 144
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 16
+      rotation: 1
+      chance: 0.01
+      dot: 0.7
+      offset: -0.5
+      top: 1
+      bottom: 1
+      distance: 3
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u96EA\u5730"
+        index: 1
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 1
+        index: 3
+        min: -0.1
+        max: 1.1
+        center: 0.5
+        scale: 2
+        offset: 0
+      - isInverce: 0
+        index: 1
+        min: -0.1
+        max: 0.5
+        center: 0
+        scale: 2
+        offset: 0
+    - name: "\u51B0\u5DDD\u6B8B\u58C1"
+      guid: 
+      objectName: Rock_Wall_2C_05
+      index: 145
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 16
+      rotation: 1
+      chance: 0.01
+      dot: 0.7
+      offset: -0.5
+      top: 1
+      bottom: 1
+      distance: 3
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u96EA\u5730"
+        index: 1
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 1
+        index: 3
+        min: -0.1
+        max: 1.1
+        center: 0.5
+        scale: 2
+        offset: 0
+      - isInverce: 0
+        index: 1
+        min: -0.1
+        max: 0.5
+        center: 0
+        scale: 2
+        offset: 0
+    - name: "\u51B0\u5DDD\u6B8B\u58C1"
+      guid: 
+      objectName: Rock_Wall_2C_06
+      index: 146
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 16
+      rotation: 1
+      chance: 0.01
+      dot: 0.7
+      offset: -0.5
+      top: 1
+      bottom: 1
+      distance: 3
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u96EA\u5730"
+        index: 1
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 1
+        index: 3
+        min: -0.1
+        max: 1.1
+        center: 0.5
+        scale: 2
+        offset: 0
+      - isInverce: 0
+        index: 1
+        min: -0.1
+        max: 0.5
+        center: 0
+        scale: 2
+        offset: 0
+    - name: "\u51B0\u5DDD\u6B8B\u58C1"
+      guid: 
+      objectName: Rock_Wall_2C_07
+      index: 147
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 16
+      rotation: 1
+      chance: 0.01
+      dot: 0.7
+      offset: -0.5
+      top: 1
+      bottom: 1
+      distance: 3
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u96EA\u5730"
+        index: 1
+        chanceOffset: 0
+      mapFilters:
+      - isInverce: 1
+        index: 3
+        min: -0.1
+        max: 1.1
+        center: 0.5
+        scale: 2
+        offset: 0
+      - isInverce: 0
+        index: 1
+        min: -0.1
+        max: 0.5
+        center: 0
+        scale: 2
+        offset: 0
+    - name: "\u517D\u9AA8"
+      guid: 
+      objectName: SM_Env_Bone_Ribs_01
+      index: 148
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 16
+      rotation: 1
+      chance: 0.001
+      dot: 0.5
+      offset: -1
+      top: 0
+      bottom: 3
+      distance: 5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      - name: "\u6C99\u6F20"
+        index: 2
+        chanceOffset: 0
+      - name: "\u5730\u4E0B"
+        index: 4
+        chanceOffset: 0
+      - name: "\u5730\u5E95"
+        index: 0
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u517D\u9AA8"
+      guid: 
+      objectName: SM_Env_Bone_Rigcage_01
+      index: 149
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 16
+      rotation: 1
+      chance: 0.001
+      dot: 0.5
+      offset: -1
+      top: 0
+      bottom: 3
+      distance: 5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      - name: "\u6C99\u6F20"
+        index: 2
+        chanceOffset: 0
+      - name: "\u5730\u4E0B"
+        index: 4
+        chanceOffset: 0
+      - name: "\u5730\u5E95"
+        index: 0
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u517D\u9AA8"
+      guid: 
+      objectName: SM_Env_Bone_Skull_01
+      index: 150
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 16
+      rotation: 1
+      chance: 0.001
+      dot: 0.5
+      offset: -0.5
+      top: 0
+      bottom: 3
+      distance: 5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      - name: "\u6C99\u6F20"
+        index: 2
+        chanceOffset: 0
+      - name: "\u5730\u4E0B"
+        index: 4
+        chanceOffset: 0
+      - name: "\u5730\u5E95"
+        index: 0
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u517D\u9AA8"
+      guid: 
+      objectName: SM_Env_Bone_Spine_01
+      index: 151
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 16
+      rotation: 1
+      chance: 0.001
+      dot: 0.5
+      offset: 2
+      top: 0
+      bottom: 3
+      distance: 5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      - name: "\u6C99\u6F20"
+        index: 2
+        chanceOffset: 0
+      - name: "\u5730\u4E0B"
+        index: 4
+        chanceOffset: 0
+      - name: "\u5730\u5E95"
+        index: 0
+        chanceOffset: 0
+      mapFilters: []
+    - name: "\u517D\u9AA8"
+      guid: 
+      objectName: SM_Env_Bone_Tail_01
+      index: 152
+      ignoreMask:
+        serializedVersion: 2
+        m_Bits: 16
+      rotation: 1
+      chance: 0.001
+      dot: 0.5
+      offset: -1
+      top: 0
+      bottom: 3
+      distance: 5
+      range: 0
+      normal: {x: 0, y: 1, z: 0}
+      materialFilters:
+      - name: "\u6CE5\u5730"
+        index: 5
+        chanceOffset: 0
+      - name: "\u6C99\u6F20"
+        index: 2
+        chanceOffset: 0
+      - name: "\u5730\u4E0B"
+        index: 4
+        chanceOffset: 0
+      - name: "\u5730\u5E95"
+        index: 0
+        chanceOffset: 0
+      mapFilters: []
+    lineInfos:
+    - name: "\u6CB3\u6D41"
+      halfWidth: 1.5
+      radius: 1
+      countPerUnit: 0.1
+      chance: 0.01
+      minDentity: 0.01
+      maxDentity: -0.01
+      minExtends: {x: 3, y: 3, z: 3}
+      maxExtends: {x: 3, y: 2, z: 3}
+      gameObject: {fileID: 1269725004594340, guid: 2ac8ecf6d4130c54499673752a11be1f,
+        type: 2}
+      mapFilters: []
+    drawInfos:
+    - name: "\u6E56\u6CCA"
+      countPerUnit: 0.05
+      gameObject: {fileID: 1269725004594340, guid: e0c0665775db29247a512a477e360a60,
+        type: 2}
+      mapFilters:
+      - isInverce: 0
+        index: 0
+        min: -0.1
+        max: 0.705
+        center: 0
+        scale: 0
+        offset: 0
+      - isInverce: 0
+        index: 1
+        min: 0.69
+        max: 1.1
+        center: 0
+        scale: 0
+        offset: 0
+      - isInverce: 0
+        index: 2
+        min: -0.1
+        max: 0.705
+        center: 0
+        scale: 0
+        offset: 0
+      - isInverce: 0
+        index: 4
+        min: -0.1
+        max: 1.1
+        center: 0
+        scale: 50
+        offset: 0
+      - isInverce: 0
+        index: 5
+        min: -0.1
+        max: 1.1
+        center: 0
+        scale: 100
+        offset: 5
+    - name: "\u6CC9\u6C34"
+      countPerUnit: 0.05
+      gameObject: {fileID: 1269725004594340, guid: a98e83d53b30b53488ef9c0e308061ef,
+        type: 2}
+      mapFilters:
+      - isInverce: 0
+        index: 0
+        min: 0.9
+        max: 1.1
+        center: 0
+        scale: 0
+        offset: 0
+      - isInverce: 0
+        index: 1
+        min: 0.49
+        max: 1.1
+        center: 0
+        scale: 0
+        offset: 0
+      - isInverce: 0
+        index: 4
+        min: -0.1
+        max: 1.1
+        center: 0
+        scale: 50
+        offset: 0
+      - isInverce: 0
+        index: 5
+        min: -0.1
+        max: 1.1
+        center: 0
+        scale: 100
+        offset: 8
+    - name: "\u5CA9\u6D46"
+      countPerUnit: 0.05
+      gameObject: {fileID: 1269725004594340, guid: 1b796143bcdf8b34d8206f483a0bcdde,
+        type: 2}
+      mapFilters:
+      - isInverce: 0
+        index: 0
+        min: 0.295
+        max: 0.705
+        center: 0
+        scale: 0
+        offset: 0
+      - isInverce: 0
+        index: 1
+        min: 0.49
+        max: 1.1
+        center: 0
+        scale: 0
+        offset: 0
+      - isInverce: 0
+        index: 2
+        min: 0.845
+        max: 1.1
+        center: 0
+        scale: 0
+        offset: 0
+      - isInverce: 0
+        index: 4
+        min: -0.1
+        max: 1.1
+        center: 0
+        scale: 50
+        offset: 0
+      - isInverce: 0
+        index: 5
+        min: -0.1
+        max: 1.1
+        center: 0
+        scale: 100
+        offset: 8
+    materials:
+    - {fileID: 2100000, guid: 5f5bcf2cb5c01ec47b05397466b396b5, type: 2}
+    - {fileID: 2100000, guid: 420a5602ad24e434aa36e3773f168cf6, type: 2}
+    - {fileID: 2100000, guid: 0fb3493559019a94cbc22b86c344b2bf, type: 2}
+    - {fileID: 2100000, guid: 60a90fa9d7b49a24db4390715e7e3a4a, type: 2}
+    - {fileID: 2100000, guid: e832ab84e9057a446a975bc1e2bced20, type: 2}
+    - {fileID: 2100000, guid: fbb1c4a95933f75429f0ca7abcf937d1, type: 2}
+    - {fileID: 2100000, guid: 0e3a2db456d4b0c4083ff0431a8ce5f4, type: 2}
+    - {fileID: 2100000, guid: 74bb9c9c0cd2b304f957b51eae022926, type: 2}
+    - {fileID: 2100000, guid: 6cd195d5ffbb8d34b9e0d16ffcc328a8, type: 2}
+    - {fileID: 2100000, guid: a8a6a0a6817777c4ab169bfd580c708c, type: 2}
+    - {fileID: 2100000, guid: bda4531251f9ef3438af4ed965a36d31, type: 2}
+    - {fileID: 2100000, guid: 95a65b470c3e65743937c81926f1574e, type: 2}
+    gameObjects:
+    - {fileID: 1484579017017544, guid: 26cd67535390d0747ae99079382be9cb, type: 2}
+    - {fileID: 1647278704843398, guid: 73e7cac2ebb1eb945a2a73e99b441614, type: 2}
+    - {fileID: 1882548610177754, guid: 675c0a3231958f040b12e3e3a31315fc, type: 2}
+    - {fileID: 1970818857090384, guid: bdb7bcc5855866348b93626229204177, type: 2}
+    - {fileID: 1491970353050116, guid: f5a58e9df1840b64dbb1790d9931222f, type: 2}
+    - {fileID: 1402551187927136, guid: 4b27a7175b588b74ab8df9cec24b3574, type: 2}
+    - {fileID: 1470085157514716, guid: 28cafcb5af6bfad40a60929399bd5013, type: 2}
+    - {fileID: 1062316057233160, guid: 62de6f567ca9fd040a76c0ade17af912, type: 2}
+    - {fileID: 1526862351693216, guid: 2cfe54f3f3ed5414295f467950ff4969, type: 2}
+    - {fileID: 1615047123803870, guid: 802e2356ebb931b49b61eea3fd793f41, type: 2}
+    - {fileID: 1120793710382068, guid: dffda596d198bfb4bbeb1bda201a5673, type: 2}
+    - {fileID: 1988053293816342, guid: 5760c2e408ce3f248b990ca33716f0ac, type: 2}
+    - {fileID: 1590025351483422, guid: a1a40b697ec46f04fb842195530b8663, type: 2}
+    - {fileID: 1223955306857384, guid: 89c0458d869856f4d9c01bfe79148eb6, type: 2}
+    - {fileID: 1074996475993496, guid: 792ded7cd584685428606dc3ac739cf7, type: 2}
+    - {fileID: 1536691822042776, guid: 7cce0132e0f8eae4f82a0dbbf6d52667, type: 2}
+    - {fileID: 1754334836331938, guid: 31aecbe71a4e8fc42be835aa12931891, type: 2}
+    - {fileID: 1037640018036508, guid: 08f791160c81ed440988d23d7235f9fb, type: 2}
+    - {fileID: 1604535953289932, guid: 8581d1b13eb8c924dae4ce73f41c86d0, type: 2}
+    - {fileID: 1537950270523592, guid: db522a1ddf183144b88440ed9a6c6cad, type: 2}
+    - {fileID: 1037519497500924, guid: ba2d9f28dc660724395b0b60f940037f, type: 2}
+    - {fileID: 1765840640621726, guid: 914e59e567252a64e87c0bd81ce885fe, type: 2}
+    - {fileID: 1634944380244210, guid: e851f53f72c36d148b16ac8cc8e70ae1, type: 2}
+    - {fileID: 1839977426259486, guid: ca8139c0e0089824fb087b4c3df4d6ad, type: 2}
+    - {fileID: 1019069843307252, guid: a636aef6799c20340a1c42c354a22bdc, type: 2}
+    - {fileID: 1601614656625892, guid: 4bb86b0bba8075846a1897540c1459e3, type: 2}
+    - {fileID: 1667271794747624, guid: 4294d240c9bb7d44f89d3365c414fc84, type: 2}
+    - {fileID: 1177956841159700, guid: dce8778536b113e4ab8199ca13d2d198, type: 2}
+    - {fileID: 1291589368532404, guid: 325e10ae1da201847bf9198ca5a8050a, type: 2}
+    - {fileID: 1281439197630904, guid: 6013fadd7fe79c247bfdbc8432af81cc, type: 2}
+    - {fileID: 1383307255071656, guid: cd50acab54a165b45b816d0d96a7f6a9, type: 2}
+    - {fileID: 1203274262600064, guid: a5b77deb82756134292fe35a8a87540c, type: 2}
+    - {fileID: 1787236919608870, guid: cc043e8dbe3861749be3587c5dc70941, type: 2}
+    - {fileID: 1927889652613914, guid: af0271eb2c580f2468b8e03cd5d6a320, type: 2}
+    - {fileID: 1087083005827900, guid: 864ae79275641bb4fa69c023dc37ed4a, type: 2}
+    - {fileID: 1795284432107092, guid: 503000b328c9259429d270e89bd067b3, type: 2}
+    - {fileID: 1058393304499646, guid: 1d044a8bca5ca504989c1c9b984822e8, type: 2}
+    - {fileID: 1444171601942632, guid: d7fee42a4ba6b3b4e8b0b9a607bf8ba3, type: 2}
+    - {fileID: 1383055336398550, guid: 70a646a2adc329c489e7283248bd001a, type: 2}
+    - {fileID: 1041062233352300, guid: 90c1296cd1f736a4a9dcef8415eee730, type: 2}
+    - {fileID: 1074944698349056, guid: b9ddb69f23adb054d865059b3d63ee38, type: 2}
+    - {fileID: 1644710814193106, guid: c3932e4d5ab874f4196567342d207a59, type: 2}
+    - {fileID: 1014816164828580, guid: 3379e9e1f1dba8a43816c4861f737626, type: 2}
+    - {fileID: 1300909788063680, guid: c03af1582e6ce864a96c6fce0e07bfca, type: 2}
+    - {fileID: 1182415313621412, guid: 7e3e833de00ca7d43997eaee409b890f, type: 2}
+    - {fileID: 1012601741671040, guid: 9f2ff68a8708c9e4386ea16ada35656e, type: 2}
+    - {fileID: 1772751125710500, guid: ffb86d10a84a36445a92e002c4468714, type: 2}
+    - {fileID: 1855023113373502, guid: c3b074ddca53ce04aa65aac918736ce9, type: 2}
+    - {fileID: 1384731429772940, guid: b9519f5c54211cf45ae82d553789cccc, type: 2}
+    - {fileID: 1587034344306238, guid: d52d9da84ae8d394283a005313a52d6f, type: 2}
+    - {fileID: 1305844697535936, guid: d2bbe5471cc5d8741a743dfc499326d0, type: 2}
+    - {fileID: 1004347633206692, guid: 6c333c5474860df4aaf8c074eead77e9, type: 2}
+    - {fileID: 1507178085340418, guid: 76af7d9c45529834496f59d59690dcf4, type: 2}
+    - {fileID: 1544185759365406, guid: 7663baf65c031f34383f0cbce6dfbd67, type: 2}
+    - {fileID: 1431268601649776, guid: 703b027d7ae51794a869a8d2d4d1243c, type: 2}
+    - {fileID: 1583037577491006, guid: 67341fd40adba174c8496319b06d771b, type: 2}
+    - {fileID: 1447829756054324, guid: bdcc8db3f7e7dd241b8f84dcf5fb8c7f, type: 2}
+    - {fileID: 1398658421590700, guid: 1dd8106037b12914ca30d2739abe3af1, type: 2}
+    - {fileID: 1315255702638080, guid: 788a41513911fa54d883bd6b5a1fce40, type: 2}
+    - {fileID: 1889787462148586, guid: 72e7823058bea054e8a82888140d5b0a, type: 2}
+    - {fileID: 1509758887891548, guid: 3f51b917c0c402540b31e4a69fa2c177, type: 2}
+    - {fileID: 1547807417757322, guid: 324e6ccf20a07954493237c53dc7feda, type: 2}
+    - {fileID: 1173857063919970, guid: 9fee72378f5fb754a8ee692a5e1e00ca, type: 2}
+    - {fileID: 1424908677583176, guid: a0e8d72df73946a469bd30b54d5c26be, type: 2}
+    - {fileID: 1757202282401472, guid: 765fdc60fa82b114bb25456974a7e26c, type: 2}
+    - {fileID: 1132362176730504, guid: f5f85d8d804aca743859fa8d698f1cd7, type: 2}
+    - {fileID: 1179897323969104, guid: a7fea6cdc8f7dce498f20bc2b9564669, type: 2}
+    - {fileID: 1908959316478532, guid: 986b7040d647f414da4068e6a2657c14, type: 2}
+    - {fileID: 1955479599080688, guid: 619fccab52f9078428815c0994c8f393, type: 2}
+    - {fileID: 1897961603034068, guid: 1ba3c226e6730ed4d81179b38b098764, type: 2}
+    - {fileID: 1300313665607316, guid: d8c06dd031eff3c488c6c2f4fb50b575, type: 2}
+    - {fileID: 1742928379632976, guid: e17cae92486798448b689f396563210b, type: 2}
+    - {fileID: 1944576555617140, guid: 64a2c497786f1e148ba37752fb87ac66, type: 2}
+    - {fileID: 1926693305378500, guid: 5964270e77f075244a0ba85fed68de8e, type: 2}
+    - {fileID: 1141582737638156, guid: 7666befa017090748b893e74df121e60, type: 2}
+    - {fileID: 1151134052424276, guid: aa4263f243837ee40ac8ade7fdf8a991, type: 2}
+    - {fileID: 1981272513077846, guid: 9f0dd2bc2dbe02a4b9a26b6987fece71, type: 2}
+    - {fileID: 1988317122430936, guid: 97dd1010f0496f44ca9e49265730b325, type: 2}
+    - {fileID: 1264272914340824, guid: 5687d09e5e1f1a1429a5598a7fac5e6d, type: 2}
+    - {fileID: 1198114373057338, guid: ba6406e70a594f140a92c47d677af88a, type: 2}
+    - {fileID: 1996337713164452, guid: 4a831fbd17e8e9342848638a086997bc, type: 2}
+    - {fileID: 1652200982960468, guid: 9d6d098a9866c8848a11f91341f398e4, type: 2}
+    - {fileID: 1837802687966294, guid: 68d8deae4fcf2ac4183d0f5b8fd7f82d, type: 2}
+    - {fileID: 1539743524956856, guid: 61cf09c66379a3744bb1c4b27d8a0d53, type: 2}
+    - {fileID: 1397231028117628, guid: ead8fc7a09114bf40951f9cb2915e0ec, type: 2}
+    - {fileID: 1809637112418358, guid: d44636379b63aa54dac2c3857551d172, type: 2}
+    - {fileID: 1272313093601094, guid: 3c5d422c34b15fc4fbaf2d68a4920420, type: 2}
+    - {fileID: 1501600910493056, guid: 8163e82d113acd947be7ffb17158140d, type: 2}
+    - {fileID: 1010977894402146, guid: dd2f141a805aac44d910ffc638764b40, type: 2}
+    - {fileID: 1667059338706506, guid: 4fcf0ecf81f11ff4bac301585d787f57, type: 2}
+    - {fileID: 1603434252784334, guid: 024ebad9e9c57174f97738d346f07f67, type: 2}
+    - {fileID: 1925680394882920, guid: d2862bb0c02596c4db1611f5d2a1932a, type: 2}
+    - {fileID: 1297781104469682, guid: 4c09461ea159e61489717897c7af7837, type: 2}
+    - {fileID: 1675516286530790, guid: 94bf93787da334341bac09783940d0c1, type: 2}
+    - {fileID: 1884674286805138, guid: a2d50cc3cd59ba6419ceff0e76aae3d8, type: 2}
+    - {fileID: 1275848984545678, guid: 5cb8a432ec2ee6844a2f0f65e483e847, type: 2}
+    - {fileID: 1083197478117168, guid: 2a52695f144da574f929a51f9ba649f1, type: 2}
+    - {fileID: 1884597401360746, guid: 6817fd3c5809228498530e5ebe58f46a, type: 2}
+    - {fileID: 1873162089833820, guid: 991d8fcc23ab97847b0e801ea7bf5bc2, type: 2}
+    - {fileID: 1536464147379942, guid: 8deda24c4237fd94db95aa127822ba3c, type: 2}
+    - {fileID: 1468617956259072, guid: d19dd43872ee43b4896d75d23e9db9e6, type: 2}
+    - {fileID: 1423227762962842, guid: 10d5cf3b83029e748b5ae9dc736507ec, type: 2}
+    - {fileID: 1356782923155146, guid: fc9ece646c03b5d4f8c2d3adfb6ffa0e, type: 2}
+    - {fileID: 1207314287539896, guid: fea571d55cb1d7c4491540e4069c99be, type: 2}
+    - {fileID: 1707422150604084, guid: 634f9a4123c96024385c8154b4feb33a, type: 2}
+    - {fileID: 1319616997554436, guid: 74731200a79ee1a4ebe50d47988169df, type: 2}
+    - {fileID: 1973007999867112, guid: ad2d5e1960ad3b14e88b66d5f8a705d9, type: 2}
+    - {fileID: 1366820359781484, guid: c21c779f597b25641a190d94b3d8821c, type: 2}
+    - {fileID: 1111730614667156, guid: e5a55e3decb814a4bb367949ca77acef, type: 2}
+    - {fileID: 1057301721705316, guid: f6e0d67685c2714468bca604b4f8c3d7, type: 2}
+    - {fileID: 1843384067584120, guid: 90f7f812836308d48aae61dfb6fee7f4, type: 2}
+    - {fileID: 1328849627635364, guid: 2c33d0616cc99d048bb724afe4bd3906, type: 2}
+    - {fileID: 1995613407166738, guid: 7184162c121f73a4c9d87fe2f55c22c3, type: 2}
+    - {fileID: 1636690313405134, guid: cf0240b87c2a77c408d59ea3e0bfb083, type: 2}
+    - {fileID: 1955289355478410, guid: afc1c46aefe592345ad063eccd8292fc, type: 2}
+    - {fileID: 1138980070451946, guid: ca894efc0db6e7a4080e6bac139a129c, type: 2}
+    - {fileID: 1631580292808262, guid: da2cf130fd76c3448ac1c8137379ca18, type: 2}
+    - {fileID: 1609475669886076, guid: b5e3505e96e06f847b71db273f43fbf3, type: 2}
+    - {fileID: 1922987539570378, guid: 7d36e9964ed71f94b9e7d4a384d57a1c, type: 2}
+    - {fileID: 1621807031606346, guid: c79b01b2317f87d4795a56e7d297e61d, type: 2}
+    - {fileID: 1243170432651594, guid: e4e7d8eb4a257c54895c1a19749e3162, type: 2}
+    - {fileID: 1623044648369562, guid: baf92022361b53d43b5a031cc223ab15, type: 2}
+    - {fileID: 1245948365008806, guid: 33a7d06b107decd489ef583abfb02b60, type: 2}
+    - {fileID: 1861974682420074, guid: eeeb52a843f6e7a4989d619748f5812f, type: 2}
+    - {fileID: 1258441901345662, guid: 6a0c936a77dbeff4087da5112b73d388, type: 2}
+    - {fileID: 1634835452095608, guid: 63ffdadf2c4767d4a966673b122d7b0f, type: 2}
+    - {fileID: 1222521956734258, guid: 62fb77b041de61a45ab2c4bf6027b0a6, type: 2}
+    - {fileID: 1801229968626546, guid: 1c872d71d25d6b74cad5940706874c64, type: 2}
+    - {fileID: 1467760135936032, guid: ba04f6c442260ea4ca2230bb04c6fac7, type: 2}
+    - {fileID: 1453475787225632, guid: 6b8c9ce1423747342a28d44338d73aaf, type: 2}
+    - {fileID: 1698627370440462, guid: 18937cc1c230dcf4daa4340f68e6384b, type: 2}
+    - {fileID: 1284173178581266, guid: 86889b65a96adf84fb259ce7c1239929, type: 2}
+    - {fileID: 1191664232372924, guid: fbaa2dad779a3604d802918ad3cf6381, type: 2}
+    - {fileID: 1011084915054526, guid: 2b92970dd20443742a8e3b48de7bbe21, type: 2}
+    - {fileID: 1770250740263878, guid: 36d7df08ad39d274eb1c562a2259f089, type: 2}
+    - {fileID: 1492372913275046, guid: fbbd26ee1ab36ee48af90f8bd83e4cf0, type: 2}
+    - {fileID: 1834616332185638, guid: 291d28bbc087e274b81e5edfeffb57c4, type: 2}
+    - {fileID: 1528222071044950, guid: 7b538263936e88147bca54a1a311d2dc, type: 2}
+    - {fileID: 1150515533362774, guid: 0d136b19d63f53a4da2e83d057590ada, type: 2}
+    - {fileID: 1150253705114590, guid: d6c29b0d3f22d4a4dbfeba6728edd826, type: 2}
+    - {fileID: 1956370918069518, guid: 6a92ff43edf91cc4b9fc82af047cc7b2, type: 2}
+    - {fileID: 1313254717736926, guid: 3da22b8a3e3c64a42a0f58ebe8979801, type: 2}
+    - {fileID: 1260018097876456, guid: 2e5979441d50dd04682fc5431f6ff4cf, type: 2}
+    - {fileID: 1742260192034406, guid: e52c3105e05869449885fa00de85b8e3, type: 2}
+    - {fileID: 1189047196632942, guid: f98ee31669689344aa1eb069deffaabe, type: 2}
+    - {fileID: 1467678235951606, guid: dc8898f32bf29f6499496c8a50767d32, type: 2}
+    - {fileID: 1944040532503906, guid: 952ba9a3c73c39a4c8d2e0f0c50a04e2, type: 2}
+    - {fileID: 1411401054041800, guid: 6f97d3c24cd6adf4eaf1d00af3035d23, type: 2}
+    - {fileID: 1116534541629870, guid: 41aaad9d61e2af146939f1b2708a5e51, type: 2}
+    - {fileID: 1755558212260318, guid: 90d3f25ef17cfdd4794ee9483c1b59d1, type: 2}
+    - {fileID: 1317150186783948, guid: 3fb4cf967608c4b48a6fc32e4fe0cb02, type: 2}
+    - {fileID: 1867041948223530, guid: 4ba8a24e9d6aa4a499e8a1fd61c1ee39, type: 2}
+    - {fileID: 1244501775310256, guid: 761e7c5a541abff43bc3691dca6337e4, type: 2}
