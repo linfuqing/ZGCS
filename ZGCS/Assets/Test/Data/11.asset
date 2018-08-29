@@ -999,8 +999,8 @@ MonoBehaviour:
       layer: 1
       depth: 0
       power: 0
-      scale: 5
-      offset: 6
+      scale: 10
+      offset: 5
       max: 0
       filters:
       - isInverce: 0
