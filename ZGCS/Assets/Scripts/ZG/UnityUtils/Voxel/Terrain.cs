@@ -293,7 +293,7 @@ namespace ZG.Voxel
                     return true;
                 }
 
-                public void Do(float increment, Vector3Int position, Vector3Int size, Engine engine, Chunk[] chunks, Action<Instance> instantiate)
+                public void Do(Vector3Int position, Vector3Int size, Engine engine, Chunk[] chunks, Action<Instance> instantiate)
                 {
                     if (engine == null)
                         return;
@@ -378,7 +378,7 @@ namespace ZG.Voxel
                                         (pathPoint.y + position.y) * scale.y,
                                         (pathPoint.z + position.z) * scale.z);
 
-                                    offset = engine.ApproximateZeroCrossingPosition(offset, new Vector3(offset.x, offset.y - scale.y, offset.z), increment);
+                                    offset = engine.ApproximateZeroCrossingPosition(offset, new Vector3(offset.x, offset.y - scale.y, offset.z));
 
                                     if (__points == null)
                                         __points = new List<Vector3>();
@@ -1017,7 +1017,7 @@ namespace ZG.Voxel
             private List<ProcessorEx.Block> __blocks;
             private Dictionary<Vector2Int, Chunk[]> __chunks = new Dictionary<Vector2Int, Chunk[]>();
             
-            public Engine(int noiseSize, int depth, Vector3 scale, Vector3 offset, Vector2Int mapSize, System.Random random) : base(depth, scale, offset)
+            public Engine(int noiseSize, int depth, float increment, Vector3 scale, Vector3 offset, Vector2Int mapSize, System.Random random) : base(depth, increment, scale, offset)
             {
                 __noiseSize = noiseSize;
                 
@@ -1061,7 +1061,6 @@ namespace ZG.Voxel
             }
             
             public bool Create(
-                float increment, 
                 Vector2Int position, 
                 MapInfo[] mapInfos, 
                 VolumeInfo[] volumeInfos, 
@@ -1430,7 +1429,7 @@ namespace ZG.Voxel
                     {
                         BoundsInt bounds = new BoundsInt(new Vector3Int(position.x, min, position.y), new Vector3Int(__mapSize.x, max - min, __mapSize.y));
 
-                        __liner.Do(increment, bounds.position, bounds.size, this, chunks, instantiate);
+                        __liner.Do(bounds.position, bounds.size, this, chunks, instantiate);
 
                         if (builder != null)
                             builder.Set(new BoundsInt(new Vector3Int(position.x, min, position.y), new Vector3Int(__mapSize.x, max - min, __mapSize.y)));
@@ -1737,7 +1736,7 @@ namespace ZG.Voxel
         }
 #endif
 
-        public override DualContouring Create(Vector3Int world, float increment)
+        public override DualContouring Create(Vector3Int world)
         {
             DualContouring.IBuilder builder = base.builder;
             Engine engine = builder == null ? null : builder.parent as Engine;
@@ -1771,7 +1770,6 @@ namespace ZG.Voxel
                 {
                     for(j = min.y; j <= max.y; ++j)
                         engine.Create(
-                            increment, 
                             new Vector2Int(i, j), 
                             mapInfos, 
                             volumeInfos, 
@@ -1782,7 +1780,7 @@ namespace ZG.Voxel
                 }
             }
             
-            return base.Create(world, increment);
+            return base.Create(world);
         }
 
         public override GameObject Convert(MeshData<Vector3> meshData, Level level)
@@ -1824,12 +1822,12 @@ namespace ZG.Voxel
             return gameObject;
         }
 
-        public override DualContouring.IBuilder Create(int depth, Vector3 scale)
+        public override DualContouring.IBuilder Create(int depth, float increment, Vector3 scale)
         {
             if (__random == null)
                 __random = new System.Random(seed);
 
-            Engine node = new Engine(noiseSize, depth, scale, Vector3.zero, mapSize, __random);
+            Engine node = new Engine(noiseSize, depth, increment, scale, Vector3.zero, mapSize, __random);
             node.builder = new DualContouring.BoundsBuilder(node);
             return node.builder;
         }
@@ -1877,20 +1875,39 @@ namespace ZG.Voxel
 
             if (objectInfos != null)
             {
-                Vector3 point;
-                if (!octree.Get(x, out point))
+                Vector3 pointX;
+                if (!octree.Get(x, out pointX))
+                    return result;
+
+                Vector3 pointY;
+                if (!octree.Get(y, out pointY))
+                    return result;
+
+                Vector3 pointZ;
+                if (!octree.Get(z, out pointZ))
+                    return result;
+
+                Vector3 pointW;
+                if (!octree.Get(w, out pointW))
                     return result;
 
                 DualContouring.Block a, b, c, d;
                 if (!octree.Get(x, out a) || !octree.Get(y, out b) || !octree.Get(z, out c) || !octree.Get(w, out d))
                     return result;
 
+                float area;
+                Vector3 normal = (a.normal + b.normal + c.normal + d.normal).normalized;
+                if (Vector3.Dot(b.normal, c.normal) > Vector3.Dot(a.normal, d.normal))
+                    area = __ComputeArea(pointX, pointY, pointZ) + __ComputeArea(pointZ, pointY, pointW);
+                else
+                    area = __ComputeArea(pointX, pointY, pointW) + __ComputeArea(pointX, pointW, pointZ);
+                
+                area /= scale.x * scale.y * scale.z / (Mathf.Min(scale.x, scale.y, scale.z));
                 lock (__random)
                 {
                     bool isContains;
                     int numObjectInfos = objectInfos == null ? 0 : objectInfos.Length, numGameObjects = gameObjects == null ? 0 : gameObjects.Length;
                     float chance, temp;
-                    Vector3 normal;
                     Plane plane;
                     ObjectInfo objectInfo;
                     GameObject gameObject;
@@ -1918,7 +1935,8 @@ namespace ZG.Voxel
                                 continue;
                         }
 
-                        normal = (a.normal + b.normal + c.normal + d.normal).normalized;
+                        chance = 1.0f - Mathf.Pow((1.0f - chance), area);
+
                         if (Vector3.Dot(normal, objectInfo.normal) > objectInfo.dot &&
                             __Check(position.x, position.z, mapInfos, objectInfo.mapFilters, out temp) && temp > (float)__random.NextDouble() &&
                             chance > (float)__random.NextDouble())
@@ -1927,7 +1945,7 @@ namespace ZG.Voxel
                             if (gameObject == null)
                                 continue;
 
-                            plane = new Plane(normal, point);
+                            plane = new Plane(normal, pointX);
                             temp = objectInfo.range * 2.0f;
                             Vector3 finalPosition = plane.ClosestPointOnPlane(
                                 position + new Vector3(
@@ -2083,6 +2101,13 @@ namespace ZG.Voxel
             }
 
             return result;
+        }
+
+        private static float __ComputeArea(Vector3 x, Vector3 y, Vector3 z)
+        {
+            float a = (x - y).magnitude, b = (y - z).magnitude, c = (z - x).magnitude, p = (a + b + c) * 0.5f;
+
+            return Mathf.Sqrt(p * (p - a) * (p - b) * (p - c));
         }
 
         private static int __Compare(Vector3 x, Vector3 y)

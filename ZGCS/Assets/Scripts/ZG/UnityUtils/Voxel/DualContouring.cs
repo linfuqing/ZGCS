@@ -53,7 +53,7 @@ namespace ZG.Voxel
         {
             DualContouring parent { get; }
 
-            bool Create(Vector3Int world, float increment);
+            bool Create(Vector3Int world);
 
             bool Set(BoundsInt bounds);
 
@@ -78,7 +78,7 @@ namespace ZG.Voxel
                 __parent = parent;
             }
 
-            public bool Create(Vector3Int world, float increment)
+            public bool Create(Vector3Int world)
             {
                 if (__parent == null)
                     return false;
@@ -143,8 +143,8 @@ namespace ZG.Voxel
                                     if (x < 0.0f == y < 0.0f)
                                         continue;
 
-                                    point = __parent.ApproximateZeroCrossingPosition(from, to, increment);
-                                    normal = __parent.CalculateSurfaceNormal(point, increment);
+                                    point = __parent.ApproximateZeroCrossingPosition(from, to);
+                                    normal = __parent.CalculateSurfaceNormal(point);
                                     for (n = 0; n < 4; ++n)
                                     {
                                         offset = local + __edgeToBlockOffsets[m, n];
@@ -314,7 +314,7 @@ namespace ZG.Voxel
                 __parent = parent;
             }
 
-            public bool Create(Vector3Int world, float increment)
+            public bool Create(Vector3Int world)
             {
                 if (__parent == null)
                     return false;
@@ -380,8 +380,8 @@ namespace ZG.Voxel
                                 if (x < 0.0f == y < 0.0f)
                                     continue;
 
-                                point = __parent.ApproximateZeroCrossingPosition(from, to, increment);
-                                normal = __parent.CalculateSurfaceNormal(point, increment);
+                                point = __parent.ApproximateZeroCrossingPosition(from, to);
+                                normal = __parent.CalculateSurfaceNormal(point);
                                 for (n = 0; n < 4; ++n)
                                 {
                                     offset = local + __edgeToBlockOffsets[m, n];
@@ -606,13 +606,13 @@ namespace ZG.Voxel
                 Lower = 0x04,
                 Upper = 0x08,
 
-                Front = 0x10,
-                Back = 0x20,
+                Back = 0x10,
+                Front = 0x20,
 
-                LeftLowerFront = Left | Lower | Front,
-                RightUpperBack = Right | Upper | Back,
+                LeftLowerBack = Left | Lower | Back,
+                RightUpperFront = Right | Upper | Front,
 
-                All = LeftLowerFront | RightUpperBack
+                All = LeftLowerBack | RightUpperFront
             }
 
             public enum Type
@@ -784,7 +784,7 @@ namespace ZG.Voxel
                 }
             }
 
-            public delegate int TileProcessor(Info x, Info y, Info z, Info w, Axis axis, Vector3Int offset);
+            public delegate int TileProcessor(Axis axis, Vector3Int offset, Info x, Info y, Info z, Info w);
 
             private static readonly Vector3Int[] __cellProcFaceMask =
             {
@@ -870,21 +870,21 @@ namespace ZG.Voxel
                 if ((boundary & Boundary.All) == 0)
                     return false;
 
-                if ((boundary & Boundary.LeftLowerFront) != 0)
+                if ((boundary & Boundary.LeftLowerBack) != 0)
                 {
                     if (((boundary & Boundary.Left) == Boundary.Left && position.x == 0) ||
                         ((boundary & Boundary.Lower) == Boundary.Lower && position.y == 0) ||
-                        ((boundary & Boundary.Front) == Boundary.Front && position.z == 0))
+                        ((boundary & Boundary.Back) == Boundary.Back && position.z == 0))
                         return true;
                 }
 
-                if ((boundary & Boundary.RightUpperBack) == 0)
+                if ((boundary & Boundary.RightUpperFront) == 0)
                     return false;
 
                 int max = 1 << __depth;
                 return ((boundary & Boundary.Right) == Boundary.Right && position.x + size == max) ||
                     ((boundary & Boundary.Upper) == Boundary.Upper && position.y + size == max) ||
-                    ((boundary & Boundary.Back) == Boundary.Back && position.z + size == max);
+                    ((boundary & Boundary.Front) == Boundary.Front && position.z + size == max);
             }
 
             public bool Get(Info info, out Vector3 point)
@@ -1006,10 +1006,10 @@ namespace ZG.Voxel
 
                     destination = __nodes[--depth];
 
+                    size = 1 << (__depth - depth - 2);
+
                     foreach (KeyValuePair<Vector3Int, Node> pair in source)
                     {
-                        size = 1 << (parent.__depth - depth - 2);
-
                         if (destination == null)
                         {
                             destination = new Dictionary<Vector3Int, Node>(size * size * size, new Vector3IntEqualityComparer());
@@ -1117,6 +1117,8 @@ namespace ZG.Voxel
                 __root.type = Type.Psuedo;
                 __root.block = new Block();
 
+                size = 1 << (__depth - depth - 1);
+
                 foreach (KeyValuePair<Vector3Int, Node> pair in source)
                 {
                     position = pair.Key;
@@ -1131,8 +1133,6 @@ namespace ZG.Voxel
 
                         continue;
                     }
-
-                    size = 1 << (parent.__depth - depth - 1);
 
                     point = temp.block.qef.Solve(sweeps);
 
@@ -1209,17 +1209,17 @@ namespace ZG.Voxel
                 return false;
             }
 
-            public void Build(TileProcessor tileProcessor)
+            public void Build(Boundary boundary, TileProcessor tileProcessor)
             {
-                __ContourCellProc(new NodeInfo(__root.type, __root.block.corners, new Info(0, Vector3Int.zero)), tileProcessor);
+                __ContourCellProc(boundary, new NodeInfo(__root.type, __root.block.corners, new Info(0, Vector3Int.zero)), tileProcessor);
             }
 
-            public bool Build(TileProcessor tileProcessor, out MeshData<Vector3> meshData)
+            public bool Build(Boundary boundary, TileProcessor tileProcessor, out MeshData<Vector3> meshData)
             {
                 List<MeshData<Vector3>.Vertex> vertices = null;
                 List< MeshData<Vector3>.Triangle> triangles = null;
                 Dictionary<Info, int> indices = null;
-                Build((x, y, z, w, axis, offset) =>
+                Build(boundary, (axis, offset, x, y, z, w) =>
                 {
                     int indexX, indexY, indexZ, indexW;
                     MeshData<Vector3>.Vertex vertexX, vertexY, vertexZ, vertexW;
@@ -1330,7 +1330,7 @@ namespace ZG.Voxel
                         indices[w] = indexW;
                     }
 
-                    int index = tileProcessor == null ? 0 : tileProcessor(x, y, z, w, axis, offset);
+                    int index = tileProcessor == null ? 0 : tileProcessor(axis, offset, x, y, z, w);
 
                     if (triangles == null)
                         triangles = new List<MeshData<Vector3>.Triangle>();
@@ -1526,7 +1526,7 @@ namespace ZG.Voxel
                 return result;
             }
             
-            private void __ContourProcessEdge(Node4 nodes, Axis axis, TileProcessor tileProcessor)
+            private void __ContourProcessEdge(Boundary boundary, Axis axis, Node4 nodes, TileProcessor tileProcessor)
             {
                 if (tileProcessor == null)
                     return;
@@ -1557,25 +1557,28 @@ namespace ZG.Voxel
                 Vector3Int offset;
                 __Get(nodeInfo.info, isFlip ? new Vector2Int(vertexIndices.y, vertexIndices.x) : vertexIndices, out offset);// (nodeInfo.info.position + (isFlip ? __childMinOffsets[vertexIndices.y] : __childMinOffsets[vertexIndices.x])) * (1 << (__depth - depth));
 
+                if (IsBoundary(offset, 1 << (__depth - depth), boundary))
+                    return;
+
                 if (isFlip)
                     tileProcessor(
+                        axis,
+                        offset, 
                         nodes.z.info,
                         nodes.x.info,
                         nodes.w.info,
-                        nodes.y.info,
-                        axis,
-                        offset);
+                        nodes.y.info);
                 else
                     tileProcessor(
+                        axis,
+                        offset, 
                         nodes.z.info,
                         nodes.w.info,
                         nodes.x.info,
-                        nodes.y.info,
-                        axis,
-                        offset);
+                        nodes.y.info);
             }
 
-            private void __ContourEdgeProc(Node4 nodes, Axis axis, TileProcessor tileProcessor)
+            private void __ContourEdgeProc(Boundary boundary, Axis axis, Node4 nodes, TileProcessor tileProcessor)
             {
                 if (nodes.isInternal)
                 {
@@ -1606,14 +1609,14 @@ namespace ZG.Voxel
                         }
 
                         if (result)
-                            __ContourEdgeProc(edgeNodes, (Axis)__edgeProcEdgeMask[(int)axis, i, 4], tileProcessor);
+                            __ContourEdgeProc(boundary, (Axis)__edgeProcEdgeMask[(int)axis, i, 4], edgeNodes, tileProcessor);
                     }
                 }
                 else
-                    __ContourProcessEdge(nodes, axis, tileProcessor);
+                    __ContourProcessEdge(boundary, axis, nodes, tileProcessor);
             }
 
-            private void __ContourFaceProc(Node2 nodes, Axis axis, TileProcessor tileProcessor)
+            private void __ContourFaceProc(Boundary boundary, Axis axis, Node2 nodes, TileProcessor tileProcessor)
             {
                 if (!nodes.isInternal)
                     return;
@@ -1646,7 +1649,7 @@ namespace ZG.Voxel
                     }
 
                     if (result)
-                        __ContourFaceProc(faceNodes, (Axis)__faceProcFaceMask[(int)axis, i, 2], tileProcessor);
+                        __ContourFaceProc(boundary, (Axis)__faceProcFaceMask[(int)axis, i, 2], faceNodes, tileProcessor);
 
                     result = true;
 
@@ -1670,11 +1673,11 @@ namespace ZG.Voxel
                     }
 
                     if (result)
-                        __ContourEdgeProc(edgeNodes, (Axis)__faceProcEdgeMask[(int)axis, i, 5], tileProcessor);
+                        __ContourEdgeProc(boundary, (Axis)__faceProcEdgeMask[(int)axis, i, 5], edgeNodes, tileProcessor);
                 }
             }
 
-            private bool __ContourCellProc(NodeInfo nodeInfo, TileProcessor tileProcessor)
+            private bool __ContourCellProc(Boundary boundary, NodeInfo nodeInfo, TileProcessor tileProcessor)
             {
                 if (nodeInfo.type != Type.Internal)
                     return false;
@@ -1684,7 +1687,7 @@ namespace ZG.Voxel
                 for (i = 0; i < 8; ++i)
                 {
                     if(__Get(i, nodeInfo.info, out temp))
-                        __ContourCellProc(temp, tileProcessor);
+                        __ContourCellProc(boundary, temp, tileProcessor);
                 }
 
                 Node2 faceNodes;
@@ -1696,7 +1699,7 @@ namespace ZG.Voxel
                        !__Get(cellProcFaceMask.y, nodeInfo.info, out faceNodes.y))
                         continue;
                     
-                    __ContourFaceProc(faceNodes, (Axis)cellProcFaceMask.z, tileProcessor);
+                    __ContourFaceProc(boundary, (Axis)cellProcFaceMask.z, faceNodes, tileProcessor);
                 }
 
                 bool result;
@@ -1721,7 +1724,7 @@ namespace ZG.Voxel
                     if (!result)
                         continue;
 
-                    __ContourEdgeProc(edgeNodes, (Axis)__cellProcEdgeMask[i, 4], tileProcessor);
+                    __ContourEdgeProc(boundary, (Axis)__cellProcEdgeMask[i, 4], edgeNodes, tileProcessor);
                 }
 
                 return true;
@@ -1763,6 +1766,7 @@ namespace ZG.Voxel
         };
 
         private int __depth;
+        private float __increment;
         private Vector3 __scale;
         private Vector3 __offset;
         private Dictionary<Vector3Int, Dictionary<Vector3Int, Block>> __blocks;
@@ -1772,6 +1776,14 @@ namespace ZG.Voxel
             get
             {
                 return __depth;
+            }
+        }
+
+        public float increment
+        {
+            get
+            {
+                return __increment;
             }
         }
 
@@ -1791,14 +1803,15 @@ namespace ZG.Voxel
             }
         }
 
-        public DualContouring(int depth, Vector3 scale, Vector3 offset)
+        public DualContouring(int depth, float increment, Vector3 scale, Vector3 offset)
         {
             __depth = depth;
+            __increment = increment;
             __scale = scale;
             __offset = offset;
         }
 
-        public Vector3 ApproximateZeroCrossingPosition(Vector3 x, Vector3 y, float increment)
+        public Vector3 ApproximateZeroCrossingPosition(Vector3 x, Vector3 y)
         {
             // approximate the zero crossing by finding the min value along the edge
             float density, minValue = int.MaxValue, result = 0.0f, t = 0.0f;
@@ -1812,16 +1825,16 @@ namespace ZG.Voxel
                     result = t;
                 }
 
-                t += increment;
+                t += __increment;
             }
 
             return x + (y - x) * result;
         }
 
-        public Vector3 CalculateSurfaceNormal(Vector3 point, float increment)
+        public Vector3 CalculateSurfaceNormal(Vector3 point)
         {
             //Vector3 x = new Vector3(__scale.x, 0.0f, 0.0f), y = new Vector3(0.0f, __scale.y, 0.0f), z = new Vector3(0.0f, 0.0f, __scale.z);
-            Vector3 x = new Vector3(increment, 0.0f, 0.0f), y = new Vector3(0.0f, increment, 0.0f), z = new Vector3(0.0f, 0.0f, increment);
+            Vector3 x = new Vector3(__increment * __scale.x, 0.0f, 0.0f), y = new Vector3(0.0f, __increment * __scale.y, 0.0f), z = new Vector3(0.0f, 0.0f, __increment * __scale.z);
 
             return new Vector3(
                 GetDensity(point + x) - GetDensity(point - x),
@@ -1883,8 +1896,8 @@ namespace ZG.Voxel
                             if (x < 0.0f == y < 0.0f)
                                 continue;
 
-                            point = ApproximateZeroCrossingPosition(from, to, increment);
-                            normal = CalculateSurfaceNormal(point, increment);
+                            point = ApproximateZeroCrossingPosition(from, to);
+                            normal = CalculateSurfaceNormal(point);
                             for (n = 0; n < 4; ++n)
                             {
                                 offset = local + __edgeToBlockOffsets[m, n];

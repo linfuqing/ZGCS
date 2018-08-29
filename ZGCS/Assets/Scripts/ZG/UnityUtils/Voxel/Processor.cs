@@ -93,7 +93,7 @@ namespace ZG.Voxel
                 this.levels = levels;
             }
         }
-
+        
         private struct MeshData
         {
             public Info info;
@@ -203,7 +203,7 @@ namespace ZG.Voxel
                 lock (this)
                 {
                     if (__builder == null)
-                        __builder = Create(_depth, scale);
+                        __builder = Create(_depth, _increment, scale);
                 }
 
                 return __builder;
@@ -441,9 +441,9 @@ namespace ZG.Voxel
                         level.qefSweeps,
                         level.threshold,
                         info.position,
-                        Create(info.position, _increment)))
+                        Create(info.position)))
                     {
-                        if (octree.Build((x, y, z, w, aixs, offset) =>
+                        if (octree.Build(DualContouring.Octree.Boundary.LeftLowerBack, (aixs, offset, x, y, z, w) =>
                         {
                             return tileProcessor == null ? 0 : tileProcessor(i, aixs, offset, x, y, z, w, octree);
                         }, out mesh))
@@ -776,7 +776,7 @@ namespace ZG.Voxel
             return gameObject;
         }
         
-        public virtual DualContouring Create(Vector3Int world, float increment)
+        public virtual DualContouring Create(Vector3Int world)
         {
             DualContouring.IBuilder builder = this.builder;
             if (builder == null)
@@ -784,13 +784,13 @@ namespace ZG.Voxel
 
             lock (builder)
             {
-                builder.Create(world, increment);
+                builder.Create(world);
             }
 
             return builder.parent;
         }
 
-        public abstract DualContouring.IBuilder Create(int depth, Vector3 scale);
+        public abstract DualContouring.IBuilder Create(int depth, float increment, Vector3 scale);
 
         public abstract GameObject Convert(MeshData<Vector3> meshData, Level level);
 
@@ -858,7 +858,7 @@ namespace ZG.Voxel
                 return Mathf.Min(distance.x, Mathf.Min(distance.y, distance.z));
             }
             
-            public Engine(int depth, Vector3 scale, Vector3 offset) : base(depth, scale, offset)
+            public Engine(int depth, float increment, Vector3 scale, Vector3 offset) : base(depth, increment, scale, offset)
             {
 
             }
