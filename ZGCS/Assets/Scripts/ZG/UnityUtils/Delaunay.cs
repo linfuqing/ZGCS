@@ -382,13 +382,13 @@ namespace ZG
 
                         if ((edge.vertexIndexX != triangle.vertexIndexX &&
                             edge.vertexIndexY != triangle.vertexIndexX &&
-                            MathHelper.IsIntersect(point, x, u, v)) ||
+                            MathUtility.IsIntersect(point, x, u, v)) ||
                             (edge.vertexIndexX != triangle.vertexIndexY &&
                             edge.vertexIndexY != triangle.vertexIndexY &&
-                            MathHelper.IsIntersect(point, y, u, v)) ||
+                            MathUtility.IsIntersect(point, y, u, v)) ||
                             (edge.vertexIndexX != triangle.vertexIndexZ &&
                             edge.vertexIndexY != triangle.vertexIndexZ &&
-                            MathHelper.IsIntersect(point, z, u, v)))
+                            MathUtility.IsIntersect(point, z, u, v)))
                         {
                             isIntersect = true;
 

@@ -1005,7 +1005,7 @@ namespace ZG.Voxel
                     }
                 }
             }
-
+            
             public override float GetDensity(Vector3 position)
             {
                 Vector3 scale = base.scale;

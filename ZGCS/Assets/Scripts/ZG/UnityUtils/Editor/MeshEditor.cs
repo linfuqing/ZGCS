@@ -173,6 +173,134 @@ namespace ZG
             }
         }
 
+        public static string SaveMeshes(bool isShowProgressbar, GameObject gameObject, ref string folder)
+        {
+            if (gameObject == null)
+                return null;
+
+            bool result = false;
+            int i;
+            string name;
+            UnityEngine.Object instance;
+            Mesh mesh;
+
+            string path = folder + '/' + gameObject.name;
+
+            name = path + ".asset";
+
+            MeshFilter[] meshFilters = gameObject.GetComponentsInChildren<MeshFilter>(true);
+
+            int numMeshFilters = meshFilters == null ? 0 : meshFilters.Length;
+            if (numMeshFilters > 0)
+            {
+                //EditorHelper.CreateFolder(name);
+
+                MeshFilter meshFilter;
+                for (i = 0; i < numMeshFilters; ++i)
+                {
+                    meshFilter = meshFilters[i];
+                    if (meshFilter == null)
+                        continue;
+
+                    mesh = meshFilter == null ? null : meshFilter.sharedMesh;
+                    if (mesh == null)
+                        continue;
+
+                    if (isShowProgressbar && EditorUtility.DisplayCancelableProgressBar("Save Mesh Filters..", meshFilter.name, i * 1.0f / numMeshFilters))
+                    {
+                        folder = string.Empty;
+
+                        return null;
+                    }
+
+                    if (__map == null)
+                        __map = new Dictionary<UnityEngine.Object, UnityEngine.Object>();
+
+                    if (!__map.TryGetValue(mesh, out instance) || !(instance is Mesh))
+                    {
+                        if (AssetDatabase.IsNativeAsset(mesh))
+                            instance = mesh;
+                        else
+                        {
+                            instance = Instantiate(mesh);
+
+                            if (result)
+                                AssetDatabase.AddObjectToAsset(instance, name);
+                            else
+                            {
+                                result = true;
+
+                                AssetDatabase.CreateAsset(instance, name);
+                            }
+                        }
+
+                        __map[mesh] = instance;
+                    }
+
+                    meshFilter.sharedMesh = instance as Mesh;
+                }
+            }
+
+
+            MeshCollider[] meshColliders = gameObject.GetComponentsInChildren<MeshCollider>(true);
+
+            int numMeshColliders = meshColliders == null ? 0 : meshColliders.Length;
+            if (numMeshColliders > 0)
+            {
+                //EditorHelper.CreateFolder(name);
+
+                MeshCollider meshCollider;
+                for (i = 0; i < numMeshColliders; ++i)
+                {
+                    meshCollider = meshColliders[i];
+                    if (meshCollider == null)
+                        continue;
+
+                    mesh = meshCollider == null ? null : meshCollider.sharedMesh;
+                    if (mesh == null)
+                        continue;
+
+                    if (isShowProgressbar && EditorUtility.DisplayCancelableProgressBar("Save Mesh Colliders..", meshCollider.name, i * 1.0f / numMeshColliders))
+                    {
+                        folder = string.Empty;
+
+                        return null;
+                    }
+
+                    if (__map == null)
+                        __map = new Dictionary<UnityEngine.Object, UnityEngine.Object>();
+
+                    if (!__map.TryGetValue(mesh, out instance) || !(instance is Mesh))
+                    {
+                        if (AssetDatabase.IsNativeAsset(mesh))
+                            instance = mesh;
+                        else
+                        {
+                            instance = Instantiate(mesh);
+
+                            if (result)
+                                AssetDatabase.AddObjectToAsset(instance, name);
+                            else
+                            {
+                                result = true;
+
+                                AssetDatabase.CreateAsset(instance, name);
+                            }
+                        }
+
+                        __map[mesh] = instance;
+                    }
+
+                    meshCollider.sharedMesh = instance as Mesh;
+                }
+            }
+
+            if(isShowProgressbar)
+                EditorUtility.ClearProgressBar();
+
+            return path;
+        }
+
         public static bool Split(MeshFilter source, Plane plane, out MeshFilter destination)
         {
             destination = null;
@@ -791,78 +919,13 @@ namespace ZG
             else if (__path == string.Empty)
                 return;
 
-            bool result = false;
-            int i, numMeshFilters;
-            string name;
-            UnityEngine.Object instance;
-            Mesh mesh;
-            MeshFilter meshFilter;
-            List<MeshFilter> meshFilters = null;
-
-            string path = __path + '/' + gameObject.name;
-
-            name = path + ".asset";
+            string path = SaveMeshes(true, gameObject, ref __path);
             
-            if (meshFilters == null)
-                meshFilters = new List<MeshFilter>();
+            gameObject.SetActive(false);
+            gameObject.SetActive(true);
 
-            gameObject.GetComponentsInChildren(meshFilters);
-                
-            numMeshFilters = meshFilters == null ? 0 : meshFilters.Count;
-            if (numMeshFilters > 0)
-            {
-                //EditorHelper.CreateFolder(name);
-
-                for (i = 0; i < numMeshFilters; ++i)
-                {
-                    meshFilter = meshFilters[i];
-                    if (meshFilter == null)
-                        continue;
-
-                    mesh = meshFilter == null ? null : meshFilter.sharedMesh;
-                    if (mesh == null)
-                        continue;
-                    
-                    if (EditorUtility.DisplayCancelableProgressBar("Save Mesh Filters..", meshFilter.name, i * 1.0f / numMeshFilters))
-                        break;
-
-                    if (__map == null)
-                        __map = new Dictionary<UnityEngine.Object, UnityEngine.Object>();
-
-                    if (!__map.TryGetValue(mesh, out instance) || !(instance is Mesh))
-                    {
-                        instance = Instantiate(mesh);
-
-                        __map[mesh] = instance;
-                    }
-
-                    //mesh.hideFlags = HideFlags.HideInHierarchy;
-
-                    if (result)
-                        AssetDatabase.AddObjectToAsset(instance, name);
-                    else
-                    {
-                        result = true;
-
-                        AssetDatabase.CreateAsset(instance, name);
-                    }
-
-                    meshFilter.sharedMesh = instance as Mesh;
-
-                    /*temp = mesh.name;
-                    if (string.IsNullOrEmpty(temp))
-                        temp = "mesh";
-
-                    temp = Path.Combine(name, temp + ".asset");
-                    temp = AssetDatabase.GenerateUniqueAssetPath(temp);
-
-                    AssetDatabase.CreateAsset(mesh, temp);*/
-                }
-            }
-                
             PrefabUtility.CreatePrefab(path + ".prefab", gameObject);
-            
-            EditorUtility.ClearProgressBar();
+
         }
 
         [MenuItem("GameObject/ZG/Mesh/Split", false, 10)]
@@ -913,7 +976,7 @@ namespace ZG
                         source = meshFilters[j];
                         transform = source == null ? null : source.transform;
                         if (transform != null && Split(source,
-                            transform.worldToLocalMatrix.TransformPlane(new Plane(Vector3.forward, -(center.z - extents.z + segments.z * i))),
+                            transform.InverseTransform(new Plane(Vector3.forward, -(center.z - extents.z + segments.z * i))),
                             out destination) && destination != null)
                             meshFilters.Add(destination);
                     }
@@ -934,7 +997,7 @@ namespace ZG
                         source = meshFilters[j];
                         transform = source == null ? null : source.transform;
                         if (transform != null && Split(source,
-                            transform.worldToLocalMatrix.TransformPlane(new Plane(Vector3.right, -(center.x - extents.x + segments.x * i))),
+                            transform.InverseTransform(new Plane(Vector3.right, -(center.x - extents.x + segments.x * i))),
                             out destination) && destination != null)
                             meshFilters.Add(destination);
                     }
@@ -955,7 +1018,7 @@ namespace ZG
                         source = meshFilters[j];
                         transform = source == null ? null : source.transform;
                         if (transform != null && Split(source,
-                            transform.worldToLocalMatrix.TransformPlane(new Plane(Vector3.up, -(center.y - extents.y + segments.y * i))),
+                            transform.InverseTransform(new Plane(Vector3.up, -(center.y - extents.y + segments.y * i))),
                             out destination) && destination != null)
                             meshFilters.Add(destination);
                     }

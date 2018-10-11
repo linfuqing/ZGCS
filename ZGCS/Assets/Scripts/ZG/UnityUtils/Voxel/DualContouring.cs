@@ -635,6 +635,63 @@ namespace ZG.Voxel
                 }
             }
 
+            public struct Tile<T>
+            {
+                public T x;
+                public T y;
+                public T z;
+                public T w;
+
+                public T this[int index]
+                {
+                    get
+                    {
+                        switch(index)
+                        {
+                            case 0:
+                                return x;
+                            case 1:
+                                return y;
+                            case 2:
+                                return z;
+                            case 3:
+                                return w;
+                        }
+
+                        throw new IndexOutOfRangeException();
+                    }
+
+                    set
+                    {
+                        switch (index)
+                        {
+                            case 0:
+                                x = value;
+                                break;
+                            case 1:
+                                y = value;
+                                break;
+                            case 2:
+                                z = value;
+                                break;
+                            case 3:
+                                w = value;
+                                break;
+                            default:
+                                throw new IndexOutOfRangeException();
+                        }
+                    }
+                }
+
+                public Tile(T x, T y, T z, T w)
+                {
+                    this.x = x;
+                    this.y = y;
+                    this.z = z;
+                    this.w = w;
+                }
+            }
+
             private struct Node
             {
                 public bool isMiddleCorner;
@@ -805,7 +862,7 @@ namespace ZG.Voxel
             private static readonly int[,] __cellProcEdgeMask = { { 0, 1, 2, 3, 0 }, { 4, 5, 6, 7, 0 }, { 0, 4, 1, 5, 1 }, { 2, 6, 3, 7, 1 }, { 0, 2, 4, 6, 2 }, { 1, 3, 5, 7, 2 } };
 
             private static readonly int[,,] __faceProcFaceMask =
-                {
+            {
                 {{4,0,0},{5,1,0},{6,2,0},{7,3,0}},
                 {{2,0,1},{6,4,1},{3,1,1},{7,5,1}},
                 {{1,0,2},{3,2,2},{5,4,2},{7,6,2}}
@@ -1375,7 +1432,7 @@ namespace ZG.Voxel
 
                 return meshData.vertices != null && meshData.triangles != null;
             }
-
+            
             private bool __Destroy(int depth, Vector3Int position)
             {
                 if (__nodes == null || __nodes.Length < depth)
@@ -1525,7 +1582,201 @@ namespace ZG.Voxel
 
                 return result;
             }
-            
+
+            private bool __TestFace(Axis axis, int length, Vector3Int sizeDelta, Vector3 x, Vector3 y)
+            {
+                int indexX = ((int)axis + 1) % 3, indexY = ((int)axis + 2) % 3;
+                Vector3 distance = y - x, axisX = Vector3.zero, axisY = Vector3.zero;
+                axisX[indexX] = 1.0f;
+                axisY[indexY] = 1.0f;
+
+                axisX = Vector3.Cross(axisX, distance);
+                axisY = Vector3.Cross(axisY, distance);
+
+                float size = length * __scale[(int)axis];
+                Vector3 delta = Vector3.Scale(sizeDelta, __scale) + __offset;
+                Triangle triangleX = new Triangle(x, y, y), triangleY = new Triangle(delta, delta, delta);
+                triangleY.y[indexX] += size;
+                triangleY.z[indexY] += size;
+
+                return !triangleX.IsSeparating(axisX, triangleY) && !triangleX.IsSeparating(axisY, triangleY);
+            }
+
+            private bool __TestEdge(Axis axis, int length, Vector3Int sizeDelta, Tile<Vector3> tile)
+            {
+                Vector3 x = Vector3.Scale(sizeDelta, __scale) + __offset, y = x;
+                y[(int)axis] += __scale[(int)axis] * length;
+                
+                int i, j;
+                Vector3 axisX, axisY, axisZ, temp;
+                Triangle triangleX, triangleY;
+                for(i = 0; i < 2; ++i)
+                {
+                    for (j = 0; j < 2; ++j)
+                    {
+                        triangleX.x = tile[__triangleIndices[i, j, 0]];
+                        triangleX.y = tile[__triangleIndices[i, j, 1]];
+                        triangleX.z = tile[__triangleIndices[i, j, 2]];
+
+                        if (triangleX.IsSeparating(triangleX.normal, x, y))
+                            continue;
+
+                        temp = tile[__triangleIndices[i, j, 3]];
+
+                        triangleY = new Triangle(x, y, temp);
+
+                        axisX = y - x;
+                        axisY = temp - y;
+                        axisZ = x - temp;
+                        temp = triangleX.z - triangleX.x;
+
+                        axisX = Vector3.Cross(axisX, temp);
+                        axisY = Vector3.Cross(axisY, temp);
+                        axisZ = Vector3.Cross(axisZ, temp);
+
+                        if (triangleY.IsSeparating(axisX, triangleX.x, triangleX.z) ||
+                            triangleY.IsSeparating(axisY, triangleX.x, triangleX.z) ||
+                            triangleY.IsSeparating(axisZ, triangleX.x, triangleX.z))
+                            continue;
+
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
+            private Vector3 __MakeEdgeVertex(Axis axis, int length, Vector3Int sizeDelta, Tile<Vector3> tile)
+            {
+                Vector3 result = Vector3.Scale(sizeDelta, __scale) + __offset;
+                float source = result[(int)axis], destination = source + __scale[(int)axis] * length;
+                result[(int)axis] = destination;
+
+                int indexX = ((int)axis + 1) % 3, indexY = ((int)axis + 2) % 3, i;
+                Vector2 vertex = new Vector2(result[indexX], result[indexY]);
+                Vector4 point;
+                Tile<Vector4> points = new Tile<Vector4>(tile[0], tile[1], tile[3], tile[2]);
+                for (i = 0; i < 4; ++i)
+                {
+                    point = points[i];
+                    point = new Vector3(point[indexX], point[indexY], point[(int)axis]);
+
+                    point.x -= vertex.x;
+                    point.y -= vertex.y;
+                    point.w = point.x * point.x + point.y * point.y;
+
+                    if (Mathf.Approximately(point.w, 0.0f))
+                    {
+                        result[(int)axis] = Mathf.Clamp(point.z, source, destination);
+
+                        return result;
+                    }
+
+                    point.w = Mathf.Sqrt(point.w);
+
+                    points[i] = point;
+                }
+
+                int index;
+                float temp, sine, cosine, tan, total = 0.0f;
+                Vector4 x, y, z = Vector4.zero;
+                for(i = 0; i < 4; ++i)
+                {
+                    index = (i + 1) & 3;
+                    x = points[i];
+                    y = points[index];
+                    temp = x.w * y.w;
+                    sine = (x.x * y.y - x.y * y.x) / temp;
+                    cosine = (x.x * y.x + x.y * y.y) / temp + 1.0f;
+                    
+                    if(Mathf.Approximately(cosine, 0.0f))
+                    {
+                        result[(int)axis] = Mathf.Clamp((x.z * y.w + y.z * x.w) / (x.w + y.w), source, destination);
+
+                        return result;
+                    }
+
+                    tan = sine / cosine;
+                    temp = tan / x.w;
+                    tan /= y.w;
+
+                    z[i] += temp;
+                    z[index] += tan;
+
+                    total += temp + tan;
+                }
+
+                temp = 0.0f;
+                for (i = 0; i < 4; ++i)
+                    temp += z[i] * points[i].z / total;
+
+                result[(int)axis] = Mathf.Clamp(temp, source, destination);
+
+                return result;
+            }
+
+            private static readonly int[,,] __triangleIndices = {{{0,1,3,2},{3,2,0,1}},{{2,0,1,3},{1,3,2,0}}} ;
+            private static readonly Vector2Int[] __neighborNodeIndices = { new Vector2Int(0, 1), new Vector2Int(1, 3), new Vector2Int(2, 3), new Vector2Int(0, 2) };
+            private static readonly Vector2Int[,] __faceAxisOffsets =
+            {
+                { new Vector2Int(1, -1), new Vector2Int(2, 0), new Vector2Int(1, 0), new Vector2Int(2, -1) },
+                { new Vector2Int(2, -1), new Vector2Int(0, 0), new Vector2Int(2, 0), new Vector2Int(0, -1) },
+                { new Vector2Int(0, -1), new Vector2Int(1, 0), new Vector2Int(0, 0), new Vector2Int(1, -1) }
+            };
+
+            private static readonly int[,] __faceAxes =
+            {
+                {2,1,2,1},
+                {0,2,0,2},
+                {1,0,1,0}
+            };
+
+            private bool __TestNoInter2(Axis axis, int length, Vector3Int sizeDelta, Tile<Vector3> tile, Node4 nodes, out bool isDiag)
+            {
+                bool isNeedTess = false;
+                int shift, index, delta;
+                NodeInfo x, y;
+                Vector2Int temp;
+                Vector3Int faceSizeDelta = default(Vector3Int);
+                for (int i = 0; i < 4; ++i)
+                {
+                    temp = __neighborNodeIndices[i];
+                    x = nodes[temp.x];
+                    y = nodes[temp.y];
+                    if (x.info.depth == y.info.depth)
+                        continue;
+                    
+                    shift = 1 << Mathf.Min(x.info.depth, x.info.depth);
+
+                    index = __faceAxes[(int)axis, i];
+                    faceSizeDelta[index] = sizeDelta[index];
+
+                    temp = __faceAxisOffsets[(int)axis, i];
+
+                    faceSizeDelta[temp.x] = sizeDelta[temp.x] + temp.y * shift;
+
+                    delta = sizeDelta[(int)axis];
+                    faceSizeDelta[(int)axis] = delta - (delta & (shift - 1));
+
+                    if (__TestFace((Axis)index, shift, faceSizeDelta, tile[temp.x], tile[temp.y]))
+                        continue;
+
+                    isNeedTess = true;
+
+                    break;
+                }
+
+                isDiag = true;
+                if(!isNeedTess)
+                {
+                    isDiag = __TestEdge(axis, length, sizeDelta, tile);
+                    if (!isDiag)
+                        isNeedTess = true;
+                }
+
+                return isNeedTess;
+            }
+                
             private void __ContourProcessEdge(Boundary boundary, Axis axis, Node4 nodes, TileProcessor tileProcessor)
             {
                 if (tileProcessor == null)

@@ -1666,7 +1666,7 @@ namespace ZG.Voxel
             for (i = 0; i < count; ++i)
             {
                 objectInfo = objectInfos[i];
-
+                
                 if (objectInfo.index < 0 || objectInfo.index >= numGameObjects)
                 {
                     if (string.IsNullOrEmpty(objectInfo.objectName))
@@ -1877,27 +1877,47 @@ namespace ZG.Voxel
             {
                 Vector3 pointX;
                 if (!octree.Get(x, out pointX))
+                {
+                    Debug.Log("wtf?");
+
                     return result;
+                }
 
                 Vector3 pointY;
                 if (!octree.Get(y, out pointY))
+                {
+                    Debug.Log("wtf?");
+
                     return result;
+                }
 
                 Vector3 pointZ;
                 if (!octree.Get(z, out pointZ))
+                {
+                    Debug.Log("wtf?");
+
                     return result;
+                }
 
                 Vector3 pointW;
                 if (!octree.Get(w, out pointW))
+                {
+                    Debug.Log("wtf?");
+
                     return result;
+                }
 
                 DualContouring.Block a, b, c, d;
                 if (!octree.Get(x, out a) || !octree.Get(y, out b) || !octree.Get(z, out c) || !octree.Get(w, out d))
+                {
+                    Debug.Log("wtf?");
+
                     return result;
+                }
 
                 float area;
                 Vector3 normal = (a.normal + b.normal + c.normal + d.normal).normalized;
-                if (Vector3.Dot(b.normal, c.normal) > Vector3.Dot(a.normal, d.normal))
+                if (Vector3.Dot(b.normal.normalized, c.normal.normalized) > Vector3.Dot(a.normal.normalized, d.normal.normalized))
                     area = __ComputeArea(pointX, pointY, pointZ) + __ComputeArea(pointZ, pointY, pointW);
                 else
                     area = __ComputeArea(pointX, pointY, pointW) + __ComputeArea(pointX, pointW, pointZ);
@@ -2014,23 +2034,26 @@ namespace ZG.Voxel
                                                     rotation * transform.rotation, 
                                                     layerMask))
                                                 return false;
-                                            
-                                            bounds.GetCorners((matrix * transform.localToWorldMatrix),
-                                                out vertices[0],
-                                                out vertices[1],
-                                                out vertices[2],
-                                                out vertices[3],
-                                                out vertices[4],
-                                                out vertices[5],
-                                                out vertices[6],
-                                                out vertices[7]);
 
-                                            Array.Sort(vertices, __Compare);
+                                            if (maxDistance > 0.0f)
+                                            {
+                                                bounds.GetCorners((matrix * transform.localToWorldMatrix),
+                                                    out vertices[0],
+                                                    out vertices[1],
+                                                    out vertices[2],
+                                                    out vertices[3],
+                                                    out vertices[4],
+                                                    out vertices[5],
+                                                    out vertices[6],
+                                                    out vertices[7]);
 
-                                            if (!Physics.Raycast(vertices[0], Vector3.down, maxDistance, layerMask) ||
-                                                !Physics.Raycast(vertices[1], Vector3.down, maxDistance, layerMask) ||
-                                                !Physics.Raycast(vertices[2], Vector3.down, maxDistance, layerMask))
-                                                return false;
+                                                Array.Sort(vertices, __Compare);
+
+                                                if (!Physics.Raycast(vertices[0], Vector3.down, maxDistance, layerMask) ||
+                                                    !Physics.Raycast(vertices[1], Vector3.down, maxDistance, layerMask) ||
+                                                    !Physics.Raycast(vertices[2], Vector3.down, maxDistance, layerMask))
+                                                    return false;
+                                            }
                                         }
                                     }
                                 }
@@ -2056,7 +2079,9 @@ namespace ZG.Voxel
                                                 layerMask))
                                             return false;
 
-                                        bounds.GetCorners((matrix * transform.localToWorldMatrix),
+                                        if (maxDistance > 0.0f)
+                                        {
+                                            bounds.GetCorners((matrix * transform.localToWorldMatrix),
                                                 out vertices[0],
                                                 out vertices[1],
                                                 out vertices[2],
@@ -2066,12 +2091,13 @@ namespace ZG.Voxel
                                                 out vertices[6],
                                                 out vertices[7]);
 
-                                        Array.Sort(vertices, __Compare);
+                                            Array.Sort(vertices, __Compare);
 
-                                        if (!Physics.Raycast(vertices[0], Vector3.down, maxDistance, layerMask) ||
-                                            !Physics.Raycast(vertices[1], Vector3.down, maxDistance, layerMask) ||
-                                            !Physics.Raycast(vertices[2], Vector3.down, maxDistance, layerMask))
-                                            return false;
+                                            if (!Physics.Raycast(vertices[0], Vector3.down, maxDistance, layerMask) ||
+                                                !Physics.Raycast(vertices[1], Vector3.down, maxDistance, layerMask) ||
+                                                !Physics.Raycast(vertices[2], Vector3.down, maxDistance, layerMask))
+                                                return false;
+                                        }
                                     }
                                 }
 
