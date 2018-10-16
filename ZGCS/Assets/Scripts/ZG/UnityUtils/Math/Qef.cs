@@ -80,7 +80,7 @@ namespace ZG
                         + (m02 * m02) + (m12 * m12) + (m22 * m22));
                 }
             }
-
+            
             public float this[int y, int x]
             {
                 get
@@ -180,6 +180,26 @@ namespace ZG
                     x.m12 + y.m12,
 
                     x.m22 + y.m22);
+            }
+
+            public static implicit operator Matrix3x3(Matrix3 matrix)
+            {
+                Matrix3x3 result;
+                result.m00 = matrix.m00;
+                result.m01 = matrix.m01;
+                result.m02 = matrix.m02;
+
+                result.m10 = matrix.m01;
+
+                result.m11 = matrix.m11;
+                result.m12 = matrix.m12;
+
+                result.m20 = matrix.m02;
+                result.m21 = matrix.m12;
+
+                result.m22 = matrix.m22;
+
+                return result;
             }
 
             public Matrix3(float m00, float m01, float m02, float m11, float m12, float m22)
@@ -391,6 +411,194 @@ namespace ZG
                     (m01 * vector.x) + (m11 * vector.y) + (m12 * vector.z),
                     (m02 * vector.x) + (m12 * vector.y) + (m22 * vector.z));
             }
+
+            public Matrix3x3 Jacobian(out Vector3 determinant)
+            {
+                int i, j, k, l;
+                float temp, g, h, t, c, s, tau, theta, tresh;
+                Vector3 b = new Vector3(m00, m11, m22), z = Vector3.zero;
+                Matrix3x3 a = this, v = Matrix3x3.identity;
+
+                determinant = b;
+                for (i = 1; i <=50; ++i)
+                {
+                    temp = Mathf.Abs(a.m01) + Mathf.Abs(a.m02) + Mathf.Abs(a.m12);
+
+                    if(Mathf.Approximately(temp, 0.0f))
+                    {
+                        v = v.transpose;
+                        if(Mathf.Abs(determinant.x) < Mathf.Abs(determinant.y))
+                        {
+                            temp = determinant.x;
+                            determinant.x = determinant.y;
+                            determinant.y = temp;
+
+                            temp = v.m00;
+                            v.m00 = v.m10;
+                            v.m10 = temp;
+
+                            temp = v.m01;
+                            v.m01 = v.m11;
+                            v.m11 = temp;
+
+                            temp = v.m02;
+                            v.m02 = v.m12;
+                            v.m12 = temp;
+                        }
+
+                        if (Mathf.Abs(determinant.y) < Mathf.Abs(determinant.z))
+                        {
+                            temp = determinant.y;
+                            determinant.y = determinant.z;
+                            determinant.z = temp;
+
+                            temp = v.m10;
+                            v.m10 = v.m20;
+                            v.m20 = temp;
+
+                            temp = v.m11;
+                            v.m11 = v.m21;
+                            v.m21 = temp;
+
+                            temp = v.m12;
+                            v.m12 = v.m22;
+                            v.m22 = temp;
+                        }
+
+                        if (Mathf.Abs(determinant.x) < Mathf.Abs(determinant.y))
+                        {
+                            temp = determinant.x;
+                            determinant.x = determinant.y;
+                            determinant.y = temp;
+
+                            temp = v.m00;
+                            v.m00 = v.m10;
+                            v.m10 = temp;
+
+                            temp = v.m01;
+                            v.m01 = v.m11;
+                            v.m11 = temp;
+
+                            temp = v.m02;
+                            v.m02 = v.m12;
+                            v.m12 = temp;
+                        }
+
+                        return v;
+                    }
+
+                    tresh = i < 4 ? temp * 0.2f / 9.0f : 0.0f;
+                    for(j = 0; j < 2; ++j)
+                    {
+                        for(k = j + 1; k < 3; ++k)
+                        {
+                            temp = a[j, k];
+                            g = /*100.0f * */Mathf.Abs(temp);
+                            if (i > 4 && 
+                                Mathf.Approximately(Mathf.Abs(determinant[j]) + g, Mathf.Abs(determinant[j])) &&
+                                Mathf.Approximately(Mathf.Abs(determinant[k]) + g, Mathf.Abs(determinant[k])))
+                                a[j, k] = 0.0f;
+                            else if(Mathf.Abs(temp) > tresh)
+                            {
+                                h = determinant[k] - determinant[j];
+                                if (Mathf.Approximately(Mathf.Abs(h) + g, Mathf.Abs(h)))
+                                    t = temp / h;
+                                else
+                                {
+                                    theta = 0.5f * h / temp;
+                                    t = 1.0f / (Mathf.Abs(theta) + Mathf.Sqrt(1.0f + theta * theta));
+                                    if (theta < 0.0f)
+                                        t = -t;
+                                }
+
+                                c = 1.0f / Mathf.Sqrt(1.0f + t * t);
+                                s = t * c;
+                                tau = s / (1.0f + c);
+                                h = t * temp;
+
+                                z[j] -= h;
+                                z[k] += h;
+
+                                determinant[j] -= h;
+                                determinant[k] += h;
+
+                                a[j, k] = 0.0f;
+                                for(l = 0; l <= j - 1; ++l)
+                                {
+                                    a.Rotate(l, j, l, k, tau, s);
+                                }
+
+                                for(l = j + 1; l <= k - 1; ++l)
+                                {
+                                    a.Rotate(j, l, l, k, tau, s);
+                                }
+
+                                for(l = k + 1; l < 3; ++l)
+                                {
+                                    a.Rotate(j, l, k, l, tau, s);
+                                }
+
+                                for(l = 0; l < 3; ++l)
+                                {
+                                    v.Rotate(l, j, l, k, tau, s);
+                                }
+                            }
+                        }
+                    }
+                    
+                    b += z;
+                    determinant = b;
+                    z = Vector3.zero;
+                }
+
+                throw new Exception("too many iterations in jacobi");
+            }
+
+            public Matrix3x3 Invert(out Vector3 determinant)
+            {
+                Matrix3x3 u = Jacobian(out determinant);
+                UnityEngine.Assertions.Assert.IsFalse(Mathf.Approximately(determinant.x, 0.0f));
+                float temp;
+                for(int i = 1; i < 3; ++i)
+                {
+                    temp = determinant[i];
+                    determinant[i] = Mathf.Approximately(temp, 0.0f) ? 0.0f : 1.0f / temp;
+                }
+
+                determinant.x = 1.0f / determinant.x;
+
+                Matrix3x3 result;
+
+                result.m00 = determinant.x * u.m00 * u.m00 +
+                                determinant.y * u.m10 * u.m10 +
+                                determinant.z * u.m20 * u.m20;
+                result.m01 = determinant.x * u.m00 * u.m01 +
+                                determinant.y * u.m10 * u.m11 +
+                                determinant.z * u.m20 * u.m21;
+                result.m02 = determinant.x * u.m00 * u.m02 +
+                                determinant.y * u.m10 * u.m12 +
+                                determinant.z * u.m20 * u.m22;
+                result.m10 = determinant.x * u.m01 * u.m00 +
+                                determinant.y * u.m11 * u.m10 +
+                                determinant.z * u.m21 * u.m20;
+                result.m11 = determinant.x * u.m01 * u.m01 +
+                                determinant.y * u.m11 * u.m11 +
+                                determinant.z * u.m21 * u.m21;
+                result.m12 = determinant.x * u.m01 * u.m02 +
+                                determinant.y * u.m11 * u.m12 +
+                                determinant.z * u.m21 * u.m22;
+                result.m20 = determinant.x * u.m02 * u.m00 +
+                                determinant.y * u.m12 * u.m10 +
+                                determinant.z * u.m22 * u.m20;
+                result.m21 = determinant.x * u.m02 * u.m01 +
+                                determinant.y * u.m12 * u.m11 +
+                                determinant.z * u.m22 * u.m21;
+                result.m22 = determinant.x * u.m02 * u.m02 +
+                                determinant.y * u.m12 * u.m12 +
+                                determinant.z * u.m22 * u.m22;
+
+                return result;
+            }
         }
 
         public struct Matrix3x3
@@ -413,6 +621,14 @@ namespace ZG
                         0.0f,
                         0.0f,
                         1.0f);
+                }
+            }
+
+            public Matrix3x3 transpose
+            {
+                get
+                {
+                    return new Matrix3x3(m00, m10, m20, m01, m11, m21, m02, m12, m22);
                 }
             }
 
@@ -524,6 +740,50 @@ namespace ZG
                 }
             }
 
+            public static implicit operator Matrix4x4(Matrix3x3 matrix)
+            {
+                Matrix4x4 result;
+                result.m00 = matrix.m00;
+                result.m01 = matrix.m01;
+                result.m02 = matrix.m02;
+                result.m03 = 0.0f;
+
+                result.m10 = matrix.m10;
+                result.m11 = matrix.m11;
+                result.m12 = matrix.m12;
+                result.m13 = 0.0f;
+
+                result.m20 = matrix.m20;
+                result.m21 = matrix.m21;
+                result.m22 = matrix.m22;
+                result.m23 = 0.0f;
+
+                result.m30 = 0.0f;
+                result.m31 = 0.0f;
+                result.m32 = 0.0f;
+                result.m33 = 1.0f;
+
+                return result;
+            }
+
+            public static implicit operator Unity.Mathematics.float3x3(Matrix3x3 matrix)
+            {
+                Unity.Mathematics.float3x3 result;
+                result.c0.x = matrix.m00;
+                result.c0.y = matrix.m01;
+                result.c0.z = matrix.m02;
+
+                result.c1.x = matrix.m10;
+                result.c1.y = matrix.m11;
+                result.c1.z = matrix.m12;
+
+                result.c2.x = matrix.m20;
+                result.c2.y = matrix.m21;
+                result.c2.z = matrix.m22;
+                
+                return result;
+            }
+
             public Matrix3x3(float m00, float m01, float m02, float m10, float m11, float m12, float m20, float m21, float m22)
             {
                 this.m00 = m00;
@@ -537,6 +797,14 @@ namespace ZG
                 this.m20 = m20;
                 this.m21 = m21;
                 this.m22 = m22;
+            }
+
+            public void Rotate(int i, int j, int k, int l, float tau, float s)
+            {
+                float g = this[i, j], h = this[k, l];
+
+                this[i, j] = g - s * (h + g * tau);
+                this[k, l] = h + s * (g - h * tau);
             }
 
             public void Rotate01(float c, float s)
@@ -593,6 +861,14 @@ namespace ZG
                     (m10 * vector.x) + (m11 * vector.y) + (m12 * vector.z),
                     (m20 * vector.x) + (m21 * vector.y) + (m22 * vector.z));
             }
+
+            public Vector3 MultiplyTS(Vector3 vector)
+            {
+                return new Vector3(
+                    (m00 * vector.x) + (m10 * vector.y) + (m20 * vector.z),
+                    (m01 * vector.x) + (m11 * vector.y) + (m21 * vector.z),
+                    (m02 * vector.x) + (m12 * vector.y) + (m22 * vector.z));
+            }
         }
 
         private Data __data;
@@ -611,6 +887,13 @@ namespace ZG
             {
                 return __data.massPoint / __data.numPoints;
             }
+        }
+
+        public static Qef operator +(Qef x, Qef y)
+        {
+            x.__data += y.__data;
+
+            return x;
         }
 
         public static void CalcSymmetricGivensCoefficients(
@@ -668,10 +951,24 @@ namespace ZG
             __data += data;
         }
         
-        public Vector3 Solve(/*float svdTol, */int svdSweeps/*, float pinvTol*/)
+        public Vector3 Solve()
         {
             Vector3 massPoint = this.massPoint;
 
+            Vector3 determinant;
+            Matrix3x3 result = __data.ata.Invert(out determinant).transpose;
+            //Matrix3x3 result = __data.ata.Invert(out determinant);
+            //Unity.Mathematics.float3x3 result = (Matrix3x3)__data.ata;
+            //result = Unity.Mathematics.math.inverse(result);
+
+            return result.Multiply(__data.atb - __data.ata.Multiply(massPoint)) + massPoint;
+        }
+
+        public Vector3 Solve(/*float svdTol, */int svdSweeps/*, float pinvTol*/)
+        {
+            return Solve();
+
+            Vector3 massPoint = this.massPoint;
             return __data.ata.SolveSymmetric(/*svdTol, */svdSweeps, /*pinvTol, */__data.atb - __data.ata.Multiply(massPoint)) + massPoint;
         }
 

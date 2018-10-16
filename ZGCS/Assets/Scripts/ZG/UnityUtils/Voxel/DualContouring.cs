@@ -622,7 +622,7 @@ namespace ZG.Voxel
                 Leaf
             }
             
-            public struct Info
+            public struct Info : IEquatable<Info>
             {
                 public int depth;
 
@@ -633,9 +633,79 @@ namespace ZG.Voxel
                     this.depth = depth;
                     this.position = position;
                 }
+
+                public bool Equals(Info info)
+                {
+                    return depth == info.depth && position == info.position;
+                }
             }
 
-            public struct Tile<T>
+            public struct Vertex : IEquatable<Vertex>
+            {
+                public int count;
+
+                public Vector3 position;
+                public Vector3 normal;
+
+                public Qef qef;
+
+                public Vertex(Vector3 position, Vector3 normal, Qef qef)
+                {
+                    this.count = 1;
+                    this.position = position;
+                    this.normal = normal;
+                    this.qef = qef;
+                }
+
+                public bool Equals(Vertex vertex)
+                {
+                    return position == vertex.position && normal == vertex.normal;
+                }
+
+                public static Vertex operator +(Vertex x, Vertex y)
+                {
+                    x.count += y.count;
+                    x.position += y.position;
+                    x.normal += y.normal;
+                    x.qef += y.qef;
+
+                    return x;
+                }
+
+                public static Vertex Solve(Vertex x, Vertex y, /*Vector3 min, Vector3 max, */int svdSweeps)
+                {
+                    x.qef += y.qef;
+                    x.normal += y.normal;
+                    x.position = (x.position + y.position) * 0.5f;
+
+                    /*if (x.position.x < min.x || x.position.y < min.y || x.position.z < min.z || x.position.x > max.x || x.position.y > max.y || x.position.z > max.z)
+                        x.position = x.qef.massPoint;*/
+
+                    return x;
+                }
+
+                public static implicit operator MeshData<Vector3>.Vertex(Vertex vertex)
+                {
+                    MeshData<Vector3>.Vertex result;
+                    result.position = vertex.position / vertex.count;
+                    result.data = vertex.normal.normalized;
+
+                    return result;
+                }
+            }
+
+            public struct Face
+            {
+                public int depth;
+
+                public Axis axis;
+
+                public Vector3Int sizeDelta;
+
+                public Vector3Int indices;
+            }
+
+            private struct Tile<T>
             {
                 public T x;
                 public T y;
@@ -718,6 +788,8 @@ namespace ZG.Voxel
 
             private struct Node2
             {
+                public Vector3Int sizeDelta;
+
                 public NodeInfo x;
                 public NodeInfo y;
 
@@ -764,6 +836,8 @@ namespace ZG.Voxel
 
             private struct Node4
             {
+                public Vector3Int sizeDelta;
+
                 public NodeInfo x;
                 public NodeInfo y;
                 public NodeInfo z;
@@ -840,9 +914,7 @@ namespace ZG.Voxel
                     return obj.GetHashCode();
                 }
             }
-
-            public delegate int TileProcessor(Axis axis, Vector3Int offset, Info x, Info y, Info z, Info w);
-
+            
             private static readonly Vector3Int[] __cellProcFaceMask =
             {
                 new Vector3Int(0, 4, 0),
@@ -890,7 +962,7 @@ namespace ZG.Voxel
                 { 0, 1, 0, 1 },
             };
 
-            //private int __sweeps;
+            private int __sweeps;
             private int __depth;
             private Vector3 __scale;
             private Vector3 __offset;
@@ -1002,7 +1074,7 @@ namespace ZG.Voxel
                 if (!parent.__blocks.TryGetValue(world, out blocks) || blocks == null || blocks.Count < 1)
                     return false;
 
-                //__sweeps = sweeps;
+                __sweeps = sweeps;
                 __depth = parent.__depth;
                 __scale = parent.__scale;
                 __offset = Vector3.Scale(world * ((1 << __depth) - 1), parent.__scale) + parent.__offset;
@@ -1266,169 +1338,49 @@ namespace ZG.Voxel
                 return false;
             }
 
-            public void Build(Boundary boundary, TileProcessor tileProcessor)
+            public void Build(Boundary boundary, 
+                IList<Vertex> vertices,
+                IDictionary<Edge<Info>, int> edgeIndices,
+                IDictionary<Info, int> infoIndices,
+                Action<Face> faces)
             {
-                __ContourCellProc(boundary, new NodeInfo(__root.type, __root.block.corners, new Info(0, Vector3Int.zero)), tileProcessor);
+                __ContourCellProc(
+                    boundary, 
+                    Vector3Int.zero, 
+                    new NodeInfo(__root.type, __root.block.corners, new Info(0, Vector3Int.zero)),
+                    vertices,
+                    edgeIndices, 
+                    infoIndices, 
+                    faces);
             }
 
-            public bool Build(Boundary boundary, TileProcessor tileProcessor, out MeshData<Vector3> meshData)
+            public bool Build(Boundary boundary, Func<Face, IReadOnlyList<Vertex>, int> subMeshHandler, out MeshData<Vector3> meshData)
             {
-                List<MeshData<Vector3>.Vertex> vertices = null;
-                List< MeshData<Vector3>.Triangle> triangles = null;
-                Dictionary<Info, int> indices = null;
-                Build(boundary, (axis, offset, x, y, z, w) =>
+                List<Vertex> vertices = new List<Vertex>();
+                Dictionary<Edge<Info>, int> edgeIndices = new Dictionary<Edge<Info>, int>();
+                Dictionary<Info, int> infoIndices = new Dictionary<Info, int>();
+                List<Face> faces = new List<Face>();
+                Build(boundary, vertices, edgeIndices, infoIndices, faces.Add);
+                
+                List<MeshData<Vector3>.Triangle> triangles = null;
+                foreach(Face face in faces)
                 {
-                    int indexX, indexY, indexZ, indexW;
-                    MeshData<Vector3>.Vertex vertexX, vertexY, vertexZ, vertexW;
-                    if (indices == null)
-                        indices = new Dictionary<Info, int>(new InfoIntEqualityComparer());
-
-                    if (indices.TryGetValue(x, out indexX))
-                        vertexX = vertices[indexX];
-                    else
-                    {
-                        if (!Get(x, out vertexX.position))
-                            return 0;
-
-                        Block block;
-                        if (!Get(x, out block))
-                            return 0;
-
-                        vertexX.data = block.normal.normalized;
-
-                        /*Vector3 min = Vector3.Scale(x.position, __scale) + __offset, max = min + __scale * (1 << (__depth - x.depth));
-                        vertexX.data = new Bounds((min + max) * 0.5f, max - min);
-                        */
-                        if (vertices == null)
-                            vertices = new List<MeshData<Vector3>.Vertex>();
-
-                        indexX = vertices.Count;
-
-                        vertices.Add(vertexX);
-
-                        indices[x] = indexX;
-                    }
-
-                    if (indices.TryGetValue(y, out indexY))
-                        vertexY = vertices[indexY];
-                    else
-                    {
-                        if (!Get(y, out vertexY.position))
-                            return 0;
-
-                        Block block;
-                        if (!Get(y, out block))
-                            return 0;
-
-                        vertexY.data = block.normal.normalized;
-
-                        /*Vector3 min = Vector3.Scale(y.position, __scale) + __offset, max = min + __scale * (1 << (__depth - y.depth));
-                        vertexY.data = new Bounds((min + max) * 0.5f, max - min);
-                        */
-                        if (vertices == null)
-                            vertices = new List<MeshData<Vector3>.Vertex>();
-
-                        indexY = vertices.Count;
-
-                        vertices.Add(vertexY);
-
-                        indices[y] = indexY;
-                    }
-
-                    if (indices.TryGetValue(z, out indexZ))
-                        vertexZ = vertices[indexZ];
-                    else
-                    {
-                        if (!Get(z, out vertexZ.position))
-                            return 0;
-
-                        Block block;
-                        if (!Get(z, out block))
-                            return 0;
-
-                        vertexZ.data = block.normal.normalized;
-
-                        /*Vector3 min = Vector3.Scale(z.position, __scale) + __offset, max = min + __scale * (1 << (__depth - z.depth));
-                        vertexZ.data = new Bounds((min + max) * 0.5f, max - min);*/
-
-                        if (vertices == null)
-                            vertices = new List<MeshData<Vector3>.Vertex>();
-
-                        indexZ = vertices.Count;
-
-                        vertices.Add(vertexZ);
-
-                        indices[z] = indexZ;
-                    }
-
-                    if (indices.TryGetValue(w, out indexW))
-                        vertexW = vertices[indexW];
-                    else
-                    {
-                        if (!Get(w, out vertexW.position))
-                            return 0;
-
-                        Block block;
-                        if (!Get(w, out block))
-                            return 0;
-
-                        vertexW.data = block.normal.normalized;
-
-                        /*Vector3 min = Vector3.Scale(w.position, __scale) + __offset, max = min + __scale * (1 << (__depth - w.depth));
-                        vertexW.data = new Bounds((min + max) * 0.5f, max - min);
-                        */
-                        if (vertices == null)
-                            vertices = new List<MeshData<Vector3>.Vertex>();
-
-                        indexW = vertices.Count;
-
-                        vertices.Add(vertexW);
-
-                        indices[w] = indexW;
-                    }
-
-                    int index = tileProcessor == null ? 0 : tileProcessor(axis, offset, x, y, z, w);
-
                     if (triangles == null)
                         triangles = new List<MeshData<Vector3>.Triangle>();
-                    
-                    /*Qef qef = new Qef();
-                    qef.Add(new Qef.Data(vertexX.position, vertexX.normal));
-                    qef.Add(new Qef.Data(vertexY.position, vertexY.normal));
-                    qef.Add(new Qef.Data(vertexZ.position, vertexZ.normal));
-                    float source = Mathf.Abs(qef.GetError(qef.Solve(__sweeps)));
-                    qef = new Qef();
-                    qef.Add(new Qef.Data(vertexZ.position, vertexZ.normal));
-                    qef.Add(new Qef.Data(vertexY.position, vertexY.normal));
-                    qef.Add(new Qef.Data(vertexW.position, vertexW.normal));
-                    source += Mathf.Abs(qef.GetError(qef.Solve(__sweeps)));
 
-                    qef = new Qef();
-                    qef.Add(new Qef.Data(vertexX.position, vertexX.normal));
-                    qef.Add(new Qef.Data(vertexY.position, vertexY.normal));
-                    qef.Add(new Qef.Data(vertexW.position, vertexW.normal));
-                    float destination = Mathf.Abs(qef.GetError(qef.Solve(__sweeps)));
-                    qef = new Qef();
-                    qef.Add(new Qef.Data(vertexX.position, vertexX.normal));
-                    qef.Add(new Qef.Data(vertexW.position, vertexW.normal));
-                    qef.Add(new Qef.Data(vertexZ.position, vertexZ.normal));
-                    destination += Mathf.Abs(qef.GetError(qef.Solve(__sweeps)));*/
+                    triangles.Add(new MeshData<Vector3>.Triangle(subMeshHandler == null ? 0 : subMeshHandler(face, vertices), face.indices));
+                }
+                
+                List<MeshData<Vector3>.Vertex> result = null;
+                foreach(Vertex vertex in vertices)
+                {
+                    if (result == null)
+                        result = new List<MeshData<Vector3>.Vertex>();
 
-                    if (Vector3.Dot(vertexY.data, vertexZ.data) > Vector3.Dot(vertexX.data, vertexW.data))
-                    {
-                        triangles.Add(new MeshData<Vector3>.Triangle(index, new Vector3Int(indexX, indexY, indexZ)));
-                        triangles.Add(new MeshData<Vector3>.Triangle(index, new Vector3Int(indexZ, indexY, indexW)));
-                    }
-                    else
-                    {
-                        triangles.Add(new MeshData<Vector3>.Triangle(index, new Vector3Int(indexX, indexY, indexW)));
-                        triangles.Add(new MeshData<Vector3>.Triangle(index, new Vector3Int(indexX, indexW, indexZ)));
-                    }
+                    result.Add(vertex);
+                }
 
-                    return index;
-                });
-
-                meshData = new MeshData<Vector3>(vertices == null ? null : vertices.ToArray(), triangles == null ? null : triangles.ToArray());
+                meshData = new MeshData<Vector3>(result == null ? null : result.ToArray(), triangles == null ? null : triangles.ToArray());
 
                 return meshData.vertices != null && meshData.triangles != null;
             }
@@ -1477,7 +1429,7 @@ namespace ZG.Voxel
 
             private bool __Get(Info info, out NodeInfo nodeInfo)
             {
-                nodeInfo = new NodeInfo();
+                nodeInfo = default(NodeInfo);
                 nodeInfo.info = info;
 
                 if (info.depth < 1)
@@ -1602,10 +1554,10 @@ namespace ZG.Voxel
                 return !triangleX.IsSeparating(axisX, triangleY) && !triangleX.IsSeparating(axisY, triangleY);
             }
 
-            private bool __TestEdge(Axis axis, int length, Vector3Int sizeDelta, Tile<Vector3> tile)
+            private bool __TestEdge(Axis axis, int length, Vector3Int sizeDelta, Tile<Vertex> tile)
             {
                 Vector3 x = Vector3.Scale(sizeDelta, __scale) + __offset, y = x;
-                y[(int)axis] += __scale[(int)axis] * length;
+                y[(int)axis] += length * __scale[(int)axis];
                 
                 int i, j;
                 Vector3 axisX, axisY, axisZ, temp;
@@ -1614,14 +1566,14 @@ namespace ZG.Voxel
                 {
                     for (j = 0; j < 2; ++j)
                     {
-                        triangleX.x = tile[__triangleIndices[i, j, 0]];
-                        triangleX.y = tile[__triangleIndices[i, j, 1]];
-                        triangleX.z = tile[__triangleIndices[i, j, 2]];
+                        triangleX.x = tile[__triangleIndices[i, j, 0]].position;
+                        triangleX.y = tile[__triangleIndices[i, j, 1]].position;
+                        triangleX.z = tile[__triangleIndices[i, j, 2]].position;
 
                         if (triangleX.IsSeparating(triangleX.normal, x, y))
                             continue;
 
-                        temp = tile[__triangleIndices[i, j, 3]];
+                        temp = tile[__triangleIndices[i, j, 3]].position;
 
                         triangleY = new Triangle(x, y, temp);
 
@@ -1646,16 +1598,160 @@ namespace ZG.Voxel
                 return false;
             }
 
-            private Vector3 __MakeEdgeVertex(Axis axis, int length, Vector3Int sizeDelta, Tile<Vector3> tile)
+            private Vertex __MakeFaceVertex(Axis axis, int length, Vector3Int sizeDelta, Edge<Vertex> edge)
             {
-                Vector3 result = Vector3.Scale(sizeDelta, __scale) + __offset;
-                float source = result[(int)axis], destination = source + __scale[(int)axis] * length;
-                result[(int)axis] = destination;
+                Vertex result = new Vertex(Vector3.Scale(sizeDelta, __scale) + __offset, edge.x.normal + edge.y.normal, edge.x.qef + edge.y.qef);
+                
+                Axis axisX, axisY;
+                Vector2 atb;
+                Edge<Vector2> ata;
+                switch (axis)
+                {
+                    case Axis.X:
+                        axisX = Axis.Y;
+                        axisY = Axis.Z;
+
+                        ata.x.x = result.qef.data.ata.m11;
+                        ata.x.y = result.qef.data.ata.m12;
+                        ata.y.x = result.qef.data.ata.m12;
+                        ata.y.y = result.qef.data.ata.m22;
+
+                        atb.x = result.qef.data.atb.y - result.position.x * result.qef.data.ata.m01;
+                        atb.y = result.qef.data.atb.z - result.position.x * result.qef.data.ata.m02;
+                        break;
+                    case Axis.Y:
+                        axisX = Axis.X;
+                        axisY = Axis.Z;
+
+                        ata.x.x = result.qef.data.ata.m00;
+                        ata.x.y = result.qef.data.ata.m02;
+                        ata.y.x = result.qef.data.ata.m02;
+                        ata.y.y = result.qef.data.ata.m22;
+
+                        atb.x = result.qef.data.atb.x - result.position.y * result.qef.data.ata.m01;
+                        atb.y = result.qef.data.atb.z - result.position.y * result.qef.data.ata.m12;
+                        break;
+                    case Axis.Z:
+                        axisX = Axis.X;
+                        axisY = Axis.Y;
+
+                        ata.x.x = result.qef.data.ata.m00;
+                        ata.x.y = result.qef.data.ata.m01;
+                        ata.y.x = result.qef.data.ata.m01;
+                        ata.y.y = result.qef.data.ata.m11;
+
+                        atb.x = result.qef.data.atb.x - result.position.z * result.qef.data.ata.m02;
+                        atb.y = result.qef.data.atb.y - result.position.z * result.qef.data.ata.m12;
+                        break;
+                    default:
+                        return result;
+                }
+
+                float determinant = ata.x.x * ata.y.y - ata.x.y * ata.y.x,
+                    sizeX = __scale[(int)axisX] * length, 
+                    sourceX = result.position[(int)axisX],
+                    destinationX = sourceX + sizeX,
+                    sizeY = __scale[(int)axisY] * length,
+                    sourceY = result.position[(int)axisY],
+                    destinationY = sourceY + sizeY;
+                if(Mathf.Approximately(determinant, 0.0f))
+                {
+                    int count = 0, i, j;
+                    float x, y, z;
+                    Vector2 temp, point = Vector2.zero;
+                    for(i = 0; i < 2; ++i)
+                    {
+                        temp = ata[i];
+                        z = atb[i];
+
+                        if (!Mathf.Approximately(temp.x, 0.0f))
+                        {
+                            for(j = 0; j < 2; ++j)
+                            {
+                                y = sourceY + sizeY * j;
+                                x = (z - temp.y * y) / temp.x;
+                                if(x >= sourceX && x <= destinationX)
+                                {
+                                    point.x += x;
+                                    point.y += y;
+
+                                    ++count;
+                                }
+                            }
+                        }
+
+                        if(!Mathf.Approximately(temp.y, 0.0f))
+                        {
+                            for(j = 0; j < 2; ++j)
+                            {
+                                x = sourceX + sizeX * j;
+                                y = (z - temp.x * x) / temp.y;
+                                if (y >= sourceY && y <= destinationY)
+                                {
+                                    point.x += x;
+                                    point.y += y;
+
+                                    ++count;
+                                }
+                            }
+                        }
+                    }
+
+                    if (count > 0)
+                    {
+                        result.position[(int)axisX] = point.x / count;
+                        result.position[(int)axisY] = point.y / count;
+                    }
+                    else
+                    {
+                        result.position[(int)axisX] = (sourceX + destinationX) * 0.5f;
+                        result.position[(int)axisY] = (sourceY + destinationY) * 0.5f;
+                    }
+
+                    return result;
+                }
+
+                Vector4 invert = new Vector4(ata.y.y / determinant, -ata.x.y / determinant, -ata.x.y / determinant, ata.x.x / determinant);
+
+                result.position[(int)axisX] = Mathf.Clamp(Vector2.Dot(new Vector2(invert.x, invert.y), atb), sourceX, destinationX);
+                result.position[(int)axisY] = Mathf.Clamp(Vector2.Dot(new Vector2(invert.z, invert.w), atb), sourceY, destinationY);
+
+                return result;
+            }
+
+            private Vertex __MakeEdgeVertex(Axis axis, int length, Vector3Int sizeDelta, Tile<Vertex> tile)
+            {
+                Vertex result = new Vertex(
+                    Vector3.Scale(sizeDelta, __scale) + __offset, 
+                    tile.x.normal + tile.y.normal + tile.z.normal + tile.w.normal, 
+                    tile.x.qef + tile.y.qef + tile.z.qef + tile.w.qef);
+                float source = result.position[(int)axis], destination = source + __scale[(int)axis] * length;
+                //result.position[(int)axis] = destination;
+                /*switch(axis)
+                {
+                    case Axis.X:
+                        a = result.qef.data.ata.m00;
+                        b = result.qef.data.atb.x - result.qef.data.ata.m01 * sizeDelta.y - result.qef.data.ata.m02 * sizeDelta.z;
+                        break;
+                    case Axis.Y:
+                        a = result.qef.data.ata.m11;
+                        b = result.qef.data.atb.y - result.qef.data.ata.m01 * sizeDelta.x - result.qef.data.ata.m12 * sizeDelta.z;
+                        break;
+                    case Axis.Z:
+                        a = result.qef.data.ata.m22;
+                        b = result.qef.data.atb.z - result.qef.data.ata.m02 * sizeDelta.x - result.qef.data.ata.m12 * sizeDelta.y;
+                        break;
+                    default:
+                        return result;
+                }
+
+                result.position[(int)axis] = Mathf.Clamp(b / a, source, destination);
+                return result;*/
 
                 int indexX = ((int)axis + 1) % 3, indexY = ((int)axis + 2) % 3, i;
-                Vector2 vertex = new Vector2(result[indexX], result[indexY]);
+                Vector2 vertex = new Vector2(result.position[indexX], result.position[indexY]);
                 Vector4 point;
-                Tile<Vector4> points = new Tile<Vector4>(tile[0], tile[1], tile[3], tile[2]);
+                Tile<Vector4> points = new Tile<Vector4>(tile.x.position, tile.y.position, tile.w.position, tile.z.position);
                 for (i = 0; i < 4; ++i)
                 {
                     point = points[i];
@@ -1667,7 +1763,7 @@ namespace ZG.Voxel
 
                     if (Mathf.Approximately(point.w, 0.0f))
                     {
-                        result[(int)axis] = Mathf.Clamp(point.z, source, destination);
+                        result.position[(int)axis] = Mathf.Clamp(point.z, source, destination);
 
                         return result;
                     }
@@ -1691,7 +1787,7 @@ namespace ZG.Voxel
                     
                     if(Mathf.Approximately(cosine, 0.0f))
                     {
-                        result[(int)axis] = Mathf.Clamp((x.z * y.w + y.z * x.w) / (x.w + y.w), source, destination);
+                        result.position[(int)axis] = Mathf.Clamp((x.z * y.w + y.z * x.w) / (x.w + y.w), source, destination);
 
                         return result;
                     }
@@ -1706,11 +1802,16 @@ namespace ZG.Voxel
                     total += temp + tan;
                 }
 
-                temp = 0.0f;
-                for (i = 0; i < 4; ++i)
-                    temp += z[i] * points[i].z / total;
+                if (Mathf.Approximately(total, 0.0f))
+                    result.position[(int)axis] = destination;
+                else
+                {
+                    temp = 0.0f;
+                    for (i = 0; i < 4; ++i)
+                        temp += z[i] * points[i].z;
 
-                result[(int)axis] = Mathf.Clamp(temp, source, destination);
+                    result.position[(int)axis] = Mathf.Clamp(temp / total, source, destination);
+                }
 
                 return result;
             }
@@ -1731,62 +1832,305 @@ namespace ZG.Voxel
                 {1,0,1,0}
             };
 
-            private bool __TestNoInter2(Axis axis, int length, Vector3Int sizeDelta, Tile<Vector3> tile, Node4 nodes, out bool isDiag)
+            private bool __ContourProcessNoInter(
+                bool isFlip, 
+                Axis axis, 
+                int depth, 
+                Vector3Int sizeDelta, 
+                Tile<Vertex> tile, 
+                Node4 nodes, 
+                IList<Vertex> vertices, 
+                IDictionary<Edge<Info>, int> edgeIndices,
+                IDictionary<Info, int> infoIndices,
+                Action<Face> faces)
             {
+                const int FLAG_CONTAINS = 0x01, FLAG_NEW = 0x03;
+
                 bool isNeedTess = false;
-                int shift, index, delta;
+                int numVertices = vertices == null ? 0 : vertices.Count, length = 1 << (__depth - depth), flag, index, delta, i;
                 NodeInfo x, y;
-                Vector2Int temp;
+                Vector2Int indices, temp;
                 Vector3Int faceSizeDelta = default(Vector3Int);
-                for (int i = 0; i < 4; ++i)
+                Edge<Info> edgeInfos;
+                Edge<Vertex> edgeVertices;
+                Tile<int> vertexIndices = default(Tile<int>), flags = default(Tile<int>);
+                for (i = 0; i < 4; ++i)
                 {
-                    temp = __neighborNodeIndices[i];
-                    x = nodes[temp.x];
-                    y = nodes[temp.y];
+                    indices = __neighborNodeIndices[i];
+                    x = nodes[indices.x];
+                    y = nodes[indices.y];
                     if (x.info.depth == y.info.depth)
                         continue;
-                    
-                    shift = 1 << Mathf.Min(x.info.depth, x.info.depth);
 
-                    index = __faceAxes[(int)axis, i];
-                    faceSizeDelta[index] = sizeDelta[index];
+                    edgeInfos = new Edge<Info>(x.info, y.info);
+                    if (edgeIndices != null && edgeIndices.TryGetValue(edgeInfos, out index))
+                    {
+                        vertexIndices[i] = index;
+                        
+                        flags[i] = FLAG_CONTAINS;
+                        
+                        isNeedTess = true;
+                    }
+                    else
+                    {
+                        flag = 1 << (__depth - Mathf.Max(x.info.depth, y.info.depth));
 
-                    temp = __faceAxisOffsets[(int)axis, i];
+                        index = __faceAxes[(int)axis, i];
+                        faceSizeDelta[index] = sizeDelta[index];
 
-                    faceSizeDelta[temp.x] = sizeDelta[temp.x] + temp.y * shift;
+                        temp = __faceAxisOffsets[(int)axis, i];
 
-                    delta = sizeDelta[(int)axis];
-                    faceSizeDelta[(int)axis] = delta - (delta & (shift - 1));
+                        faceSizeDelta[temp.x] = sizeDelta[temp.x] + temp.y * flag;
 
-                    if (__TestFace((Axis)index, shift, faceSizeDelta, tile[temp.x], tile[temp.y]))
-                        continue;
+                        delta = sizeDelta[(int)axis];
+                        faceSizeDelta[(int)axis] = delta - (delta & (flag - 1));
 
+                        edgeVertices = new Edge<Vertex>(tile[indices.x], tile[indices.y]);
+                        if (__TestFace((Axis)index, flag, faceSizeDelta, edgeVertices.x.position, edgeVertices.y.position))
+                            continue;
+
+                        index = numVertices++;
+
+                        if (vertices != null)
+                            vertices.Add(default(Vertex)/*__MakeFaceVertex((Axis)index, flag, faceSizeDelta, edgeVertices)*/);
+
+                        edgeIndices[edgeInfos] = index;
+
+                        vertexIndices[i] = index;
+
+                        flags[i] = FLAG_NEW;
+
+                        isNeedTess = true;
+                    }
+                }
+                
+                if (!isNeedTess && !__TestEdge(axis, length, sizeDelta, tile))
                     isNeedTess = true;
 
-                    break;
-                }
-
-                isDiag = true;
-                if(!isNeedTess)
+                Vector3Int flipped = isFlip ? new Vector3Int(0, 1, 2) : new Vector3Int(2, 1, 0);
+                if (isNeedTess)
                 {
-                    isDiag = __TestEdge(axis, length, sizeDelta, tile);
-                    if (!isDiag)
-                        isNeedTess = true;
+                    Vertex vertex = __MakeEdgeVertex(axis, length, sizeDelta, tile);
+
+                    delta = numVertices++;
+
+                    if (vertices != null)
+                        vertices.Add(vertex);
+
+                    if (faces != null && infoIndices != null)
+                    {
+                        Face face = default(Face);
+                        face.depth = depth;
+                        face.axis = axis;
+                        face.sizeDelta = sizeDelta;
+                        for (i = 0; i < 4; ++i)
+                        {
+                            indices = __neighborNodeIndices[i];
+                            if ((i & 0x2) != 0)
+                            {
+                                index = indices.x;
+                                indices.x = indices.y;
+                                indices.y = index;
+                            }
+
+                            x = nodes[indices.x];
+                            y = nodes[indices.y];
+
+                            flag = flags[i];
+                            if (flag == 0)
+                            {
+                                if (x.info.Equals(y.info))
+                                    continue;
+
+                                if (!infoIndices.TryGetValue(x.info, out index))
+                                {
+                                    index = numVertices++;
+
+                                    infoIndices[x.info] = index;
+
+                                    if (vertices != null)
+                                        vertices.Add(tile[indices.x]);
+                                }
+
+                                face.indices[flipped[0]] = index;
+
+                                if (!infoIndices.TryGetValue(y.info, out index))
+                                {
+                                    index = numVertices++;
+
+                                    infoIndices[y.info] = index;
+
+                                    if (vertices != null)
+                                        vertices.Add(tile[indices.y]);
+                                }
+
+                                face.indices[flipped[1]] = index;
+
+                                face.indices[flipped[2]] = delta;
+
+                                faces(face);
+                            }
+                            else
+                            {
+                                index = vertexIndices[i];
+
+                                if (vertices != null)
+                                    vertices[index] = flag == FLAG_NEW ? vertex : (vertices[index] + vertex);
+
+                                face.indices[flipped[1]] = index;
+
+                                if (!infoIndices.TryGetValue(x.info, out index))
+                                {
+                                    index = numVertices++;
+
+                                    infoIndices[x.info] = index;
+
+                                    if (vertices != null)
+                                        vertices.Add(tile[indices.x]);
+                                }
+
+                                face.indices[flipped[0]] = index;
+                                face.indices[flipped[2]] = delta;
+                                faces(face);
+
+                                if (!infoIndices.TryGetValue(y.info, out index))
+                                {
+                                    index = numVertices++;
+
+                                    infoIndices[y.info] = index;
+
+                                    if (vertices != null)
+                                        vertices.Add(tile[indices.y]);
+                                }
+
+                                face.indices[flipped[2]] = index;
+                                face.indices[flipped[0]] = delta;
+                                faces(face);
+                            }
+                        }
+                    }
+
+                }
+                else
+                {
+                    if (!nodes.x.info.Equals(nodes.y.info) && !nodes.y.info.Equals(nodes.w.info))
+                    {
+                        Vector3Int tileIndices = new Vector3Int(0, 1, 3);
+
+                        Face face = default(Face);
+                        face.depth = depth;
+                        face.axis = axis;
+                        face.sizeDelta = sizeDelta;
+                        for (i = 0; i < 3; ++i)
+                        {
+                            delta = tileIndices[i];
+                            x = nodes[delta];
+                            if (!infoIndices.TryGetValue(x.info, out index))
+                            {
+                                index = numVertices++;
+
+                                infoIndices[x.info] = index;
+
+                                if (vertices != null)
+                                    vertices.Add(tile[delta]);
+                            }
+
+                            face.indices[flipped[i]] = index;
+                        }
+
+                        if (faces != null)
+                            faces(face);
+                    }
+
+                    if (!nodes.w.info.Equals(nodes.z.info) && !nodes.z.info.Equals(nodes.x.info))
+                    {
+                        Vector3Int tileIndices = new Vector3Int(3, 2, 0);
+
+                        Face face = default(Face);
+                        face.depth = depth;
+                        face.axis = axis;
+                        face.sizeDelta = sizeDelta;
+                        for (i = 0; i < 3; ++i)
+                        {
+                            delta = tileIndices[i];
+                            x = nodes[delta];
+                            if (!infoIndices.TryGetValue(x.info, out index))
+                            {
+                                index = numVertices++;
+
+                                infoIndices[x.info] = index;
+
+                                if (vertices != null)
+                                    vertices.Add(tile[delta]);
+                            }
+
+                            face.indices[flipped[i]] = index;
+                        }
+
+                        if (faces != null)
+                            faces(face);
+                    }
                 }
 
                 return isNeedTess;
             }
-                
-            private void __ContourProcessEdge(Boundary boundary, Axis axis, Node4 nodes, TileProcessor tileProcessor)
+
+            private void __ContourProcessTile(
+                Axis axis, 
+                int depth,
+                Vector3Int sizeDelta,
+                Tile<int> tile,
+                IList<Vertex> vertices,
+                Action<Face> faces)
             {
-                if (tileProcessor == null)
+                if (faces == null)
                     return;
-                
-                int depth = int.MinValue, index = -1;
+
+                int x = tile[0], y = tile[1], z = tile[2], w = tile[3];
+                Face face;
+                face.depth = depth;
+                face.axis = axis;
+                face.sizeDelta = sizeDelta;
+                if (Vector3.Dot(vertices[y].normal.normalized, vertices[z].normal.normalized) > Vector3.Dot(vertices[x].normal.normalized, vertices[w].normal.normalized))
+                {
+                    face.indices = new Vector3Int(x, y, z);
+                    faces(face);
+
+                    face.indices = new Vector3Int(z, y, w);
+                    faces(face);
+                }
+                else
+                {
+                    face.indices = new Vector3Int(x, y, w);
+                    faces(face);
+
+                    face.indices = new Vector3Int(x, w, z);
+                    faces(face);
+                }
+            }
+
+            private void __ContourProcessEdge(
+                Boundary boundary, 
+                Axis axis,
+                Node4 nodes,
+                IList<Vertex> vertices,
+                IDictionary<Edge<Info>, int> edgeIndices,
+                IDictionary<Info, int> infoIndices,
+                Action<Face> faces)
+            {
+                int depth = int.MinValue, index = -1, i;
                 NodeInfo nodeInfo;
-                for (int i = 0; i < 4; ++i)
+                Vector3 position;
+                Block block;
+                Tile<Vertex> tile = default(Tile<Vertex>);
+                for (i = 0; i < 4; ++i)
                 {
                     nodeInfo = nodes[i];
+                    if (Get(nodeInfo.info, out position) && Get(nodeInfo.info, out block))
+                        tile[i] = new Vertex(position, block.normal, block.qef);
+                    else
+                        Debug.LogWarning("Failed To Get Point.");
+
                     if (nodeInfo.info.depth > depth)
                     {
                         depth = nodeInfo.info.depth;
@@ -1805,34 +2149,57 @@ namespace ZG.Voxel
                 if (isSign)
                     return;
 
-                Vector3Int offset;
-                __Get(nodeInfo.info, isFlip ? new Vector2Int(vertexIndices.y, vertexIndices.x) : vertexIndices, out offset);// (nodeInfo.info.position + (isFlip ? __childMinOffsets[vertexIndices.y] : __childMinOffsets[vertexIndices.x])) * (1 << (__depth - depth));
+                Vector3Int sizeDelta;
+                __Get(nodeInfo.info, isFlip ? new Vector2Int(vertexIndices.y, vertexIndices.x) : vertexIndices, out sizeDelta);// (nodeInfo.info.position + (isFlip ? __childMinOffsets[vertexIndices.y] : __childMinOffsets[vertexIndices.x])) * (1 << (__depth - depth));
 
-                if (IsBoundary(offset, 1 << (__depth - depth), boundary))
+                if (IsBoundary(nodes.sizeDelta, 1 << (__depth - depth), boundary))
                     return;
 
-                if (isFlip)
-                    tileProcessor(
-                        axis,
-                        offset, 
-                        nodes.z.info,
-                        nodes.x.info,
-                        nodes.w.info,
-                        nodes.y.info);
-                else
-                    tileProcessor(
-                        axis,
-                        offset, 
-                        nodes.z.info,
-                        nodes.w.info,
-                        nodes.x.info,
-                        nodes.y.info);
+                if (__ContourProcessNoInter(isFlip, axis, depth, nodes.sizeDelta, tile, nodes, vertices, edgeIndices, infoIndices, faces))
+                    return;
+
+                return;
+                int numVertices = vertices == null ? 0 : vertices.Count;
+                Tile<int> indices = default(Tile<int>);
+                for (i = 0; i < 4; ++i)
+                {
+                    nodeInfo = nodes[i];
+                    if (!infoIndices.TryGetValue(nodeInfo.info, out index))
+                    {
+                        index = numVertices++;
+
+                        infoIndices[nodeInfo.info] = index;
+
+                        if (vertices != null)
+                            vertices.Add(tile[i]);
+                    }
+
+                    indices[i] = index;
+                }
+
+                __ContourProcessTile(
+                    axis, 
+                    depth,
+                    sizeDelta,
+                    isFlip ? new Tile<int>(indices.z, indices.x, indices.w, indices.y) : new Tile<int>(indices.z, indices.w, indices.x, indices.y), 
+                    vertices, 
+                    faces);
             }
 
-            private void __ContourEdgeProc(Boundary boundary, Axis axis, Node4 nodes, TileProcessor tileProcessor)
+            private void __ContourEdgeProc(
+                Boundary boundary, 
+                Axis axis, 
+                int length, 
+                Node4 nodes,
+                IList<Vertex> vertices,
+                IDictionary<Edge<Info>, int> edgeIndices,
+                IDictionary<Info, int> infoIndices,
+                Action<Face> faces)
             {
                 if (nodes.isInternal)
                 {
+                    length >>= 1;
+
                     bool result;
                     int i, j;
                     NodeInfo nodeInfo, temp;
@@ -1860,23 +2227,42 @@ namespace ZG.Voxel
                         }
 
                         if (result)
-                            __ContourEdgeProc(boundary, (Axis)__edgeProcEdgeMask[(int)axis, i, 4], edgeNodes, tileProcessor);
+                        {
+                            edgeNodes.sizeDelta = nodes.sizeDelta;
+                            edgeNodes.sizeDelta[(int)axis] += length * i;
+
+                            __ContourEdgeProc(boundary, (Axis)__edgeProcEdgeMask[(int)axis, i, 4], length, edgeNodes, vertices, edgeIndices, infoIndices, faces);
+                        }
                     }
                 }
                 else
-                    __ContourProcessEdge(boundary, axis, nodes, tileProcessor);
+                    __ContourProcessEdge(boundary, axis, nodes, vertices, edgeIndices, infoIndices, faces);
             }
 
-            private void __ContourFaceProc(Boundary boundary, Axis axis, Node2 nodes, TileProcessor tileProcessor)
+            private void __ContourFaceProc(
+                Boundary boundary, 
+                Axis axis, 
+                int length, 
+                Node2 nodes,
+                IList<Vertex> vertices,
+                IDictionary<Edge<Info>, int> edgeIndices,
+                IDictionary<Info, int> infoIndices,
+                Action<Face> faces)
             {
                 if (!nodes.isInternal)
                     return;
 
+                length >>= 1;
+
                 bool result;
                 int i, j, index;
+                Axis edgeAxis;
+                Vector3Int offset = __childMinOffsets[__faceProcFaceMask[(int)axis, 0, 0]], sizeDelta = nodes.sizeDelta + new Vector3Int(length, length, length);
                 NodeInfo nodeInfo, temp;
                 Node2 faceNodes = new Node2();
                 Node4 edgeNodes = new Node4();
+
+                sizeDelta[(int)axis] -= length;
                 for (i = 0; i < 4; ++i)
                 {
                     result = true;
@@ -1900,7 +2286,11 @@ namespace ZG.Voxel
                     }
 
                     if (result)
-                        __ContourFaceProc(boundary, (Axis)__faceProcFaceMask[(int)axis, i, 2], faceNodes, tileProcessor);
+                    {
+                        faceNodes.sizeDelta = nodes.sizeDelta + (__childMinOffsets[__faceProcFaceMask[(int)axis, i, 0]] - offset) * length;
+
+                        __ContourFaceProc(boundary, (Axis)__faceProcFaceMask[(int)axis, i, 2], length, faceNodes, vertices, edgeIndices, infoIndices, faces);
+                    }
 
                     result = true;
 
@@ -1924,37 +2314,60 @@ namespace ZG.Voxel
                     }
 
                     if (result)
-                        __ContourEdgeProc(boundary, (Axis)__faceProcEdgeMask[(int)axis, i, 5], edgeNodes, tileProcessor);
+                    {
+                        edgeNodes.sizeDelta = sizeDelta;
+
+                        edgeAxis = (Axis)__faceProcEdgeMask[(int)axis, i, 5];
+                        if ((i & 1) == 0)
+                            edgeNodes.sizeDelta[(int)edgeAxis] -= length;
+
+                        __ContourEdgeProc(boundary, edgeAxis, length, edgeNodes, vertices, edgeIndices, infoIndices, faces);
+                    }
                 }
             }
 
-            private bool __ContourCellProc(Boundary boundary, NodeInfo nodeInfo, TileProcessor tileProcessor)
+            private bool __ContourCellProc(
+                Boundary boundary,
+                Vector3Int sizeDelta, 
+                NodeInfo nodeInfo, 
+                IList<Vertex> vertices,
+                IDictionary<Edge<Info>, int> edgeIndices,
+                IDictionary<Info, int> infoIndices,
+                Action<Face> faces)
             {
                 if (nodeInfo.type != Type.Internal)
                     return false;
-
-                int i;
+                
+                int length = 1 << (__depth - nodeInfo.info.depth - 1), i;
                 NodeInfo temp;
                 for (i = 0; i < 8; ++i)
                 {
-                    if(__Get(i, nodeInfo.info, out temp))
-                        __ContourCellProc(boundary, temp, tileProcessor);
+                    if (__Get(i, nodeInfo.info, out temp))
+                        __ContourCellProc(boundary, sizeDelta + __childMinOffsets[i] * length, temp, vertices, edgeIndices, infoIndices, faces);
                 }
 
+                sizeDelta += new Vector3Int(length, length, length);
+
+                int j;
                 Node2 faceNodes;
                 Vector3Int cellProcFaceMask;
-                for (i = 0; i < 12; ++i)
+                for(i = 0; i < 3; ++i)
                 {
-                    cellProcFaceMask = __cellProcFaceMask[i];
-                    if(!__Get(cellProcFaceMask.x, nodeInfo.info, out faceNodes.x) ||
-                       !__Get(cellProcFaceMask.y, nodeInfo.info, out faceNodes.y))
-                        continue;
-                    
-                    __ContourFaceProc(boundary, (Axis)cellProcFaceMask.z, faceNodes, tileProcessor);
+                    for (j = 0; j < 4; ++j)
+                    {
+                        cellProcFaceMask = __cellProcFaceMask[(i << 2) + j];
+                        if (!__Get(cellProcFaceMask.x, nodeInfo.info, out faceNodes.x) ||
+                           !__Get(cellProcFaceMask.y, nodeInfo.info, out faceNodes.y))
+                            continue;
+
+                        faceNodes.sizeDelta = sizeDelta + __edgeToBlockOffsets[i, j] * length;
+
+                        __ContourFaceProc(boundary, (Axis)cellProcFaceMask.z, length, faceNodes, vertices, edgeIndices, infoIndices, faces);
+                    }
                 }
 
                 bool result;
-                int j;
+                Axis axis;
                 Node4 edgeNodes = new Node4();
                 for (i = 0; i < 6; ++i)
                 {
@@ -1975,7 +2388,13 @@ namespace ZG.Voxel
                     if (!result)
                         continue;
 
-                    __ContourEdgeProc(boundary, (Axis)__cellProcEdgeMask[i, 4], edgeNodes, tileProcessor);
+                    axis = (Axis)__cellProcEdgeMask[i, 4];
+
+                    edgeNodes.sizeDelta = sizeDelta;
+                    if((i & 1) == 0)
+                        edgeNodes.sizeDelta[(int)axis] -= length;
+
+                    __ContourEdgeProc(boundary, axis, length, edgeNodes, vertices, edgeIndices, infoIndices, faces);
                 }
 
                 return true;
@@ -2010,10 +2429,15 @@ namespace ZG.Voxel
         };
 
         private static Vector3Int[,] __edgeToBlockOffsets =
-        {
+        /*{
             { new Vector3Int(0, 0, 0), new Vector3Int(0, 0, -1), new Vector3Int(0, -1, 0), new Vector3Int(0, -1, -1) }, 
             { new Vector3Int(0, 0, 0), new Vector3Int(0, 0, -1), new Vector3Int(-1, 0, 0), new Vector3Int(-1, 0, -1) },
             { new Vector3Int(0, 0, 0), new Vector3Int(0, -1, 0), new Vector3Int(-1, 0, 0), new Vector3Int(-1, -1, 0) },
+        };*/
+        {
+            { new Vector3Int(0, -1, -1), new Vector3Int(0, -1, 0), new Vector3Int(0, 0, -1), new Vector3Int(0, 0, 0) },
+            { new Vector3Int(-1, 0, -1), new Vector3Int(0, 0, -1), new Vector3Int(-1, 0, 0), new Vector3Int(0, 0, 0) },
+            { new Vector3Int(-1, -1, 0), new Vector3Int(-1, 0, 0), new Vector3Int(0, -1, 0), new Vector3Int(0, 0, 0) },
         };
 
         private int __depth;

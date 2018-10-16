@@ -134,17 +134,13 @@ namespace ZG.Voxel
             }
         }
         
-        public delegate int TileProcessor(
+        public delegate int SubMeshHandler(
             int level, 
-            DualContouring.Axis axis,
-            Vector3Int offset,
-            DualContouring.Octree.Info x,
-            DualContouring.Octree.Info y, 
-            DualContouring.Octree.Info z, 
-            DualContouring.Octree.Info w, 
+            DualContouring.Octree.Face face,
+            IReadOnlyList<DualContouring.Octree.Vertex> vertices, 
             DualContouring.Octree octree);
 
-        public TileProcessor tileProcessor;
+        public SubMeshHandler subMeshHandler;
         
         [SerializeField]
         internal int _depth;
@@ -443,9 +439,9 @@ namespace ZG.Voxel
                         info.position,
                         Create(info.position)))
                     {
-                        if (octree.Build(DualContouring.Octree.Boundary.LeftLowerBack, (aixs, offset, x, y, z, w) =>
+                        if (octree.Build(DualContouring.Octree.Boundary.LeftLowerBack, (face, vertices) =>
                         {
-                            return tileProcessor == null ? 0 : tileProcessor(i, aixs, offset, x, y, z, w, octree);
+                            return subMeshHandler == null ? 0 : subMeshHandler(i, face, vertices, octree);
                         }, out mesh))
                         {
                             if(level.minCollapseDegree > 0)

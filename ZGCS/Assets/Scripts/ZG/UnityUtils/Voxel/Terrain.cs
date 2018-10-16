@@ -1572,7 +1572,7 @@ namespace ZG.Voxel
         
         public FlatTerrain()
         {
-            tileProcessor = __GetMaterialIndex;
+            subMeshHandler = __GetMaterialIndex;
         }
 
 #if UNITY_EDITOR
@@ -1775,7 +1775,7 @@ namespace ZG.Voxel
                             volumeInfos, 
                             layerInfos, 
                             lineInfos, 
-                            drawInfos, 
+                            null, //drawInfos, 
                             Instantiate);
                 }
             }
@@ -1833,13 +1833,9 @@ namespace ZG.Voxel
         }
         
         private int __GetMaterialIndex(
-            int level, 
-            DualContouring.Axis axis,
-            Vector3Int offset,
-            DualContouring.Octree.Info x,
-            DualContouring.Octree.Info y,
-            DualContouring.Octree.Info z,
-            DualContouring.Octree.Info w,
+            int level,
+            DualContouring.Octree.Face face,
+            IReadOnlyList<DualContouring.Octree.Vertex> vertices,
             DualContouring.Octree octree)
         {
             if (octree == null)
@@ -1849,9 +1845,10 @@ namespace ZG.Voxel
             Engine engine = builder == null ? null : builder.parent as Engine;
             if (engine == null)
                 return -1;
-            
-            Vector3 scale = base.scale, position = octree.offset + Vector3.Scale(offset, scale);
-            offset = Vector3Int.RoundToInt(new Vector3(position.x / scale.x, position.y / scale.y, position.z / scale.z));
+
+            Vector3 scale = base.scale,
+                position = octree.offset + Vector3.Scale(face.sizeDelta, scale);
+            Vector3Int offset = Vector3Int.RoundToInt(new Vector3(position.x / scale.x, position.y / scale.y, position.z / scale.z));
             Block block;
             if (!engine.Get(offset, out block))
             {
@@ -1862,7 +1859,7 @@ namespace ZG.Voxel
 
             int numMaterials = materialInfos == null ? 0 : materialInfos.Length;
             int result = block.materialIndex >= 0 && block.materialIndex < numMaterials ? materialInfos[block.materialIndex].index : -1;
-            if (level > 0)
+            //if (level > 0)
                 return result;
 
             lock(__nodes)
@@ -1875,63 +1872,21 @@ namespace ZG.Voxel
 
             if (objectInfos != null)
             {
-                Vector3 pointX;
-                if (!octree.Get(x, out pointX))
-                {
-                    Debug.Log("wtf?");
-
-                    return result;
-                }
-
-                Vector3 pointY;
-                if (!octree.Get(y, out pointY))
-                {
-                    Debug.Log("wtf?");
-
-                    return result;
-                }
-
-                Vector3 pointZ;
-                if (!octree.Get(z, out pointZ))
-                {
-                    Debug.Log("wtf?");
-
-                    return result;
-                }
-
-                Vector3 pointW;
-                if (!octree.Get(w, out pointW))
-                {
-                    Debug.Log("wtf?");
-
-                    return result;
-                }
-
-                DualContouring.Block a, b, c, d;
-                if (!octree.Get(x, out a) || !octree.Get(y, out b) || !octree.Get(z, out c) || !octree.Get(w, out d))
-                {
-                    Debug.Log("wtf?");
-
-                    return result;
-                }
-
-                float area;
-                Vector3 normal = (a.normal + b.normal + c.normal + d.normal).normalized;
-                if (Vector3.Dot(b.normal.normalized, c.normal.normalized) > Vector3.Dot(a.normal.normalized, d.normal.normalized))
-                    area = __ComputeArea(pointX, pointY, pointZ) + __ComputeArea(pointZ, pointY, pointW);
-                else
-                    area = __ComputeArea(pointX, pointY, pointW) + __ComputeArea(pointX, pointW, pointZ);
-                
-                area /= scale.x * scale.y * scale.z / (Mathf.Min(scale.x, scale.y, scale.z));
                 lock (__random)
                 {
+                    Triangle triangle = new Triangle(vertices[face.indices.x].position, vertices[face.indices.y].position, vertices[face.indices.z].position);
+
+                    float area = triangle.area;
+                    Vector3 normal = triangle.normal;
+                    Plane plane = new Plane(normal, triangle.x);
+                    area /= scale.x * scale.y * scale.z / (Mathf.Min(scale.x, scale.y, scale.z));
+
                     bool isContains;
                     int numObjectInfos = objectInfos == null ? 0 : objectInfos.Length, numGameObjects = gameObjects == null ? 0 : gameObjects.Length;
                     float chance, temp;
-                    Plane plane;
                     ObjectInfo objectInfo;
                     GameObject gameObject;
-                    for(int i = 0; i < numObjectInfos; ++i)
+                    for (int i = 0; i < numObjectInfos; ++i)
                     {
                         objectInfo = objectInfos[i];
 
@@ -1964,8 +1919,7 @@ namespace ZG.Voxel
                             gameObject = objectInfo.index >= 0 && objectInfo.index < numGameObjects ? gameObjects[objectInfo.index] : null;
                             if (gameObject == null)
                                 continue;
-
-                            plane = new Plane(normal, pointX);
+                            
                             temp = objectInfo.range * 2.0f;
                             Vector3 finalPosition = plane.ClosestPointOnPlane(
                                 position + new Vector3(
@@ -2011,7 +1965,7 @@ namespace ZG.Voxel
                                 Mesh mesh;
                                 Transform transform;
                                 MeshFilter[] meshFilters = target.GetComponentsInChildren<MeshFilter>(true);
-                                Vector3[] vertices = new Vector3[8];
+                                Vector3[] corners = new Vector3[8];
                                 foreach (MeshFilter meshFilter in meshFilters)
                                 {
                                     mesh = meshFilter == null ? null : meshFilter.sharedMesh;
@@ -2038,20 +1992,20 @@ namespace ZG.Voxel
                                             if (maxDistance > 0.0f)
                                             {
                                                 bounds.GetCorners((matrix * transform.localToWorldMatrix),
-                                                    out vertices[0],
-                                                    out vertices[1],
-                                                    out vertices[2],
-                                                    out vertices[3],
-                                                    out vertices[4],
-                                                    out vertices[5],
-                                                    out vertices[6],
-                                                    out vertices[7]);
+                                                    out corners[0],
+                                                    out corners[1],
+                                                    out corners[2],
+                                                    out corners[3],
+                                                    out corners[4],
+                                                    out corners[5],
+                                                    out corners[6],
+                                                    out corners[7]);
 
-                                                Array.Sort(vertices, __Compare);
+                                                Array.Sort(corners, __Compare);
 
-                                                if (!Physics.Raycast(vertices[0], Vector3.down, maxDistance, layerMask) ||
-                                                    !Physics.Raycast(vertices[1], Vector3.down, maxDistance, layerMask) ||
-                                                    !Physics.Raycast(vertices[2], Vector3.down, maxDistance, layerMask))
+                                                if (!Physics.Raycast(corners[0], Vector3.down, maxDistance, layerMask) ||
+                                                    !Physics.Raycast(corners[1], Vector3.down, maxDistance, layerMask) ||
+                                                    !Physics.Raycast(corners[2], Vector3.down, maxDistance, layerMask))
                                                     return false;
                                             }
                                         }
@@ -2082,20 +2036,20 @@ namespace ZG.Voxel
                                         if (maxDistance > 0.0f)
                                         {
                                             bounds.GetCorners((matrix * transform.localToWorldMatrix),
-                                                out vertices[0],
-                                                out vertices[1],
-                                                out vertices[2],
-                                                out vertices[3],
-                                                out vertices[4],
-                                                out vertices[5],
-                                                out vertices[6],
-                                                out vertices[7]);
+                                                out corners[0],
+                                                out corners[1],
+                                                out corners[2],
+                                                out corners[3],
+                                                out corners[4],
+                                                out corners[5],
+                                                out corners[6],
+                                                out corners[7]);
 
-                                            Array.Sort(vertices, __Compare);
+                                            Array.Sort(corners, __Compare);
 
-                                            if (!Physics.Raycast(vertices[0], Vector3.down, maxDistance, layerMask) ||
-                                                !Physics.Raycast(vertices[1], Vector3.down, maxDistance, layerMask) ||
-                                                !Physics.Raycast(vertices[2], Vector3.down, maxDistance, layerMask))
+                                            if (!Physics.Raycast(corners[0], Vector3.down, maxDistance, layerMask) ||
+                                                !Physics.Raycast(corners[1], Vector3.down, maxDistance, layerMask) ||
+                                                !Physics.Raycast(corners[2], Vector3.down, maxDistance, layerMask))
                                                 return false;
                                         }
                                     }
@@ -2128,14 +2082,7 @@ namespace ZG.Voxel
 
             return result;
         }
-
-        private static float __ComputeArea(Vector3 x, Vector3 y, Vector3 z)
-        {
-            float a = (x - y).magnitude, b = (y - z).magnitude, c = (z - x).magnitude, p = (a + b + c) * 0.5f;
-
-            return Mathf.Sqrt(p * (p - a) * (p - b) * (p - c));
-        }
-
+        
         private static int __Compare(Vector3 x, Vector3 y)
         {
             return Mathf.RoundToInt(x.y - y.y);
