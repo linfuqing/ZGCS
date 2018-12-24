@@ -101,6 +101,15 @@ namespace ZG
                 matrix.MultiplyPoint(bounds.center), 
                 absAxisX * size.x + absAxisY * size.y + absAxisZ * size.z);
         }
+        
+        public static Bounds Multiply(this Quaternion rotation, Bounds bounds)
+        {
+            Vector3 absAxisX = Abs(rotation * Vector3.right), 
+                    absAxisY = Abs(rotation * Vector3.up), 
+                    absAxisZ = Abs(rotation * Vector3.forward), 
+                    size = bounds.size;
+            return new Bounds(bounds.center, absAxisX * size.x + absAxisY * size.y + absAxisZ * size.z);
+        }
 
         public static void GetCorners(
             this Bounds bounds,

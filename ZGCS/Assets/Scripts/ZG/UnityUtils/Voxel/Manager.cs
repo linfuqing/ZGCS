@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace ZG.Voxel
+namespace ZG.Voxel.Old
 {
     [System.Serializable]
     public struct Level

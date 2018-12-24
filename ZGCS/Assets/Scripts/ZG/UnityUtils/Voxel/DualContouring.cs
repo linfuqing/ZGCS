@@ -4,17 +4,8 @@ using UnityEngine;
 
 namespace ZG.Voxel
 {
-    public abstract class DualContouring
+    public class DualContouring : IEngine
     {
-        public enum Axis
-        {
-            X,
-            Y,
-            Z,
-
-            Unkown
-        }
-        
         private struct Edge
         {
             public bool isInside;
@@ -48,19 +39,8 @@ namespace ZG.Voxel
                 return obj.GetHashCode();
             }
         }
-
-        public interface IBuilder
-        {
-            DualContouring parent { get; }
-
-            bool Create(Vector3Int world);
-
-            bool Set(BoundsInt bounds);
-
-            bool Set(Vector3Int position);
-        }
-
-        public class VoxelBuilder : IBuilder
+        
+        public class VoxelBuilder : IEngineBuilder
         {
             private DualContouring __parent;
             private Dictionary<Vector3Int, HashSet<Vector3Int>> __voxels;
@@ -133,7 +113,7 @@ namespace ZG.Voxel
 
                                 local = new Vector3Int(i, j, k);
 
-                                from = Vector3.Scale(world + local, __parent.__scale) + __parent.__offset;
+                                from = Vector3.Scale(world + local, __parent.__scale);
                                 x = __parent.GetDensity(from);
                                 for (m = 0; m < (int)Axis.Unkown; ++m)
                                 {
@@ -159,7 +139,7 @@ namespace ZG.Voxel
 
                                             for (l = 0; l < 8; ++l)
                                             {
-                                                if (__parent.GetDensity(Vector3.Scale(position + __childMinOffsets[l], __parent.__scale) + __parent.__offset) < 0.0f)
+                                                if (__parent.GetDensity(Vector3.Scale(position + __childMinOffsets[l], __parent.__scale)) < 0.0f)
                                                     block.corners |= 1 << l;
                                             }
                                         }
@@ -296,7 +276,7 @@ namespace ZG.Voxel
             }
         }
 
-        public class BoundsBuilder : IBuilder
+        public class BoundsBuilder : IEngineBuilder
         {
             private DualContouring __parent;
             private Dictionary<Vector3Int, BoundsInt> __bounds;
@@ -370,7 +350,7 @@ namespace ZG.Voxel
 
                             local = new Vector3Int(i, j, k);
 
-                            from = Vector3.Scale(world + local, __parent.__scale) + __parent.__offset;
+                            from = Vector3.Scale(world + local, __parent.__scale);
                             x = __parent.GetDensity(from);
                             for (m = 0; m < (int)Axis.Unkown; ++m)
                             {
@@ -396,7 +376,7 @@ namespace ZG.Voxel
 
                                         for (l = 0; l < 8; ++l)
                                         {
-                                            if (__parent.GetDensity(Vector3.Scale(position + __childMinOffsets[l], __parent.__scale) + __parent.__offset) < 0.0f)
+                                            if (__parent.GetDensity(Vector3.Scale(position + __childMinOffsets[l], __parent.__scale)) < 0.0f)
                                                 block.corners |= 1 << l;
                                         }
                                     }
@@ -593,35 +573,15 @@ namespace ZG.Voxel
             }
         }
         
-        public class Octree
+        public class Octree : IEngineProcessor<DualContouring>
         {
-            [Flags]
-            public enum Boundary
-            {
-                None = 0x00,
-
-                Left = 0x01,
-                Right = 0x02,
-
-                Lower = 0x04,
-                Upper = 0x08,
-
-                Back = 0x10,
-                Front = 0x20,
-
-                LeftLowerBack = Left | Lower | Back,
-                RightUpperFront = Right | Upper | Front,
-
-                All = LeftLowerBack | RightUpperFront
-            }
-
             public enum Type
             {
                 Internal,
                 Psuedo,
                 Leaf
             }
-            
+
             public struct Info : IEquatable<Info>
             {
                 public int depth;
@@ -638,71 +598,6 @@ namespace ZG.Voxel
                 {
                     return depth == info.depth && position == info.position;
                 }
-            }
-
-            public struct Vertex : IEquatable<Vertex>
-            {
-                public int count;
-
-                public Vector3 position;
-                public Vector3 normal;
-
-                public Qef qef;
-
-                public Vertex(Vector3 position, Vector3 normal, Qef qef)
-                {
-                    this.count = 1;
-                    this.position = position;
-                    this.normal = normal;
-                    this.qef = qef;
-                }
-
-                public bool Equals(Vertex vertex)
-                {
-                    return position == vertex.position && normal == vertex.normal;
-                }
-
-                public static Vertex operator +(Vertex x, Vertex y)
-                {
-                    x.count += y.count;
-                    x.position += y.position;
-                    x.normal += y.normal;
-                    x.qef += y.qef;
-
-                    return x;
-                }
-
-                public static Vertex Solve(Vertex x, Vertex y, /*Vector3 min, Vector3 max, */int svdSweeps)
-                {
-                    x.qef += y.qef;
-                    x.normal += y.normal;
-                    x.position = (x.position + y.position) * 0.5f;
-
-                    /*if (x.position.x < min.x || x.position.y < min.y || x.position.z < min.z || x.position.x > max.x || x.position.y > max.y || x.position.z > max.z)
-                        x.position = x.qef.massPoint;*/
-
-                    return x;
-                }
-
-                public static implicit operator MeshData<Vector3>.Vertex(Vertex vertex)
-                {
-                    MeshData<Vector3>.Vertex result;
-                    result.position = vertex.position / vertex.count;
-                    result.data = vertex.normal.normalized;
-
-                    return result;
-                }
-            }
-
-            public struct Face
-            {
-                public int depth;
-
-                public Axis axis;
-
-                public Vector3Int sizeDelta;
-
-                public Vector3Int indices;
             }
 
             private struct Tile<T>
@@ -914,7 +809,8 @@ namespace ZG.Voxel
                     return obj.GetHashCode();
                 }
             }
-            
+
+            #region BUILD_PROC_TABLES
             private static readonly Vector3Int[] __cellProcFaceMask =
             {
                 new Vector3Int(0, 4, 0),
@@ -956,12 +852,31 @@ namespace ZG.Voxel
 
             private static readonly int[,] __processEdgeMask = { { 3, 2, 1, 0 }, { 7, 5, 6, 4 }, { 11, 10, 9, 8 } };
 
-            private static readonly int[,] __orders =
+            private static readonly int[,] __faceOrders =
             {
                 { 0, 0, 1, 1 },
                 { 0, 1, 0, 1 },
             };
+            #endregion
 
+            #region INTER_FREE_TABLES
+            private static readonly int[,,] __triangleIndices = { { { 0, 1, 3, 2 }, { 3, 2, 0, 1 } }, { { 2, 0, 1, 3 }, { 1, 3, 2, 0 } } };
+            private static readonly Vector2Int[] __neighborNodeIndices = { new Vector2Int(0, 1), new Vector2Int(1, 3), new Vector2Int(2, 3), new Vector2Int(0, 2) };
+            private static readonly Vector2Int[,] __faceAxisOffsets =
+            {
+                { new Vector2Int(1, -1), new Vector2Int(2, 0), new Vector2Int(1, 0), new Vector2Int(2, -1) },
+                { new Vector2Int(2, -1), new Vector2Int(0, 0), new Vector2Int(2, 0), new Vector2Int(0, -1) },
+                { new Vector2Int(0, -1), new Vector2Int(1, 0), new Vector2Int(0, 0), new Vector2Int(1, -1) }
+            };
+
+            private static readonly int[,] __faceAxes =
+            {
+                {2,1,2,1},
+                {0,2,0,2},
+                {1,0,1,0}
+            };
+            #endregion
+            
             private int __sweeps;
             private int __depth;
             private Vector3 __scale;
@@ -1077,7 +992,7 @@ namespace ZG.Voxel
                 __sweeps = sweeps;
                 __depth = parent.__depth;
                 __scale = parent.__scale;
-                __offset = Vector3.Scale(world * ((1 << __depth) - 1), parent.__scale) + parent.__offset;
+                __offset = Vector3.Scale(world * ((1 << __depth) - 1), parent.__scale);
 
                 int depth = __nodes == null ? 0 : __nodes.Length;
                 if (depth < __depth)
@@ -1816,22 +1731,6 @@ namespace ZG.Voxel
                 return result;
             }
 
-            private static readonly int[,,] __triangleIndices = {{{0,1,3,2},{3,2,0,1}},{{2,0,1,3},{1,3,2,0}}} ;
-            private static readonly Vector2Int[] __neighborNodeIndices = { new Vector2Int(0, 1), new Vector2Int(1, 3), new Vector2Int(2, 3), new Vector2Int(0, 2) };
-            private static readonly Vector2Int[,] __faceAxisOffsets =
-            {
-                { new Vector2Int(1, -1), new Vector2Int(2, 0), new Vector2Int(1, 0), new Vector2Int(2, -1) },
-                { new Vector2Int(2, -1), new Vector2Int(0, 0), new Vector2Int(2, 0), new Vector2Int(0, -1) },
-                { new Vector2Int(0, -1), new Vector2Int(1, 0), new Vector2Int(0, 0), new Vector2Int(1, -1) }
-            };
-
-            private static readonly int[,] __faceAxes =
-            {
-                {2,1,2,1},
-                {0,2,0,2},
-                {1,0,1,0}
-            };
-
             private bool __ContourProcessNoInter(
                 bool isFlip, 
                 Axis axis, 
@@ -2155,10 +2054,10 @@ namespace ZG.Voxel
                 if (IsBoundary(nodes.sizeDelta, 1 << (__depth - depth), boundary))
                     return;
 
-                if (__ContourProcessNoInter(isFlip, axis, depth, nodes.sizeDelta, tile, nodes, vertices, edgeIndices, infoIndices, faces))
+                /*if (__ContourProcessNoInter(isFlip, axis, depth, nodes.sizeDelta, tile, nodes, vertices, edgeIndices, infoIndices, faces))
                     return;
 
-                return;
+                return;*/
                 int numVertices = vertices == null ? 0 : vertices.Count;
                 Tile<int> indices = default(Tile<int>);
                 for (i = 0; i < 4; ++i)
@@ -2297,7 +2196,7 @@ namespace ZG.Voxel
                     index = __faceProcEdgeMask[(int)axis, i, 0];
                     for (j = 0; j < 4; ++j)
                     {
-                        nodeInfo = nodes[__orders[index, j]];
+                        nodeInfo = nodes[__faceOrders[index, j]];
                         if (nodeInfo.type == Type.Internal)
                         {
                             if (!__Get(__faceProcEdgeMask[(int)axis, i, j + 1], nodeInfo.info, out temp))
@@ -2443,7 +2342,7 @@ namespace ZG.Voxel
         private int __depth;
         private float __increment;
         private Vector3 __scale;
-        private Vector3 __offset;
+        private IEngineSampler __sampler;
         private Dictionary<Vector3Int, Dictionary<Vector3Int, Block>> __blocks;
 
         public int depth
@@ -2469,21 +2368,13 @@ namespace ZG.Voxel
                 return __scale;
             }
         }
-
-        public Vector3 offset
-        {
-            get
-            {
-                return __offset;
-            }
-        }
-
-        public DualContouring(int depth, float increment, Vector3 scale, Vector3 offset)
+        
+        public DualContouring(int depth, float increment, Vector3 scale, IEngineSampler sampler)
         {
             __depth = depth;
             __increment = increment;
             __scale = scale;
-            __offset = offset;
+            __sampler = sampler;
         }
 
         public Vector3 ApproximateZeroCrossingPosition(Vector3 x, Vector3 y)
@@ -2529,7 +2420,7 @@ namespace ZG.Voxel
             return blocks.Count > 0;
         }
 
-        public void Create(Vector3Int world, float increment)
+        /*public void Create(Vector3Int world, float increment)
         {
             if (__blocks == null)
                 __blocks = new Dictionary<Vector3Int, Dictionary<Vector3Int, Block>>(new Vector3IntEqualityComparer());
@@ -2601,7 +2492,7 @@ namespace ZG.Voxel
                     }
                 }
             }
-        }
+        }*/
         
         public bool Destroy(Vector3Int world)
         {
@@ -2617,6 +2508,9 @@ namespace ZG.Voxel
             return true;
         }
         
-        public abstract float GetDensity(Vector3 position);
+        public float GetDensity(Vector3 position)
+        {
+            return __sampler == null ? 0.0f : __sampler.GetDensity(position);
+        }
     }
 }
