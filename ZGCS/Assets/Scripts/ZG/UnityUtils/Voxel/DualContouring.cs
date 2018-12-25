@@ -58,6 +58,17 @@ namespace ZG.Voxel
                 __parent = parent;
             }
 
+            public bool Check(Vector3Int world)
+            {
+                if (__parent == null)
+                    return false;
+
+                if (__voxels == null)
+                    return false;
+
+                return __voxels.ContainsKey(world);
+            }
+
             public bool Create(Vector3Int world)
             {
                 if (__parent == null)
@@ -292,6 +303,17 @@ namespace ZG.Voxel
             public BoundsBuilder(DualContouring parent)
             {
                 __parent = parent;
+            }
+
+            public bool Check(Vector3Int world)
+            {
+                if (__parent == null)
+                    return false;
+
+                if (__bounds == null)
+                    return false;
+
+                return __bounds.ContainsKey(world);
             }
 
             public bool Create(Vector3Int world)

@@ -966,7 +966,7 @@ namespace ZG
 
         public Vector3 Solve(/*float svdTol, */int svdSweeps/*, float pinvTol*/)
         {
-            return Solve();
+            //return Solve();
 
             Vector3 massPoint = this.massPoint;
             return __data.ata.SolveSymmetric(/*svdTol, */svdSweeps, /*pinvTol, */__data.atb - __data.ata.Multiply(massPoint)) + massPoint;

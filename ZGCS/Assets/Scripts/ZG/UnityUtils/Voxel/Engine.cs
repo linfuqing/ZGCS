@@ -112,6 +112,8 @@ namespace ZG.Voxel
 
     public interface IEngineBuilder
     {
+        bool Check(Vector3Int world);
+
         bool Create(Vector3Int world);
 
         bool Set(BoundsInt bounds);

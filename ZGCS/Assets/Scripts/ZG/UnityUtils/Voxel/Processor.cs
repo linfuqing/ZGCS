@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -104,16 +105,35 @@ namespace ZG.Voxel
                 this.levels = levels;
             }
         }
-        
+
+        private struct ThreadData : IEquatable<ThreadData>
+        {
+            public int id;
+            public int version;
+
+            public bool Equals(ThreadData other)
+            {
+                return id == other.id && version == other.version;
+            }
+
+            public override int GetHashCode()
+            {
+                return id;
+            }
+        }
+
         private struct MeshData
         {
             public Info info;
 
+            public ThreadData threadData;
+
             public IDictionary<Vector3Int, MeshData<Vector3>>[] meshes;
 
-            public MeshData(Info info, IDictionary<Vector3Int, MeshData<Vector3>>[] meshes)
+            public MeshData(Info info, ThreadData threadData, IDictionary<Vector3Int, MeshData<Vector3>>[] meshes)
             {
                 this.info = info;
+                this.threadData = threadData;
                 this.meshes = meshes;
             }
         }
@@ -130,13 +150,13 @@ namespace ZG.Voxel
                 this.levels = levels;
             }
         }
-
+        
         public struct Instance
         {
             public UnityEngine.Object target;
             public Predicate<UnityEngine.Object> predicate;
             public Action<UnityEngine.Object> handler;
-
+            
             public Instance(UnityEngine.Object target, Predicate<UnityEngine.Object> predicate, Action<UnityEngine.Object> handler)
             {
                 this.target = target;
@@ -144,7 +164,7 @@ namespace ZG.Voxel
                 this.handler = handler;
             }
         }
-        
+
         public delegate int SubMeshHandler(
             int level, 
             Face face,
@@ -152,6 +172,8 @@ namespace ZG.Voxel
             U processor);
 
         public SubMeshHandler subMeshHandler;
+
+        public int millisecondsTimeout = 2000;
         
         [SerializeField]
         internal int _depth;
@@ -171,14 +193,16 @@ namespace ZG.Voxel
         private volatile int __count;
 
         private BoundsInt __bounds;
-        private IEngineBuilder __builder;
-        private T __engine;
+        private volatile IEngineBuilder __builder;
+        private ReaderWriterLockSlim __readerWriterLockSlim = new ReaderWriterLockSlim();
         private List<Vector3Int> __buffer;
-        private List<Instance> __instances = new List<Instance>();
         private List<Info> __in = new List<Info>();
         private Pool<MeshData> __out = new Pool<MeshData>();
         private Pool<U> __processors = new Pool<U>();
         private Dictionary<Vector3Int, ObjectData> __objects = new Dictionary<Vector3Int, ObjectData>();
+        private Dictionary<ThreadData, List<Instance>> __instances = new Dictionary<ThreadData, List<Instance>>();
+        private Dictionary<ThreadData, int> __threadCounters = new Dictionary<ThreadData, int>();
+        private Dictionary<int, int> __threadVersions = new Dictionary<int, int>();
 
         public int depth
         {
@@ -211,11 +235,16 @@ namespace ZG.Voxel
                 lock (this)
                 {
                     if (__builder == null)
-                        Create(_depth, _increment, scale, out __builder, out __engine);
+                        __builder = Create(_depth, _increment, scale);
                 }
 
                 return __builder;
             }
+        }
+
+        ~Processor()
+        {
+            __readerWriterLockSlim.Dispose();
         }
         
         public bool GetLevels(float distance, out Level[] levels)
@@ -388,16 +417,44 @@ namespace ZG.Voxel
             Rebuild(new BoundsInt(min.x, min.y, min.z, max.x - min.x, max.y - min.y, max.z - min.z));
         }
 
-        public void Instantiate(Instance instance)
+        public bool Instantiate(Instance instance)
         {
-            lock(__instances)
+            ThreadData threadData;
+            threadData.id = Thread.CurrentThread.ManagedThreadId;
+            lock (__threadVersions)
             {
-                __instances.Add(instance);
+                if (!__threadVersions.TryGetValue(threadData.id, out threadData.version))
+                    return false;
             }
+            
+            lock (__instances)
+            {
+                List<Instance> instances;
+                if(!__instances.TryGetValue(threadData, out instances))
+                {
+                    instances = new List<Instance>();
+
+                    __instances[threadData] = instances;
+                }
+
+                instances.Add(instance);
+            }
+
+            return true;
         }
 
         public bool ThreadUpdate()
         {
+            ThreadData threadData;
+            threadData.id = Thread.CurrentThread.ManagedThreadId;
+            lock (__threadVersions)
+            {
+                if (!__threadVersions.TryGetValue(threadData.id, out threadData.version))
+                    threadData.version = 0;
+
+                __threadVersions[threadData.id] = ++threadData.version;
+            }
+
             int index, numLevels, mask, i;
             Vector3 min, max;
             Level level;
@@ -405,6 +462,8 @@ namespace ZG.Voxel
             Bounds bounds;
             MeshData<Vector3> mesh;
             U processor;
+            T engine;
+            IEngineBuilder builder;
             Dictionary<Vector3Int, MeshData<Vector3>> map;
             List<KeyValuePair<Vector3Int, MeshData<Vector3>>> buffer;
             List<KeyValuePair<Vector3Int, MeshData<Vector3>>>[] meshes;
@@ -439,45 +498,107 @@ namespace ZG.Voxel
                 }
 
                 numLevels = info.levels == null ? 0 : info.levels.Length;
+
                 meshes = null;
-                for (i = 0; i < numLevels; ++i)
+
+                builder = this.builder;
+                if (builder != null)
                 {
-                    level = info.levels[i];
-                    
-                    if (processor.Create(
-                        (level.flag & Flag.Boundary) == 0 ? Boundary.None : Boundary.All,
-                        level.qefSweeps,
-                        level.threshold,
-                        info.position,
-                        Create(info.position)))
+                    engine = default(T);
+                    while (true)
                     {
-                        if (processor.Build(Boundary.LeftLowerBack, (face, vertices) =>
+                        if (__readerWriterLockSlim.TryEnterWriteLock(millisecondsTimeout))
                         {
-                            return subMeshHandler == null ? 0 : subMeshHandler(i, face, vertices, processor);
-                        }, out mesh))
+                            engine = CreateOrUpdate(info.position);
+
+                            __readerWriterLockSlim.ExitWriteLock();
+
+                            break;
+                        }
+                        else
+                            Debug.LogWarning("CreateOrUpdate Timeout.");
+                    }
+
+                    while (true)
+                    {
+                        if (__readerWriterLockSlim.TryEnterUpgradeableReadLock(millisecondsTimeout))
                         {
-                            if(level.minCollapseDegree > 0)
+                            if (builder.Check(info.position))
                             {
-                                mesh = mesh.Simplify(
-                                    level.qefSweeps,
-                                    level.minCollapseDegree,
-                                    level.maxCollapseDegree,
-                                    level.maxIterations,
-                                    level.targetPecentage,
-                                    level.edgeFraction,
-                                    level.minAngleCosine,
-                                    level.maxEdgeSize,
-                                    level.maxError);
+                                while (true)
+                                {
+                                    if (__readerWriterLockSlim.TryEnterWriteLock(millisecondsTimeout))
+                                    {
+                                        builder.Create(info.position);
+                                        __readerWriterLockSlim.ExitWriteLock();
+
+                                        break;
+                                    }
+                                    else
+                                        Debug.LogWarning("Write Timeout.");
+                                }
                             }
 
-                            if (meshes == null)
-                                meshes = new List<KeyValuePair<Vector3Int, MeshData<Vector3>>>[numLevels];
+                            __readerWriterLockSlim.ExitUpgradeableReadLock();
 
-                            buffer = new List<KeyValuePair<Vector3Int, MeshData<Vector3>>>();
-                            buffer.Add(new KeyValuePair<Vector3Int, MeshData<Vector3>>(Vector3Int.zero, mesh));
-
-                            meshes[i] = buffer;
+                            break;
                         }
+                        else
+                            Debug.LogWarning("Upgrade Timeout.");
+                    }
+
+                    while (true)
+                    {
+                        if (__readerWriterLockSlim.TryEnterReadLock(millisecondsTimeout))
+                        {
+                            for (i = 0; i < numLevels; ++i)
+                            {
+                                level = info.levels[i];
+
+                                if (processor.Create(
+                                    (level.flag & Flag.Boundary) == 0 ? Boundary.None : Boundary.All,
+                                    level.qefSweeps,
+                                    level.threshold,
+                                    info.position,
+                                    engine))
+                                {
+                                    int temp = i;
+                                    if (processor.Build(Boundary.LeftLowerBack, (face, vertices) =>
+                                    {
+                                        return subMeshHandler == null ? 0 : subMeshHandler(temp, face, vertices, processor);
+                                    }, out mesh))
+                                    {
+                                        if (level.minCollapseDegree > 0)
+                                        {
+                                            mesh = mesh.Simplify(
+                                                level.qefSweeps,
+                                                level.minCollapseDegree,
+                                                level.maxCollapseDegree,
+                                                level.maxIterations,
+                                                level.targetPecentage,
+                                                level.edgeFraction,
+                                                level.minAngleCosine,
+                                                level.maxEdgeSize,
+                                                level.maxError);
+                                        }
+
+                                        if (meshes == null)
+                                            meshes = new List<KeyValuePair<Vector3Int, MeshData<Vector3>>>[numLevels];
+
+                                        buffer = new List<KeyValuePair<Vector3Int, MeshData<Vector3>>>();
+                                        buffer.Add(new KeyValuePair<Vector3Int, MeshData<Vector3>>(Vector3Int.zero, mesh));
+
+                                        meshes[i] = buffer;
+                                    }
+                                }
+                            }
+                            
+                            __readerWriterLockSlim.ExitReadLock();
+
+                            break;
+                        }
+                        else
+                            Debug.LogWarning("Read Timeout.");
                     }
                 }
 
@@ -521,12 +642,23 @@ namespace ZG.Voxel
                     }
                 }
 
+                lock (__threadCounters)
+                {
+                    if (!__threadCounters.TryGetValue(threadData, out i))
+                        i = 0;
+
+                    ++i;
+
+                    __threadCounters[threadData] = i;
+                }
+
                 lock (__out)
                 {
-                    __out.Add(new MeshData(info, result));
+                    __out.Add(new MeshData(info, threadData, result));
                     
                     --__count;
                 }
+
             } while (result == null);
             
             return true;
@@ -534,108 +666,200 @@ namespace ZG.Voxel
 
         public GameObject MainUpdate()
         {
-            KeyValuePair<int, MeshData> pair;
+            KeyValuePair<int, MeshData>? pair;
             lock (__out)
             {
                 Pool<MeshData>.PairEnumerator enumerable = __out.GetPairEnumerator();
-                if (!enumerable.MoveNext())
-                    return null;
+                if (enumerable.MoveNext())
+                {
+                    pair = enumerable.Current;
 
-                pair = enumerable.Current;
-
-                __out.RemoveAt(pair.Key);
+                    __out.RemoveAt(pair.Value.Key);
+                }
+                else
+                    pair = null;
             }
 
-            MeshData meshData = pair.Value;
-
-            int count = Mathf.Min(
-                meshData.info.levels == null ? 0 : meshData.info.levels.Length, 
-                meshData.meshes == null ? 0 : meshData.meshes.Length);
-
             GameObject gameObject;
-            if (count < 1)
+            if (pair == null)
                 gameObject = null;
             else
             {
-                IDictionary<Vector3Int, MeshData<Vector3>> source = meshData.meshes[0];
-                if (source == null)
+                MeshData meshData = pair.Value.Value;
+
+                int count = Mathf.Min(
+                    meshData.info.levels == null ? 0 : meshData.info.levels.Length,
+                    meshData.meshes == null ? 0 : meshData.meshes.Length);
+
+                if (count < 1)
                     gameObject = null;
                 else
                 {
-                    if (count > 1)
-                    {
+                    IDictionary<Vector3Int, MeshData<Vector3>> source = meshData.meshes[0];
+                    if (source == null)
                         gameObject = null;
-
-                        int i;
-                        Vector3Int position;
-                        Level level;
-                        LOD lod;
-                        MeshData<Vector3> instance;
-                        Transform root = null, parent = null, child;
-                        GameObject local, world;
-                        MeshCollider meshCollider;
-                        LODGroup lodGroup;
-                        IDictionary<Vector3Int, MeshData<Vector3>> destination;
-                        List<LOD> lods;
-                        List<Renderer> renderers = null;
-                        List<MeshFilter> meshFilters = null;
-                        foreach (KeyValuePair<Vector3Int, MeshData<Vector3>> mesh in source)
+                    else
+                    {
+                        if (count > 1)
                         {
-                            world = null;
-                            lodGroup = null;
-                            lods = null;
+                            gameObject = null;
 
-                            position = mesh.Key;
-                            for (i = 0; i < count; ++i)
+                            int i;
+                            Vector3Int position;
+                            Level level;
+                            LOD lod;
+                            MeshData<Vector3> instance;
+                            Transform root = null, parent = null, child;
+                            GameObject local, world;
+                            MeshCollider meshCollider;
+                            LODGroup lodGroup;
+                            IDictionary<Vector3Int, MeshData<Vector3>> destination;
+                            List<LOD> lods;
+                            List<Renderer> renderers = null;
+                            List<MeshFilter> meshFilters = null;
+                            foreach (KeyValuePair<Vector3Int, MeshData<Vector3>> mesh in source)
                             {
-                                destination = meshData.meshes[i];
-                                if (destination == null || !destination.TryGetValue(position, out instance))
+                                world = null;
+                                lodGroup = null;
+                                lods = null;
+
+                                position = mesh.Key;
+                                for (i = 0; i < count; ++i)
+                                {
+                                    destination = meshData.meshes[i];
+                                    if (destination == null || !destination.TryGetValue(position, out instance))
+                                        continue;
+
+                                    level = meshData.info.levels[i];
+
+                                    local = Convert(instance, level);
+                                    if (local == null)
+                                        continue;
+
+                                    if (gameObject == null)
+                                    {
+                                        gameObject = new GameObject();
+
+                                        root = gameObject.transform;
+                                    }
+
+                                    if (world == null)
+                                    {
+                                        world = new GameObject();
+
+                                        parent = world.transform;
+                                        if (parent != null)
+                                            parent.SetParent(root);
+
+                                        lodGroup = world.AddComponent<LODGroup>();
+                                    }
+
+                                    child = local.transform;
+                                    if (child != null)
+                                        child.SetParent(parent);
+
+                                    if (renderers == null)
+                                        renderers = new List<Renderer>();
+
+                                    local.GetComponentsInChildren(renderers);
+
+                                    lod.screenRelativeTransitionHeight = level.screenRelativeTransitionHeight;
+                                    lod.fadeTransitionWidth = level.fadeTransitionWidth;
+                                    lod.renderers = renderers.ToArray();
+
+                                    if (lods == null)
+                                        lods = new List<LOD>();
+
+                                    lods.Add(lod);
+
+                                    local.isStatic = (level.flag & Flag.Static) != 0;
+
+                                    if ((level.flag & Flag.CastShadows) == 0)
+                                    {
+                                        foreach (Renderer renderer in renderers)
+                                            renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                                    }
+                                    else
+                                    {
+                                        foreach (Renderer renderer in renderers)
+                                            renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
+                                    }
+
+                                    if ((level.flag & Flag.Collide) != 0)
+                                    {
+                                        local = UnityEngine.Object.Instantiate(local, parent);
+                                        if (local != null)
+                                        {
+                                            if ((level.flag & Flag.Static) != 0)
+                                                local.isStatic = false;
+
+                                            local.GetComponentsInChildren(renderers);
+                                            if (local != null)
+                                            {
+                                                foreach (Renderer renderer in renderers)
+                                                    UnityEngine.Object.Destroy(renderer);
+
+                                                if (meshFilters == null)
+                                                    meshFilters = new List<MeshFilter>();
+
+                                                local.GetComponentsInChildren(meshFilters);
+                                                foreach (MeshFilter meshFilter in meshFilters)
+                                                {
+                                                    local = meshFilter == null ? null : meshFilter.gameObject;
+                                                    meshCollider = local == null ? null : local.AddComponent<MeshCollider>();
+                                                    if (meshCollider != null)
+                                                    {
+                                                        meshCollider.sharedMesh = meshFilter.sharedMesh;
+
+                                                        UnityEngine.Object.Destroy(meshFilter);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                                if (lodGroup != null && lods != null)
+                                {
+                                    lodGroup.SetLODs(lods.ToArray());
+                                }
+                            }
+                        }
+                        else
+                        {
+                            gameObject = null;
+
+                            Level level = meshData.info.levels[0];
+                            Transform parent = null, child;
+                            GameObject instance, temp;
+                            MeshCollider meshCollider;
+                            List<Renderer> renderers = null;
+                            List<MeshFilter> meshFilters = null;
+                            foreach (KeyValuePair<Vector3Int, MeshData<Vector3>> mesh in source)
+                            {
+                                instance = Convert(mesh.Value, level);
+                                if (instance == null)
                                     continue;
 
-                                level = meshData.info.levels[i];
-
-                                local = Convert(instance, level);
-                                if (local == null)
+                                child = instance == null ? null : instance.transform;
+                                if (child == null)
                                     continue;
 
                                 if (gameObject == null)
                                 {
                                     gameObject = new GameObject();
 
-                                    root = gameObject.transform;
+                                    parent = gameObject.transform;
                                 }
 
-                                if (world == null)
-                                {
-                                    world = new GameObject();
+                                child.SetParent(parent);
 
-                                    parent = world.transform;
-                                    if (parent != null)
-                                        parent.SetParent(root);
-
-                                    lodGroup = world.AddComponent<LODGroup>();
-                                }
-
-                                child = local.transform;
-                                if (child != null)
-                                    child.SetParent(parent);
+                                instance.isStatic = (level.flag & Flag.Static) != 0;
 
                                 if (renderers == null)
                                     renderers = new List<Renderer>();
 
-                                local.GetComponentsInChildren(renderers);
-
-                                lod.screenRelativeTransitionHeight = level.screenRelativeTransitionHeight;
-                                lod.fadeTransitionWidth = level.fadeTransitionWidth;
-                                lod.renderers = renderers.ToArray();
-
-                                if (lods == null)
-                                    lods = new List<LOD>();
-
-                                lods.Add(lod);
-
-                                local.isStatic = (level.flag & Flag.Static) != 0;
-
+                                instance.GetComponentsInChildren(renderers);
                                 if ((level.flag & Flag.CastShadows) == 0)
                                 {
                                     foreach (Renderer renderer in renderers)
@@ -649,158 +873,77 @@ namespace ZG.Voxel
 
                                 if ((level.flag & Flag.Collide) != 0)
                                 {
-                                    local = UnityEngine.Object.Instantiate(local, parent);
-                                    if (local != null)
+                                    if (meshFilters == null)
+                                        meshFilters = new List<MeshFilter>();
+
+                                    instance.GetComponentsInChildren(meshFilters);
+
+                                    foreach (MeshFilter meshFilter in meshFilters)
                                     {
-                                        if ((level.flag & Flag.Static) != 0)
-                                            local.isStatic = false;
-
-                                        local.GetComponentsInChildren(renderers);
-                                        if (local != null)
-                                        {
-                                            foreach (Renderer renderer in renderers)
-                                                UnityEngine.Object.Destroy(renderer);
-                                            
-                                            if (meshFilters == null)
-                                                meshFilters = new List<MeshFilter>();
-
-                                            local.GetComponentsInChildren(meshFilters);
-                                            foreach(MeshFilter meshFilter in meshFilters)
-                                            {
-                                                local = meshFilter == null ? null : meshFilter.gameObject;
-                                                meshCollider = local == null ? null : local.AddComponent<MeshCollider>();
-                                                if (meshCollider != null)
-                                                {
-                                                    meshCollider.sharedMesh = meshFilter.sharedMesh;
-
-                                                    UnityEngine.Object.Destroy(meshFilter);
-                                                }
-                                            }
-                                        }
+                                        temp = meshFilter == null ? null : meshFilter.gameObject;
+                                        meshCollider = temp == null ? null : temp.AddComponent<MeshCollider>();
+                                        if (meshCollider != null)
+                                            meshCollider.sharedMesh = meshFilter.sharedMesh;
                                     }
                                 }
                             }
+                        }
+                    }
+                }
+                
+                lock (__threadCounters)
+                {
+                    if (__threadCounters.TryGetValue(meshData.threadData, out count))
+                    {
+                        if (count > 1)
+                            __threadCounters[meshData.threadData] = count - 1;
+                        else
+                        {
+                            __threadCounters.Remove(meshData.threadData);
 
-                            if (lodGroup != null && lods != null)
+                            lock (__instances)
                             {
-                                lodGroup.SetLODs(lods.ToArray());
+                                List<Instance> instances;
+                                if (__instances.TryGetValue(meshData.threadData, out instances) && instances != null)
+                                {
+                                    UnityEngine.Object target;
+                                    foreach (Instance instance in instances)
+                                    {
+                                        if (instance.predicate != null && !instance.predicate(instance.target))
+                                            continue;
+
+                                        target = UnityEngine.Object.Instantiate(instance.target);
+                                        if (instance.handler != null)
+                                            instance.handler(target);
+                                    }
+
+                                    instances.Clear();
+                                }
                             }
                         }
                     }
                     else
-                    {
-                        gameObject = null;
-
-                        Level level = meshData.info.levels[0];
-                        Transform parent = null, child;
-                        GameObject instance, temp;
-                        MeshCollider meshCollider;
-                        List<Renderer> renderers = null;
-                        List<MeshFilter> meshFilters = null;
-                        foreach (KeyValuePair<Vector3Int, MeshData<Vector3>> mesh in source)
-                        {
-                            instance = Convert(mesh.Value, level);
-                            if (instance == null)
-                                continue;
-
-                            child = instance == null ? null : instance.transform;
-                            if (child == null)
-                                continue;
-
-                            if (gameObject == null)
-                            {
-                                gameObject = new GameObject();
-
-                                parent = gameObject.transform;
-                            }
-
-                            child.SetParent(parent);
-
-                            instance.isStatic = (level.flag & Flag.Static) != 0;
-
-                            if (renderers == null)
-                                renderers = new List<Renderer>();
-
-                            instance.GetComponentsInChildren(renderers);
-                            if ((level.flag & Flag.CastShadows) == 0)
-                            {
-                                foreach (Renderer renderer in renderers)
-                                    renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-                            }
-                            else
-                            {
-                                foreach (Renderer renderer in renderers)
-                                    renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
-                            }
-
-                            if ((level.flag & Flag.Collide) != 0)
-                            {
-                                if (meshFilters == null)
-                                    meshFilters = new List<MeshFilter>();
-
-                                instance.GetComponentsInChildren(meshFilters);
-
-                                foreach (MeshFilter meshFilter in meshFilters)
-                                {
-                                    temp = meshFilter == null ? null : meshFilter.gameObject;
-                                    meshCollider = temp == null ? null : temp.AddComponent<MeshCollider>();
-                                    if (meshCollider != null)
-                                        meshCollider.sharedMesh = meshFilter.sharedMesh;
-                                }
-                            }
-                        }
-                    }
+                        Debug.LogError("WTF?");
                 }
-            }
 
-            //lock (__objects)
-            {
-                ObjectData objectData;
-                if (__objects.TryGetValue(meshData.info.position, out objectData) && objectData.gameObject != null)
-                    UnityEngine.Object.Destroy(objectData.gameObject);
-
-                __objects[meshData.info.position] = new ObjectData(gameObject, meshData.info.levels);
-            }
-
-            if (gameObject == null)
-            {
-                lock (__instances)
+                //lock (__objects)
                 {
-                    UnityEngine.Object target;
-                    foreach (Instance instance in __instances)
-                    {
-                        if (instance.predicate != null && !instance.predicate(instance.target))
-                            continue;
+                    ObjectData objectData;
+                    if (__objects.TryGetValue(meshData.info.position, out objectData) && objectData.gameObject != null)
+                        UnityEngine.Object.Destroy(objectData.gameObject);
 
-                        target = UnityEngine.Object.Instantiate(instance.target);
-                        if(instance.handler != null)
-                            instance.handler(target);
-                    }
-
-                    __instances.Clear();
+                    __objects[meshData.info.position] = new ObjectData(gameObject, meshData.info.levels);
                 }
             }
-
+            
             return gameObject;
         }
-        
-        public virtual T Create(Vector3Int world)
-        {
-            IEngineBuilder builder = this.builder;
-            if (builder == null)
-                return default(T);
-
-            lock (builder)
-            {
-                builder.Create(world);
-            }
-
-            return __engine;
-        }
-
-        public abstract bool Create(int depth, float increment, Vector3 scale, out IEngineBuilder builder, out T engine);
 
         public abstract GameObject Convert(MeshData<Vector3> meshData, Level level);
+
+        public abstract T CreateOrUpdate(Vector3Int world);
+
+        public abstract IEngineBuilder Create(int depth, float increment, Vector3 scale);
 
         private bool __Check(Info info, BoundsInt bounds)
         {

@@ -160,6 +160,17 @@ namespace ZG.Voxel
                 __parent = parent;
             }
 
+            public bool Check(Vector3Int world)
+            {
+                if (__parent == null)
+                    return false;
+
+                if (__bounds == null)
+                    return false;
+
+                return __bounds.ContainsKey(world);
+            }
+
             public bool Create(Vector3Int world)
             {
                 if (__parent == null)
@@ -2214,7 +2225,7 @@ namespace ZG.Voxel
         
         private static readonly int[,] __edgeIndices = { { 3, 2, 1, 0 }, { 7, 5, 6, 4 }, { 11, 10, 9, 8 } };
 
-        #region MANIFOLD_TABLES
+#region MANIFOLD_TABLES
 
         private static int[] __verticesNumberTable =
         {
@@ -2495,7 +2506,7 @@ namespace ZG.Voxel
             { 0, 8, 4, -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
             { -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 }
         };
-        #endregion
+#endregion
 
         private int __depth;
         private float __increment;
