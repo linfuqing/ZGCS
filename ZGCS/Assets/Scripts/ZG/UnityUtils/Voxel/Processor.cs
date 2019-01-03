@@ -657,6 +657,8 @@ namespace ZG.Voxel
                     __out.Add(new MeshData(info, threadData, result));
                     
                     --__count;
+                    
+                    Debug.Log("Thread count: " + __count);
                 }
 
             } while (result == null);

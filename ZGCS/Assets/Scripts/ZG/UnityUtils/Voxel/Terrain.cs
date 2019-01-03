@@ -1786,10 +1786,10 @@ namespace ZG.Voxel
             Sampler instance = __sampler == null ? null : __sampler.instance as Sampler;
             if(instance != null)
             {
-                int i, j, size = (1 << depth) + 1, mask = size - 2;
-                Vector2Int min = new Vector2Int(world.x * mask - 1, world.z * mask - 1), max = min + new Vector2Int(size, size), position, offset;
+                int i, j, size = (1 << depth), mask = size - 1;
+                Vector2Int min = new Vector2Int(world.x * mask, world.z * mask), max = min + new Vector2Int(size, size);//, position, offset;
 
-                offset = new Vector2Int(min.x / mapSize.x, min.y / mapSize.y);
+                /*offset = new Vector2Int(min.x / mapSize.x, min.y / mapSize.y);
                 position = min - Vector2Int.Scale(offset, mapSize);
                 if(position.x < 0)
                     --offset.x;
@@ -1798,7 +1798,10 @@ namespace ZG.Voxel
                     --offset.y;
 
                 min = offset;
-                max = new Vector2Int(max.x / mapSize.x, max.y / mapSize.y);
+                max = new Vector2Int(max.x / mapSize.x, max.y / mapSize.y);*/
+
+                min = Vector2Int.FloorToInt(new Vector2(min.x * 1.0f / mapSize.x, min.y * 1.0f / mapSize.y)) - Vector2Int.one;
+                max = Vector2Int.CeilToInt(new Vector2(max.x * 1.0f / mapSize.x, max.y * 1.0f / mapSize.y)) + Vector2Int.one;
 
                 /*offset = new Vector2Int(max.x / mapSize.x, max.y / mapSize.y);
                 position = max - Vector2Int.Scale(offset, mapSize);
@@ -1809,7 +1812,7 @@ namespace ZG.Voxel
                     ++offset.y;
 
                 max = offset;*/
-                
+
                 for (i = min.x; i <= max.x; ++i)
                 {
                     for (j = min.y; j <= max.y; ++j)

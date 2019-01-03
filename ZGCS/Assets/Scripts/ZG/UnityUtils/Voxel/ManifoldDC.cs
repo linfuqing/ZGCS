@@ -136,19 +136,6 @@ namespace ZG.Voxel
             public int corners;
             public Tile<int> vertexIndices;
         }
-
-        public struct Vector3IntEqualityComparer : IEqualityComparer<Vector3Int>
-        {
-            bool IEqualityComparer<Vector3Int>.Equals(Vector3Int x, Vector3Int y)
-            {
-                return x == y;
-            }
-
-            int IEqualityComparer<Vector3Int>.GetHashCode(Vector3Int obj)
-            {
-                return obj.GetHashCode();
-            }
-        }
         
         public class BoundsBuilder : IEngineBuilder
         {
@@ -186,7 +173,7 @@ namespace ZG.Voxel
                 Vector3Int min = bounds.min, max = bounds.max;
 
                 if (__parent.__blocks == null)
-                    __parent.__blocks = new Dictionary<Vector3Int, Dictionary<Vector3Int, Block>>(new Vector3IntEqualityComparer());
+                    __parent.__blocks = new Dictionary<Vector3Int, Dictionary<Vector3Int, Block>>();
 
                 int i, j, k, l;
                 Vector3Int local;
@@ -194,7 +181,7 @@ namespace ZG.Voxel
                 Dictionary<Vector3Int, Block> blocks;
                 if (!__parent.__blocks.TryGetValue(world, out blocks) || blocks == null)
                 {
-                    blocks = new Dictionary<Vector3Int, Block>(1 << (__parent.__depth * 3), new Vector3IntEqualityComparer());
+                    blocks = new Dictionary<Vector3Int, Block>(1 << (__parent.__depth * 3));
 
                     __parent.__blocks[world] = blocks;
                 }
@@ -457,7 +444,7 @@ namespace ZG.Voxel
                 Vector3Int max = Vector3Int.Min(local + Vector3Int.one, new Vector3Int(size, size, size));
 
                 if (__bounds == null)
-                    __bounds = new Dictionary<Vector3Int, BoundsInt>(new Vector3IntEqualityComparer());
+                    __bounds = new Dictionary<Vector3Int, BoundsInt>();
 
                 BoundsInt bounds;
                 if (__bounds.TryGetValue(world, out bounds))
@@ -725,20 +712,7 @@ namespace ZG.Voxel
                     }
                 }
             }
-
-            private struct InfoIntEqualityComparer : IEqualityComparer<Info>
-            {
-                bool IEqualityComparer<Info>.Equals(Info x, Info y)
-                {
-                    return x.depth == y.depth && x.position == y.position;
-                }
-
-                int IEqualityComparer<Info>.GetHashCode(Info obj)
-                {
-                    return obj.GetHashCode();
-                }
-            }
-
+            
             #region BUILD_PROC_TABLES
             private static readonly Vector3Int[] __cellProcFaceMask =
             {
@@ -875,7 +849,7 @@ namespace ZG.Voxel
 
                 if (source == null)
                 {
-                    source = new Dictionary<Vector3Int, Node>(new Vector3IntEqualityComparer());
+                    source = new Dictionary<Vector3Int, Node>();
 
                     __nodes[depth] = source;
                 }
@@ -958,7 +932,7 @@ namespace ZG.Voxel
                     {
                         if (destination == null)
                         {
-                            destination = new Dictionary<Vector3Int, Node>(size * size * size, new Vector3IntEqualityComparer());
+                            destination = new Dictionary<Vector3Int, Node>(size * size * size);
 
                             __nodes[depth] = destination;
                         }
