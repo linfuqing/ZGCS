@@ -130,6 +130,13 @@ namespace ZG
             }
         }
 
+        public Vector3 GetPoint(float r1, float r2)
+        {
+            r1 = Mathf.Sqrt(r1);
+            
+            return (1 - r1) * x + (r1 * (1 - r2)) * y + (r1 * r2) * z;
+        }
+
         public bool IsSeparating(Vector3 axis, Vector3 x, Vector3 y)
         {
             axis.Normalize();

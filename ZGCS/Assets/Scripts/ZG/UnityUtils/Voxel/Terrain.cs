@@ -1517,6 +1517,8 @@ namespace ZG.Voxel
 
         public int seed = 186;
 
+        public int objectCountPerArea = 1;
+
         public int noiseSize;
         
         public Vector2Int mapSize;
@@ -1536,6 +1538,7 @@ namespace ZG.Voxel
         
         private System.Random __random;
         private Voxel.Sampler __sampler;
+        private List<int> __indices = new List<int>();
         private Dictionary<Vector3Int, Node> __nodes = new Dictionary<Vector3Int, Node>();
 
         public abstract T engine { get; }
@@ -1888,18 +1891,15 @@ namespace ZG.Voxel
             {
                 lock (__random)
                 {
-                    Triangle triangle = new Triangle(vertices[face.indices.x].position, vertices[face.indices.y].position, vertices[face.indices.z].position);
-
-                    float area = triangle.area / (scale.x * scale.y * scale.z) * Mathf.Min(scale.x, scale.y, scale.z) * 2.0f;
-                    Vector3 normal = triangle.normal;
-                    Plane plane = new Plane(normal, triangle.x);
+                    __indices.Clear();
 
                     bool isContains;
-                    int numObjectInfos = objectInfos == null ? 0 : objectInfos.Length, numGameObjects = gameObjects == null ? 0 : gameObjects.Length;
+                    int numObjectInfos = objectInfos == null ? 0 : objectInfos.Length, numGameObjects = gameObjects == null ? 0 : gameObjects.Length, i;
                     float chance, temp;
+                    Triangle triangle = new Triangle(vertices[face.indices.x].position, vertices[face.indices.y].position, vertices[face.indices.z].position);
+                    Vector3 normal = triangle.normal;
                     ObjectInfo objectInfo;
-                    GameObject gameObject;
-                    for (int i = 0; i < numObjectInfos; ++i)
+                    for (i = 0; i < numObjectInfos; ++i)
                     {
                         objectInfo = objectInfos[i];
 
@@ -1923,115 +1923,85 @@ namespace ZG.Voxel
                                 continue;
                         }
 
-                        chance = 1.0f - Mathf.Pow((1.0f - chance), area);
-
+                        //chance = 1.0f - Mathf.Pow((1.0f - chance), area);
                         if (Vector3.Dot(normal, objectInfo.normal) > objectInfo.dot &&
                             __Check(position.x, position.z, mapInfos, objectInfo.mapFilters, out temp) && temp > (float)__random.NextDouble() &&
                             chance > (float)__random.NextDouble())
+                            __indices.Add(i);
+                    }
+
+                    GameObject gameObject;
+                    float area = triangle.area / (scale.x * scale.y * scale.z) * Mathf.Min(scale.x, scale.y, scale.z) * 2.0f;
+                    int numIndices = __indices.Count, numObjects = Mathf.Min(numIndices, Mathf.RoundToInt(area * objectCountPerArea)), objectIndex;
+                    for (i = 0; i < numObjects; ++i)
+                    {
+                        if (numIndices < 1)
+                            break;
+
+                        objectIndex = __random.Next(0, numIndices--);
+                        objectInfo = objectInfos[__indices[objectIndex]];
+
+                        __indices[objectIndex] = __indices[numIndices];
+                        __indices.RemoveAt(numIndices);
+
+                        gameObject = objectInfo.index >= 0 && objectInfo.index < numGameObjects ? gameObjects[objectInfo.index] : null;
+                        if (gameObject == null)
+                            continue;
+
+                        //temp = objectInfo.range * 2.0f;
+                        Vector3 finalPosition = triangle.GetPoint((float)__random.NextDouble(), (float)__random.NextDouble()) /*plane.ClosestPointOnPlane(
+                                    position + new Vector3(
+                                        (float)(__random.NextDouble() * temp - objectInfo.range),
+                                        (float)(__random.NextDouble() * temp - objectInfo.range),
+                                        (float)(__random.NextDouble() * temp - objectInfo.range)))*/
+                            + objectInfo.normal * objectInfo.offset;
+
+                        Quaternion rotation;
+                        switch (objectInfo.rotation)
                         {
-                            gameObject = objectInfo.index >= 0 && objectInfo.index < numGameObjects ? gameObjects[objectInfo.index] : null;
-                            if (gameObject == null)
-                                continue;
-                            
-                            temp = objectInfo.range * 2.0f;
-                            Vector3 finalPosition = plane.ClosestPointOnPlane(
-                                position + new Vector3(
-                                    (float)(__random.NextDouble() * temp - objectInfo.range),
-                                    (float)(__random.NextDouble() * temp - objectInfo.range),
-                                    (float)(__random.NextDouble() * temp - objectInfo.range)))
-                                + objectInfo.normal * objectInfo.offset;
+                            case ObjectInfo.Rotation.AixY:
+                                rotation = Quaternion.Euler(0.0f, (float)(__random.NextDouble() * 360.0), 0.0f);
+                                break;
+                            case ObjectInfo.Rotation.NormalUp:
+                                rotation = Quaternion.FromToRotation(Vector3.up, normal);
+                                break;
+                            case ObjectInfo.Rotation.NormalAixY:
+                                rotation = Quaternion.FromToRotation(Vector3.up, normal) * Quaternion.Euler(0.0f, (float)(__random.NextDouble() * 360.0), 0.0f);
+                                break;
+                            case ObjectInfo.Rotation.All:
+                                rotation = Quaternion.Euler((float)(__random.NextDouble() * 360.0), (float)(__random.NextDouble() * 360.0), (float)(__random.NextDouble() * 360.0));
+                                break;
+                            default:
+                                rotation = Quaternion.identity;
+                                break;
+                        }
 
-                            Quaternion rotation;
-                            switch (objectInfo.rotation)
+                        int index = i, layerMask = ~objectInfo.ignoreMask;
+                        float top = objectInfo.top, bottom = objectInfo.bottom, maxDistance = objectInfo.distance;
+                        Matrix4x4 matrix = Matrix4x4.TRS(finalPosition, rotation, Vector3.one);
+                        Instantiate(new Instance(gameObject, x =>
+                        {
+                            GameObject target = x as GameObject;
+                            if (target == null)
+                                return false;
+
+                            Vector3 distance,
+                            min,
+                            max;
+                            Bounds bounds;
+                            Mesh mesh;
+                            Transform transform;
+                            MeshFilter[] meshFilters = target.GetComponentsInChildren<MeshFilter>(true);
+                            Vector3[] corners = new Vector3[8];
+                            foreach (MeshFilter meshFilter in meshFilters)
                             {
-                                case ObjectInfo.Rotation.AixY:
-                                    rotation = Quaternion.Euler(0.0f, (float)(__random.NextDouble() * 360.0), 0.0f);
-                                    break;
-                                case ObjectInfo.Rotation.NormalUp:
-                                    rotation = Quaternion.FromToRotation(Vector3.up, normal);
-                                    break;
-                                case ObjectInfo.Rotation.NormalAixY:
-                                    rotation = Quaternion.FromToRotation(Vector3.up, normal) * Quaternion.Euler(0.0f, (float)(__random.NextDouble() * 360.0), 0.0f);
-                                    break;
-                                case ObjectInfo.Rotation.All:
-                                    rotation = Quaternion.Euler((float)(__random.NextDouble() * 360.0), (float)(__random.NextDouble() * 360.0), (float)(__random.NextDouble() * 360.0));
-                                    break;
-                                default:
-                                    rotation = Quaternion.identity;
-                                    break;
-                            }
-
-                            int index = i, layerMask = ~objectInfo.ignoreMask;
-                            float top = objectInfo.top, bottom = objectInfo.bottom, maxDistance = objectInfo.distance;
-                            Matrix4x4 matrix = Matrix4x4.TRS(finalPosition, rotation, Vector3.one);
-                            Instantiate(new Instance(gameObject, x =>
-                            {
-                                GameObject target = x as GameObject;
-                                if (target == null)
-                                    return false;
-                                
-                                Vector3 distance, 
-                                min, 
-                                max;
-                                Bounds bounds;
-                                Mesh mesh;
-                                Transform transform;
-                                MeshFilter[] meshFilters = target.GetComponentsInChildren<MeshFilter>(true);
-                                Vector3[] corners = new Vector3[8];
-                                foreach (MeshFilter meshFilter in meshFilters)
+                                mesh = meshFilter == null ? null : meshFilter.sharedMesh;
+                                if (mesh != null)
                                 {
-                                    mesh = meshFilter == null ? null : meshFilter.sharedMesh;
-                                    if (mesh != null)
-                                    {
-                                        transform = meshFilter.transform;
-                                        if (transform != null)
-                                        {
-                                            bounds = mesh.bounds;
-                                            distance = transform.InverseTransformVector(Vector3.up * bottom);
-                                            min = bounds.min;
-                                            max = bounds.max;
-                                            min = Vector3.Max(min, min + distance);
-                                            max = Vector3.Min(max, max + distance);
-                                            bounds.SetMinMax(Vector3.Min(min, max), Vector3.Max(min, max));
-                                            bounds.Encapsulate(new Bounds(bounds.center + transform.InverseTransformVector(Vector3.up * top), bounds.size));
-
-                                            if (Physics.CheckBox(
-                                                    transform.TransformPoint(bounds.center) + finalPosition,
-                                                    Vector3.Scale(bounds.extents, transform.lossyScale),
-                                                    rotation * transform.rotation, 
-                                                    layerMask))
-                                                return false;
-
-                                            if (maxDistance > 0.0f)
-                                            {
-                                                bounds.GetCorners((matrix * transform.localToWorldMatrix),
-                                                    out corners[0],
-                                                    out corners[1],
-                                                    out corners[2],
-                                                    out corners[3],
-                                                    out corners[4],
-                                                    out corners[5],
-                                                    out corners[6],
-                                                    out corners[7]);
-
-                                                Array.Sort(corners, __Compare);
-
-                                                if (!Physics.Raycast(corners[0], Vector3.down, maxDistance, layerMask) ||
-                                                    !Physics.Raycast(corners[1], Vector3.down, maxDistance, layerMask) ||
-                                                    !Physics.Raycast(corners[2], Vector3.down, maxDistance, layerMask))
-                                                    return false;
-                                            }
-                                        }
-                                    }
-                                }
-
-                                SkinnedMeshRenderer[] skinnedMeshRenderers = target.GetComponentsInChildren<SkinnedMeshRenderer>(true);
-                                foreach (SkinnedMeshRenderer skinnedMeshRenderer in skinnedMeshRenderers)
-                                {
-                                    transform = skinnedMeshRenderer == null ? null : skinnedMeshRenderer.rootBone;
+                                    transform = meshFilter.transform;
                                     if (transform != null)
                                     {
-                                        bounds = skinnedMeshRenderer.localBounds;
+                                        bounds = mesh.bounds;
                                         distance = transform.InverseTransformVector(Vector3.up * bottom);
                                         min = bounds.min;
                                         max = bounds.max;
@@ -2039,7 +2009,7 @@ namespace ZG.Voxel
                                         max = Vector3.Min(max, max + distance);
                                         bounds.SetMinMax(Vector3.Min(min, max), Vector3.Max(min, max));
                                         bounds.Encapsulate(new Bounds(bounds.center + transform.InverseTransformVector(Vector3.up * top), bounds.size));
-                                        
+
                                         if (Physics.CheckBox(
                                                 transform.TransformPoint(bounds.center) + finalPosition,
                                                 Vector3.Scale(bounds.extents, transform.lossyScale),
@@ -2068,28 +2038,71 @@ namespace ZG.Voxel
                                         }
                                     }
                                 }
+                            }
 
-                                return true;
-                            }, x =>
+                            SkinnedMeshRenderer[] skinnedMeshRenderers = target.GetComponentsInChildren<SkinnedMeshRenderer>(true);
+                            foreach (SkinnedMeshRenderer skinnedMeshRenderer in skinnedMeshRenderers)
                             {
-                                Node node = new Node(index, x as GameObject);
-
-                                Transform transform = node.gameObject == null ? null : node.gameObject.transform;
+                                transform = skinnedMeshRenderer == null ? null : skinnedMeshRenderer.rootBone;
                                 if (transform != null)
                                 {
-                                    transform.position += finalPosition;
-                                    transform.rotation = rotation * transform.rotation;
-                                    transform.SetParent(root);
-                                }
+                                    bounds = skinnedMeshRenderer.localBounds;
+                                    distance = transform.InverseTransformVector(Vector3.up * bottom);
+                                    min = bounds.min;
+                                    max = bounds.max;
+                                    min = Vector3.Max(min, min + distance);
+                                    max = Vector3.Min(max, max + distance);
+                                    bounds.SetMinMax(Vector3.Min(min, max), Vector3.Max(min, max));
+                                    bounds.Encapsulate(new Bounds(bounds.center + transform.InverseTransformVector(Vector3.up * top), bounds.size));
 
-                                lock (__nodes)
-                                {
-                                    __nodes[offset] = node;
-                                }
-                            }));
+                                    if (Physics.CheckBox(
+                                            transform.TransformPoint(bounds.center) + finalPosition,
+                                            Vector3.Scale(bounds.extents, transform.lossyScale),
+                                            rotation * transform.rotation,
+                                            layerMask))
+                                        return false;
 
-                            break;
-                        }
+                                    if (maxDistance > 0.0f)
+                                    {
+                                        bounds.GetCorners((matrix * transform.localToWorldMatrix),
+                                            out corners[0],
+                                            out corners[1],
+                                            out corners[2],
+                                            out corners[3],
+                                            out corners[4],
+                                            out corners[5],
+                                            out corners[6],
+                                            out corners[7]);
+
+                                        Array.Sort(corners, __Compare);
+
+                                        if (!Physics.Raycast(corners[0], Vector3.down, maxDistance, layerMask) ||
+                                            !Physics.Raycast(corners[1], Vector3.down, maxDistance, layerMask) ||
+                                            !Physics.Raycast(corners[2], Vector3.down, maxDistance, layerMask))
+                                            return false;
+                                    }
+                                }
+                            }
+
+                            return true;
+                        }, x =>
+                        {
+                            Node node = new Node(index, x as GameObject);
+
+                            Transform transform = node.gameObject == null ? null : node.gameObject.transform;
+                            if (transform != null)
+                            {
+                                transform.position += finalPosition;
+                                transform.rotation = rotation * transform.rotation;
+                                transform.SetParent(root);
+                            }
+
+                            lock (__nodes)
+                            {
+                                __nodes[offset] = node;
+                            }
+                        }));
+                        //break;
                     }
                 }
             }
