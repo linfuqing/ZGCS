@@ -1507,7 +1507,7 @@ namespace ZG.Voxel
                         triangleX.y = tile[__triangleIndices[i, j, 1]].position;
                         triangleX.z = tile[__triangleIndices[i, j, 2]].position;
 
-                        if (triangleX.IsSeparating(triangleX.normal, x, y))
+                        if (triangleX.IsSeparating(triangleX.normalVector, x, y))
                             continue;
 
                         temp = tile[__triangleIndices[i, j, 3]].position;

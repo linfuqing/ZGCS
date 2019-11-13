@@ -71,11 +71,19 @@ namespace ZG
             }
         }
 
-        public Vector3 normal
+        public Vector3 normalVector
         {
             get
             {
                 return Vector3.Cross(y - x, z - y);
+            }
+        }
+
+        public Vector3 normal
+        {
+            get
+            {
+                return Vector3.Normalize(normalVector);
             }
         }
 
