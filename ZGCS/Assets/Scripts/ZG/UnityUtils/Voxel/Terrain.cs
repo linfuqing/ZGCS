@@ -107,6 +107,11 @@ namespace ZG.Voxel
     [Serializable]
     public struct LayerFilter
     {
+#if UNITY_EDITOR
+        [Index("layerInfos", relativePropertyPath = "index", pathLevel = 3)]
+        public string name;
+#endif
+
         [Index("layerInfos", pathLevel = 3, uniqueLevel = 1)]
         public int index;
         [Range(0.0f, 1.0f)]
@@ -132,18 +137,24 @@ namespace ZG.Voxel
     {
 #if UNITY_EDITOR
         public string name;
-#endif
+
         [Index("materialInfos", relativePropertyPath = "materialIndex", pathLevel = 1)]
         public string materialName;
-
+#endif
         [Index("materialInfos", pathLevel = 1)]
         public int materialIndex;
 
         [Index("volumeInfos", emptyName = "无", pathLevel = 1)]
         public int volumeIndex;
 
+#if UNITY_EDITOR
+        [Index("layerInfos", emptyName = "无", relativePropertyPath = "layerIndex", pathLevel = 1)]
+        public string layerName;
+#endif
+
         [Index("layerInfos", emptyName = "无", pathLevel = 1)]
-        public int layer;
+        [UnityEngine.Serialization.FormerlySerializedAs("layer")]
+        public int layerIndex;
 
         public int depth;
 
@@ -1125,7 +1136,7 @@ namespace ZG.Voxel
                             if (__Check(point.x, point.z, mapInfos, layerInfo.filters, out current))
                             {
                                 current = (layerInfo.power > 0.0f ? Mathf.Pow(current, layerInfo.power) : current) * layerInfo.scale + layerInfo.offset;
-                                current = current + (layerInfo.layer >= 0 ? __layers[layerInfo.layer] : 0.0f);
+                                current = current + (layerInfo.layerIndex >= 0 ? __layers[layerInfo.layerIndex] : 0.0f);
 
                                 if (layerInfo.max > 0.0f)
                                     current = Mathf.Min(current, layerInfo.max);
@@ -1651,36 +1662,65 @@ namespace ZG.Voxel
                 materialInfos[i] = materialInfo;
             }
 
-            int count = layerInfos == null ? 0 : layerInfos.Length;
-            LayerInfo layerInfo;
-            for (i = 0; i < count; ++i)
+            bool isContains;
+            int numLayerInfos = layerInfos == null ? 0 : layerInfos.Length;
+            LayerInfo layerInfo, temp;
+            for (i = 0; i < numLayerInfos; ++i)
             {
                 layerInfo = layerInfos[i];
 
+                isContains = false;
                 if (layerInfo.materialIndex < 0 || layerInfo.materialIndex >= numMaterialInfos)
+                    isContains = !string.IsNullOrEmpty(layerInfo.materialName);
+                else
+                    isContains = materialInfos[layerInfo.materialIndex].name != layerInfo.materialName;
+
+                if (isContains)
                 {
                     if (string.IsNullOrEmpty(layerInfo.materialName))
-                        continue;
-                }
-                else
-                {
-                    materialInfo = materialInfos[layerInfo.materialIndex];
-                    if (materialInfo.name == layerInfo.materialName)
-                        continue;
-                }
-
-                if (string.IsNullOrEmpty(layerInfo.materialName))
-                    layerInfo.materialIndex = -1;
-                else
-                {
-                    for (j = 0; j < numMaterialInfos; ++j)
+                        layerInfo.materialName = materialInfos[layerInfo.materialIndex].name;
+                    else
                     {
-                        materialInfo = materialInfos[j];
-                        if (materialInfo.name == layerInfo.materialName)
+                        for (j = 0; j < numMaterialInfos; ++j)
                         {
-                            layerInfo.materialIndex = j;
+                            materialInfo = materialInfos[j];
+                            if (materialInfo.name == layerInfo.materialName)
+                            {
+                                layerInfo.materialIndex = j;
 
-                            break;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                isContains = false;
+                if (layerInfo.layerIndex < 0)
+                {
+                    isContains = false;
+
+                    layerInfo.layerName = string.Empty;
+                }
+                else if (layerInfo.layerIndex >= numLayerInfos)
+                    isContains = !string.IsNullOrEmpty(layerInfo.layerName);
+                else
+                    isContains = layerInfos[layerInfo.layerIndex].name != layerInfo.layerName;
+
+                if (isContains)
+                {
+                    if (string.IsNullOrEmpty(layerInfo.layerName))
+                        layerInfo.layerName = layerInfos[layerInfo.layerIndex].name;
+                    else
+                    {
+                        for (j = 0; j < numLayerInfos; ++j)
+                        {
+                            temp = layerInfos[j];
+                            if (temp.name == layerInfo.layerName)
+                            {
+                                layerInfo.layerIndex = j;
+
+                                break;
+                            }
                         }
                     }
                 }
@@ -1688,12 +1728,13 @@ namespace ZG.Voxel
                 layerInfos[i] = layerInfo;
             }
             
-            count = objectInfos == null ? 0 : objectInfos.Length;
-            int length, k;
+            int numObjectInfos = objectInfos == null ? 0 : objectInfos.Length;
+            int length, k, l;
             MaterialFilter materialFilter;
+            LayerFilter layerFilter;
             ObjectInfo objectInfo;
             GameObject gameObject;
-            for (i = 0; i < count; ++i)
+            for (i = 0; i < numObjectInfos; ++i)
             {
                 objectInfo = objectInfos[i];
                 
@@ -1758,9 +1799,47 @@ namespace ZG.Voxel
                         }
                     }
 
+                    length = materialFilter.layerFilters == null ? 0 : materialFilter.layerFilters.Length;
+                    for (k = 0; k < length; ++k)
+                    {
+                        isContains = false;
+                        layerFilter = materialFilter.layerFilters[k];
+                        if (layerFilter.index < 0)
+                        {
+                            isContains = false;
+
+                            layerFilter.name = string.Empty;
+                        }
+                        else if (layerFilter.index >= numLayerInfos)
+                            isContains = !string.IsNullOrEmpty(layerFilter.name);
+                        else
+                            isContains = layerInfos[layerFilter.index].name != layerFilter.name;
+                        
+                        if (isContains)
+                        {
+                            if (string.IsNullOrEmpty(layerFilter.name))
+                                layerFilter.name = layerInfos[layerFilter.index].name;
+                            else
+                            {
+                                for (l = 0; l < numLayerInfos; ++l)
+                                {
+                                    layerInfo = layerInfos[l];
+                                    if (layerInfo.name == layerFilter.name)
+                                    {
+                                        layerFilter.index = l;
+
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        
+                        materialFilter.layerFilters[k] = layerFilter;
+                    }
+
                     objectInfo.materialFilters[j] = materialFilter;
                 }
-                
+
                 objectInfos[i] = objectInfo;
             }
         }
@@ -2012,7 +2091,7 @@ namespace ZG.Voxel
                                         (float)(__random.NextDouble() * temp - objectInfo.range),
                                         (float)(__random.NextDouble() * temp - objectInfo.range),
                                         (float)(__random.NextDouble() * temp - objectInfo.range)))*/
-                                    + objectInfo.normal * objectInfo.offset;
+                                    + normal * objectInfo.offset;
 
                                 Quaternion rotation;
                                 switch (objectInfo.rotation)
@@ -2036,6 +2115,7 @@ namespace ZG.Voxel
 
                                 int index = objectIndex.value, layerMask = ~objectInfo.ignoreMask;
                                 float top = objectInfo.top, bottom = objectInfo.bottom, maxDistance = objectInfo.distance;
+                                Vector3 down = -objectInfo.normal;
                                 Matrix4x4 matrix = Matrix4x4.TRS(finalPosition, rotation, Vector3.one);
                                 Instantiate(new Instance(gameObject, x =>
                                 {
@@ -2046,6 +2126,7 @@ namespace ZG.Voxel
                                     Vector3 distance,
                                     min,
                                     max;
+                                    Matrix4x4 localToWorldMatrix, worldToLocalMatrix;
                                     Bounds bounds;
                                     Mesh mesh;
                                     Transform transform;
@@ -2059,15 +2140,18 @@ namespace ZG.Voxel
                                             transform = meshFilter.transform;
                                             if (transform != null)
                                             {
+                                                localToWorldMatrix = matrix * transform.localToWorldMatrix;
+                                                worldToLocalMatrix = localToWorldMatrix.inverse;
+
                                                 bounds = mesh.bounds;
-                                                distance = transform.InverseTransformDirection(Vector3.up * bottom);
+                                                distance = worldToLocalMatrix.MultiplyVector(down * -bottom);
                                                 min = bounds.min;
                                                 max = bounds.max;
                                                 min = Vector3.Max(min, min + distance);
                                                 max = Vector3.Min(max, max + distance);
                                                 bounds.SetMinMax(Vector3.Min(min, max), Vector3.Max(min, max));
-                                                bounds.Encapsulate(new Bounds(bounds.center + transform.InverseTransformDirection(Vector3.up * top), bounds.size));
-
+                                                bounds.Encapsulate(new Bounds(bounds.center + worldToLocalMatrix.MultiplyVector(down * -top), bounds.size));
+                                                
                                                 if (Physics.CheckBox(
                                                         transform.TransformPoint(bounds.center) + finalPosition,
                                                         Vector3.Scale(bounds.extents, transform.lossyScale),
@@ -2077,7 +2161,7 @@ namespace ZG.Voxel
 
                                                 if (maxDistance > 0.0f)
                                                 {
-                                                    bounds.GetCorners((matrix * transform.localToWorldMatrix),
+                                                    bounds.GetCorners(localToWorldMatrix,
                                                         out corners[0],
                                                         out corners[1],
                                                         out corners[2],
@@ -2089,9 +2173,9 @@ namespace ZG.Voxel
 
                                                     Array.Sort(corners, __Compare);
 
-                                                    if (!Physics.Raycast(corners[0], Vector3.down, maxDistance, layerMask) ||
-                                                        !Physics.Raycast(corners[1], Vector3.down, maxDistance, layerMask) ||
-                                                        !Physics.Raycast(corners[2], Vector3.down, maxDistance, layerMask))
+                                                    if (!Physics.Raycast(corners[0], down, maxDistance, layerMask) ||
+                                                        !Physics.Raycast(corners[1], down, maxDistance, layerMask) ||
+                                                        !Physics.Raycast(corners[2], down, maxDistance, layerMask))
                                                         return false;
                                                 }
                                             }
@@ -2104,14 +2188,17 @@ namespace ZG.Voxel
                                         transform = skinnedMeshRenderer == null ? null : skinnedMeshRenderer.rootBone;
                                         if (transform != null)
                                         {
+                                            localToWorldMatrix = matrix * transform.localToWorldMatrix;
+                                            worldToLocalMatrix = localToWorldMatrix.inverse;
+
                                             bounds = skinnedMeshRenderer.localBounds;
-                                            distance = transform.InverseTransformDirection(Vector3.up * bottom);
+                                            distance = worldToLocalMatrix.MultiplyVector(down * -bottom);
                                             min = bounds.min;
                                             max = bounds.max;
                                             min = Vector3.Max(min, min + distance);
                                             max = Vector3.Min(max, max + distance);
                                             bounds.SetMinMax(Vector3.Min(min, max), Vector3.Max(min, max));
-                                            bounds.Encapsulate(new Bounds(bounds.center + transform.InverseTransformDirection(Vector3.up * top), bounds.size));
+                                            bounds.Encapsulate(new Bounds(bounds.center + worldToLocalMatrix.MultiplyVector(down * -top), bounds.size));
 
                                             if (Physics.CheckBox(
                                                     transform.TransformPoint(bounds.center) + finalPosition,
@@ -2122,7 +2209,7 @@ namespace ZG.Voxel
 
                                             if (maxDistance > 0.0f)
                                             {
-                                                bounds.GetCorners((matrix * transform.localToWorldMatrix),
+                                                bounds.GetCorners(localToWorldMatrix,
                                                     out corners[0],
                                                     out corners[1],
                                                     out corners[2],
@@ -2134,9 +2221,9 @@ namespace ZG.Voxel
 
                                                 Array.Sort(corners, __Compare);
 
-                                                if (!Physics.Raycast(corners[0], Vector3.down, maxDistance, layerMask) ||
-                                                    !Physics.Raycast(corners[1], Vector3.down, maxDistance, layerMask) ||
-                                                    !Physics.Raycast(corners[2], Vector3.down, maxDistance, layerMask))
+                                                if (!Physics.Raycast(corners[0], down, maxDistance, layerMask) ||
+                                                    !Physics.Raycast(corners[1], down, maxDistance, layerMask) ||
+                                                    !Physics.Raycast(corners[2], down, maxDistance, layerMask))
                                                     return false;
                                             }
                                         }
@@ -2265,7 +2352,7 @@ namespace ZG.Voxel
             }
 
             float temp;
-            height += __GetHeight(layerInfo.layer, x, y, mapInfos, layerInfos, out temp);
+            height += __GetHeight(layerInfo.layerIndex, x, y, mapInfos, layerInfos, out temp);
 
             return height;
         }
