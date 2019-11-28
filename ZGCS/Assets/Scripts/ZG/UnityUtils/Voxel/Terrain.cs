@@ -208,7 +208,8 @@ namespace ZG.Voxel
 
         public float distance;
 
-        public float range;
+        public float minScale;
+        public float maxScale;
 
         public Vector3 normal;
 
@@ -256,10 +257,54 @@ namespace ZG.Voxel
     }
 
     //[Serializable]
-    public abstract class FlatTerrain<T, U> : Processor<T, U>
+    public abstract class FlatTerrain<T, U> : Processor<T, U>, IEnumerable<Node>
         where T : IEngine
         where U : IEngineProcessor<T>, new()
     {
+        private class Enumerator : Object, IEnumerator<Node>
+        {
+            private List<Node>.Enumerator? __leaf;
+            private Dictionary<Vector3Int, List<Node>>.Enumerator __root;
+
+            public static Enumerator Create(Dictionary<Vector3Int, List<Node>>.Enumerator enumerator)
+            {
+                Enumerator result = Create<Enumerator>();
+                result.__leaf = null;
+                result.__root = enumerator;
+                return result;
+            }
+
+            public Node Current => __leaf.Value.Current;
+
+            public bool MoveNext()
+            {
+                do
+                {
+                    if (__leaf != null)
+                    {
+                        List<Node>.Enumerator leaf = __leaf.Value;
+                        bool result = leaf.MoveNext();
+                        __leaf = leaf;
+
+                        if (result)
+                            return true;
+                    }
+
+                    if (!__root.MoveNext())
+                        return false;
+
+                    __leaf = __root.Current.Value?.GetEnumerator();
+                } while (true);
+            }
+
+            void IEnumerator.Reset()
+            {
+                throw new InvalidOperationException();
+            }
+
+            object IEnumerator.Current => Current;
+        }
+
         private struct ObjectIndex
         {
             public int value;
@@ -1571,7 +1616,7 @@ namespace ZG.Voxel
         private System.Random __random;
         private Voxel.Sampler __sampler;
         private List<ObjectIndex> __objectIndices = new List<ObjectIndex>();
-        private Dictionary<Vector3Int, Node> __nodes = new Dictionary<Vector3Int, Node>();
+        private Dictionary<Vector3Int, List<Node>> __nodes = new Dictionary<Vector3Int, List<Node>>();
 
         public abstract T engine { get; }
 
@@ -1583,13 +1628,13 @@ namespace ZG.Voxel
             }
         }
 
-        public IEnumerable<KeyValuePair<Vector3Int, Node>> nodes
+        /*public IEnumerable<KeyValuePair<Vector3Int, Node>> nodes
         {
             get
             {
                 return __nodes;
             }
-        }
+        }*/
 
         public FlatTerrain()
         {
@@ -1845,6 +1890,14 @@ namespace ZG.Voxel
         }
 #endif
 
+        public IEnumerator<Node> GetEnumerator()
+        {
+            if (__nodes == null)
+                return null;
+
+            return Enumerator.Create(__nodes.GetEnumerator());
+        }
+
         public override GameObject Convert(MeshData<Vector3> meshData, Level level)
         {
             /*meshData = meshData.Simplify(
@@ -1984,7 +2037,7 @@ namespace ZG.Voxel
                 if (__nodes.ContainsKey(offset))
                     return result;
 
-                __nodes[offset] = new Node(-1, null);
+                __nodes[offset] = null;
             }
 
             if (objectInfos != null)
@@ -2113,25 +2166,30 @@ namespace ZG.Voxel
                                         break;
                                 }
 
+                                if (objectInfo.minScale < objectInfo.maxScale)
+                                {
+                                    random = (float)__random.NextDouble();
+                                    random *= objectInfo.maxScale - objectInfo.minScale;
+                                    random += objectInfo.minScale;
+                                }
+                                else
+                                    random = 1.0f;
+
                                 int index = objectIndex.value, layerMask = ~objectInfo.ignoreMask;
                                 float top = objectInfo.top, bottom = objectInfo.bottom, maxDistance = objectInfo.distance;
-                                Vector3 down = -objectInfo.normal;
-                                Matrix4x4 matrix = Matrix4x4.TRS(finalPosition, rotation, Vector3.one);
+                                Vector3 down = -objectInfo.normal, finalScale = new Vector3(random, random, random);
+                                Matrix4x4 matrix = Matrix4x4.TRS(finalPosition, rotation, finalScale);
                                 Instantiate(new Instance(gameObject, x =>
                                 {
                                     GameObject target = x as GameObject;
                                     if (target == null)
                                         return false;
 
-                                    Vector3 distance,
-                                    min,
-                                    max;
-                                    Matrix4x4 localToWorldMatrix, worldToLocalMatrix;
-                                    Bounds bounds;
-                                    Mesh mesh;
+                                    bool isFirst = true;
+                                    Bounds bounds = default;
                                     Transform transform;
+                                    Mesh mesh;
                                     MeshFilter[] meshFilters = target.GetComponentsInChildren<MeshFilter>(true);
-                                    Vector3[] corners = new Vector3[8];
                                     foreach (MeshFilter meshFilter in meshFilters)
                                     {
                                         mesh = meshFilter == null ? null : meshFilter.sharedMesh;
@@ -2140,98 +2198,84 @@ namespace ZG.Voxel
                                             transform = meshFilter.transform;
                                             if (transform != null)
                                             {
-                                                localToWorldMatrix = matrix * transform.localToWorldMatrix;
-                                                worldToLocalMatrix = localToWorldMatrix.inverse;
-
-                                                bounds = mesh.bounds;
-                                                distance = worldToLocalMatrix.MultiplyVector(down * -bottom);
-                                                min = bounds.min;
-                                                max = bounds.max;
-                                                min = Vector3.Max(min, min + distance);
-                                                max = Vector3.Min(max, max + distance);
-                                                bounds.SetMinMax(Vector3.Min(min, max), Vector3.Max(min, max));
-                                                bounds.Encapsulate(new Bounds(bounds.center + worldToLocalMatrix.MultiplyVector(down * -top), bounds.size));
-                                                
-                                                if (Physics.CheckBox(
-                                                        transform.TransformPoint(bounds.center) + finalPosition,
-                                                        Vector3.Scale(bounds.extents, transform.lossyScale),
-                                                        rotation * transform.rotation,
-                                                        layerMask))
-                                                    return false;
-
-                                                if (maxDistance > 0.0f)
+                                                if (isFirst)
                                                 {
-                                                    bounds.GetCorners(localToWorldMatrix,
-                                                        out corners[0],
-                                                        out corners[1],
-                                                        out corners[2],
-                                                        out corners[3],
-                                                        out corners[4],
-                                                        out corners[5],
-                                                        out corners[6],
-                                                        out corners[7]);
+                                                    isFirst = false;
 
-                                                    Array.Sort(corners, __Compare);
-
-                                                    if (!Physics.Raycast(corners[0], down, maxDistance, layerMask) ||
-                                                        !Physics.Raycast(corners[1], down, maxDistance, layerMask) ||
-                                                        !Physics.Raycast(corners[2], down, maxDistance, layerMask))
-                                                        return false;
+                                                    bounds = transform.localToWorldMatrix.Multiply(mesh.bounds);
                                                 }
+                                                else
+                                                    bounds.Encapsulate(transform.localToWorldMatrix.Multiply(mesh.bounds));
                                             }
                                         }
                                     }
-
+                                    
                                     SkinnedMeshRenderer[] skinnedMeshRenderers = target.GetComponentsInChildren<SkinnedMeshRenderer>(true);
                                     foreach (SkinnedMeshRenderer skinnedMeshRenderer in skinnedMeshRenderers)
                                     {
                                         transform = skinnedMeshRenderer == null ? null : skinnedMeshRenderer.rootBone;
                                         if (transform != null)
                                         {
-                                            localToWorldMatrix = matrix * transform.localToWorldMatrix;
-                                            worldToLocalMatrix = localToWorldMatrix.inverse;
-
-                                            bounds = skinnedMeshRenderer.localBounds;
-                                            distance = worldToLocalMatrix.MultiplyVector(down * -bottom);
-                                            min = bounds.min;
-                                            max = bounds.max;
-                                            min = Vector3.Max(min, min + distance);
-                                            max = Vector3.Min(max, max + distance);
-                                            bounds.SetMinMax(Vector3.Min(min, max), Vector3.Max(min, max));
-                                            bounds.Encapsulate(new Bounds(bounds.center + worldToLocalMatrix.MultiplyVector(down * -top), bounds.size));
-
-                                            if (Physics.CheckBox(
-                                                    transform.TransformPoint(bounds.center) + finalPosition,
-                                                    Vector3.Scale(bounds.extents, transform.lossyScale),
-                                                    rotation * transform.rotation,
-                                                    layerMask))
-                                                return false;
-
-                                            if (maxDistance > 0.0f)
+                                            if (isFirst)
                                             {
-                                                bounds.GetCorners(localToWorldMatrix,
-                                                    out corners[0],
-                                                    out corners[1],
-                                                    out corners[2],
-                                                    out corners[3],
-                                                    out corners[4],
-                                                    out corners[5],
-                                                    out corners[6],
-                                                    out corners[7]);
+                                                isFirst = false;
 
-                                                Array.Sort(corners, __Compare);
-
-                                                if (!Physics.Raycast(corners[0], down, maxDistance, layerMask) ||
-                                                    !Physics.Raycast(corners[1], down, maxDistance, layerMask) ||
-                                                    !Physics.Raycast(corners[2], down, maxDistance, layerMask))
-                                                    return false;
+                                                bounds = transform.localToWorldMatrix.Multiply(skinnedMeshRenderer.localBounds);
                                             }
+                                            else
+                                                bounds.Encapsulate(transform.localToWorldMatrix.Multiply(skinnedMeshRenderer.localBounds));
                                         }
+                                    }
+
+                                    Matrix4x4 worldToLocalMatrix = matrix.inverse;
+                                    Vector3 distance = worldToLocalMatrix.MultiplyVector(down * -bottom), min = bounds.min, max = bounds.max;
+                                    min = Vector3.Max(min, min + distance);
+                                    max = Vector3.Min(max, max + distance);
+                                    bounds.SetMinMax(Vector3.Min(min, max), Vector3.Max(min, max));
+                                    bounds.Encapsulate(new Bounds(bounds.center + worldToLocalMatrix.MultiplyVector(down * -top), bounds.size));
+
+                                    if (Physics.CheckBox(
+                                            matrix.MultiplyPoint(bounds.center),
+                                            Vector3.Scale(bounds.extents, matrix.lossyScale),
+                                            matrix.rotation,
+                                            layerMask))
+                                        return false;
+
+                                    if (maxDistance > 0.0f)
+                                    {
+                                        Vector3[] corners = new Vector3[8];
+                                        bounds.GetCorners(matrix,
+                                            out corners[0],
+                                            out corners[1],
+                                            out corners[2],
+                                            out corners[3],
+                                            out corners[4],
+                                            out corners[5],
+                                            out corners[6],
+                                            out corners[7]);
+
+                                        Array.Sort(corners, __Compare);
+
+                                        if (!Physics.Raycast(corners[0], down, maxDistance, layerMask) ||
+                                            !Physics.Raycast(corners[1], down, maxDistance, layerMask) ||
+                                            !Physics.Raycast(corners[2], down, maxDistance, layerMask))
+                                            return false;
                                     }
 
                                     return true;
                                 }, x =>
                                 {
+                                    List<Node> nodes;
+                                    lock (__nodes)
+                                    {
+                                        if(!__nodes.TryGetValue(offset, out nodes) || nodes == null)
+                                        {
+                                            nodes = new List<Node>();
+
+                                            __nodes[offset] = nodes;
+                                        }
+                                    }
+
                                     Node node = new Node(index, x as GameObject);
 
                                     Transform transform = node.gameObject == null ? null : node.gameObject.transform;
@@ -2239,15 +2283,18 @@ namespace ZG.Voxel
                                     {
                                         transform.position += finalPosition;
                                         transform.rotation = rotation * transform.rotation;
+                                        transform.localScale = Vector3.Scale(finalScale, transform.localScale);
                                         transform.SetParent(root);
                                         
                                         Physics.SyncTransforms();
                                     }
 
-                                    lock (__nodes)
+                                    nodes.Add(node);
+
+                                    /*lock (__nodes)
                                     {
                                         __nodes[offset] = node;
-                                    }
+                                    }*/
                                 }));
 
                                 break;
@@ -2356,6 +2403,8 @@ namespace ZG.Voxel
 
             return height;
         }
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 
     [Serializable]

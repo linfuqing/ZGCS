@@ -914,7 +914,11 @@ namespace ZG.Voxel
                                         if (instance.predicate != null && !instance.predicate(instance.target))
                                             continue;
 
+#if UNITY_EDITOR
+                                        target = UnityEditor.PrefabUtility.InstantiatePrefab(instance.target);
+#else
                                         target = UnityEngine.Object.Instantiate(instance.target);
+#endif
                                         if (instance.handler != null)
                                             instance.handler(target);
                                     }
