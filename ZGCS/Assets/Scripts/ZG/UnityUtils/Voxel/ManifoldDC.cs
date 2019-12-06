@@ -1223,9 +1223,15 @@ namespace ZG.Voxel
 
                     return true;
                 }*/
+                
+                //modify: 2019/12/6
+                if ((node.block.corners & (1 << vertexIndices.y)) != 0)
+                {
+                    offset = __Get(info, vertexIndices.y);
 
-                bool result = true;
-                if (info.depth < __depth)
+                    return true;
+                }
+                else if (info.depth < __depth)
                 {
                     if ((node.childMask & (1 << vertexIndices.y)) != 0 &&
                         __Get(new Info(info.depth + 1, info.position * 2 + __childMinOffsets[vertexIndices.y]), vertexIndices, out offset))
@@ -1234,31 +1240,11 @@ namespace ZG.Voxel
                     if ((node.childMask & (1 << vertexIndices.x)) != 0 &&
                         __Get(new Info(info.depth + 1, info.position * 2 + __childMinOffsets[vertexIndices.x]), vertexIndices, out offset))
                         return true;
-
-                    result = false;
                 }
-                else if ((node.block.corners & (1 << vertexIndices.y)) != 0)
-                {
-                    offset = __Get(info, vertexIndices.y);
-
-                    return true;
-                }
-                else if ((node.block.corners & (1 << vertexIndices.x)) == 0)
-                {
-                    /*int shift = 7 - vertexIndices.x;
-                    if ((node.block.corners & (1 << shift)) != 0)
-                    {
-                        offset = __Get(info, shift);
-
-                        return true;
-                    }*/
-
-                    result = false;
-                }
-
+                
                 offset = __Get(info, vertexIndices.x);
 
-                return result;
+                return (node.block.corners & (1 << vertexIndices.x)) != 0;
             }
             
             private void __ContourProcessTile(

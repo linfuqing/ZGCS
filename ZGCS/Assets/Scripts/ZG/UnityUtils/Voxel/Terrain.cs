@@ -264,9 +264,9 @@ namespace ZG.Voxel
         private class Enumerator : Object, IEnumerator<Node>
         {
             private List<Node>.Enumerator? __leaf;
-            private Dictionary<Vector3Int, List<Node>>.Enumerator __root;
+            private Dictionary<NodeIndex, List<Node>>.Enumerator __root;
 
-            public static Enumerator Create(Dictionary<Vector3Int, List<Node>>.Enumerator enumerator)
+            public static Enumerator Create(Dictionary<NodeIndex, List<Node>>.Enumerator enumerator)
             {
                 Enumerator result = Create<Enumerator>();
                 result.__leaf = null;
@@ -303,6 +303,22 @@ namespace ZG.Voxel
             }
 
             object IEnumerator.Current => Current;
+        }
+
+        private struct NodeIndex : IEquatable<NodeIndex>
+        {
+            public Axis axis;
+            public Vector3Int position;
+
+            public bool Equals(NodeIndex other)
+            {
+                return axis == other.axis && position.Equals(other);
+            }
+
+            public override int GetHashCode()
+            {
+                return position.GetHashCode();
+            }
         }
 
         private struct ObjectIndex
@@ -1616,7 +1632,7 @@ namespace ZG.Voxel
         private System.Random __random;
         private Voxel.Sampler __sampler;
         private List<ObjectIndex> __objectIndices = new List<ObjectIndex>();
-        private Dictionary<Vector3Int, List<Node>> __nodes = new Dictionary<Vector3Int, List<Node>>();
+        private Dictionary<NodeIndex, List<Node>> __nodes = new Dictionary<NodeIndex, List<Node>>();
 
         public abstract T engine { get; }
 
@@ -2032,12 +2048,15 @@ namespace ZG.Voxel
             if (level > 0)
                 return result;
 
-            lock(__nodes)
+            NodeIndex nodeIndex;
+            nodeIndex.axis = face.axis;
+            nodeIndex.position = offset;
+            lock (__nodes)
             {
-                if (__nodes.ContainsKey(offset))
+                if (__nodes.ContainsKey(nodeIndex))
                     return result;
 
-                __nodes[offset] = null;
+                __nodes[nodeIndex] = null;
             }
 
             if (objectInfos != null)
@@ -2268,11 +2287,11 @@ namespace ZG.Voxel
                                     List<Node> nodes;
                                     lock (__nodes)
                                     {
-                                        if(!__nodes.TryGetValue(offset, out nodes) || nodes == null)
+                                        if(!__nodes.TryGetValue(nodeIndex, out nodes) || nodes == null)
                                         {
                                             nodes = new List<Node>();
 
-                                            __nodes[offset] = nodes;
+                                            __nodes[nodeIndex] = nodes;
                                         }
                                     }
 
