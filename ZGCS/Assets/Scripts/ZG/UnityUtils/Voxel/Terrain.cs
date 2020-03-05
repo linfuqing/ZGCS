@@ -178,19 +178,21 @@ namespace ZG.Voxel
             NormalAixY,
             All
         }
-
+        
 #if UNITY_EDITOR
         public string name;
 
         public string guid;
 #endif
-        [Index("gameObjects", relativePropertyPath = "index", pathLevel = 1, uniqueLevel = 2)]
+        [Index("gameObjects", relativePropertyPath = "index", pathLevel = 1)]
         public string objectName;
 
-        [Index("gameObjects", pathLevel = 1, uniqueLevel = 2)]
+        [Index("gameObjects", pathLevel = 1)]
         public int index;
-
+        
         public LayerMask ignoreMask;
+        public LayerMask collideLayers;
+        public LayerMask raycastLayers;
 
         public Rotation rotation;
 
@@ -261,6 +263,16 @@ namespace ZG.Voxel
         where T : IEngine
         where U : IEngineProcessor<T>, new()
     {
+        private struct Comparer : IComparer<Vector3>
+        {
+            public Vector3 forward;
+
+            public int Compare(Vector3 x, Vector3 y)
+            {
+                return Vector3.Dot(x, forward).CompareTo(Vector3.Dot(y, forward));
+            }
+        }
+
         private class Enumerator : Object, IEnumerator<Node>
         {
             private List<Node>.Enumerator? __leaf;
@@ -2194,6 +2206,7 @@ namespace ZG.Voxel
                                 else
                                     random = 1.0f;
 
+                                LayerMask collideLayers = objectInfo.collideLayers, raycastLayers = objectInfo.raycastLayers;
                                 int index = objectIndex.value, layerMask = ~objectInfo.ignoreMask;
                                 float top = objectInfo.top, bottom = objectInfo.bottom, maxDistance = objectInfo.distance;
                                 Vector3 down = -objectInfo.normal, finalScale = new Vector3(random, random, random);
@@ -2204,58 +2217,121 @@ namespace ZG.Voxel
                                     if (target == null)
                                         return false;
 
-                                    bool isFirst = true;
-                                    Bounds bounds = default;
+                                    bool isCollide = false, isRaycast = false;
+                                    int layer;
+                                    Bounds collideBounds = default, raycastBounds = default, bounds;
                                     Transform transform;
                                     Mesh mesh;
                                     MeshFilter[] meshFilters = target.GetComponentsInChildren<MeshFilter>(true);
                                     foreach (MeshFilter meshFilter in meshFilters)
                                     {
-                                        mesh = meshFilter == null ? null : meshFilter.sharedMesh;
+                                        mesh = meshFilter.sharedMesh;
                                         if (mesh != null)
                                         {
                                             transform = meshFilter.transform;
-                                            if (transform != null)
+                                            bounds = mesh.bounds;
+                                            layer = 1 <<  meshFilter.gameObject.layer;
+                                            if ((layer & collideLayers) != 0)
                                             {
-                                                if (isFirst)
-                                                {
-                                                    isFirst = false;
-
-                                                    bounds = transform.localToWorldMatrix.Multiply(mesh.bounds);
-                                                }
+                                                if (isCollide)
+                                                    collideBounds.Encapsulate(transform.localToWorldMatrix.Multiply(bounds));
                                                 else
-                                                    bounds.Encapsulate(transform.localToWorldMatrix.Multiply(mesh.bounds));
+                                                {
+                                                    isCollide = true;
+
+                                                    collideBounds = transform.localToWorldMatrix.Multiply(bounds);
+                                                }
+                                            }
+
+                                            if ((layer & raycastLayers) != 0)
+                                            {
+                                                if (isRaycast)
+                                                    raycastBounds.Encapsulate(transform.localToWorldMatrix.Multiply(bounds));
+                                                else
+                                                {
+                                                    isRaycast = true;
+
+                                                    raycastBounds = transform.localToWorldMatrix.Multiply(bounds);
+                                                }
                                             }
                                         }
                                     }
-                                    
+
                                     SkinnedMeshRenderer[] skinnedMeshRenderers = target.GetComponentsInChildren<SkinnedMeshRenderer>(true);
                                     foreach (SkinnedMeshRenderer skinnedMeshRenderer in skinnedMeshRenderers)
                                     {
-                                        transform = skinnedMeshRenderer == null ? null : skinnedMeshRenderer.rootBone;
+                                        transform = skinnedMeshRenderer.rootBone;
                                         if (transform != null)
                                         {
-                                            if (isFirst)
+                                            bounds = skinnedMeshRenderer.bounds;
+                                            layer = 1 << skinnedMeshRenderer.gameObject.layer;
+                                            if ((layer & collideLayers) != 0)
                                             {
-                                                isFirst = false;
+                                                if (isCollide)
+                                                    collideBounds.Encapsulate(transform.localToWorldMatrix.Multiply(bounds));
+                                                else
+                                                {
+                                                    isCollide = true;
 
-                                                bounds = transform.localToWorldMatrix.Multiply(skinnedMeshRenderer.localBounds);
+                                                    collideBounds = transform.localToWorldMatrix.Multiply(bounds);
+                                                }
                                             }
+
+                                            if ((layer & raycastLayers) != 0)
+                                            {
+                                                if (isRaycast)
+                                                    raycastBounds.Encapsulate(transform.localToWorldMatrix.Multiply(bounds));
+                                                else
+                                                {
+                                                    isRaycast = true;
+
+                                                    raycastBounds = transform.localToWorldMatrix.Multiply(bounds);
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    BoxCollider[] colliders = target.GetComponentsInChildren<BoxCollider>(true);
+                                    foreach (BoxCollider collider in colliders)
+                                    {
+                                        transform = collider.transform;
+                                        bounds = new Bounds(collider.center, collider.size);
+                                        layer = 1 << collider.gameObject.layer;
+                                        if ((layer & collideLayers) != 0)
+                                        {
+                                            if (isCollide)
+                                                collideBounds.Encapsulate(transform.localToWorldMatrix.Multiply(bounds));
                                             else
-                                                bounds.Encapsulate(transform.localToWorldMatrix.Multiply(skinnedMeshRenderer.localBounds));
+                                            {
+                                                isCollide = true;
+
+                                                collideBounds = transform.localToWorldMatrix.Multiply(bounds);
+                                            }
+                                        }
+
+                                        if ((layer & raycastLayers) != 0)
+                                        {
+                                            if (isRaycast)
+                                                raycastBounds.Encapsulate(transform.localToWorldMatrix.Multiply(bounds));
+                                            else
+                                            {
+                                                isRaycast = true;
+
+                                                raycastBounds = transform.localToWorldMatrix.Multiply(bounds);
+                                            }
                                         }
                                     }
 
                                     Matrix4x4 worldToLocalMatrix = matrix.inverse;
-                                    Vector3 distance = worldToLocalMatrix.MultiplyVector(down * -bottom), min = bounds.min, max = bounds.max;
+                                    Vector3 distance = worldToLocalMatrix.MultiplyVector(down * -bottom), min = collideBounds.min, max = collideBounds.max;
                                     min = Vector3.Max(min, min + distance);
                                     max = Vector3.Min(max, max + distance);
-                                    bounds.SetMinMax(Vector3.Min(min, max), Vector3.Max(min, max));
-                                    bounds.Encapsulate(new Bounds(bounds.center + worldToLocalMatrix.MultiplyVector(down * -top), bounds.size));
+                                    collideBounds.SetMinMax(Vector3.Min(min, max), Vector3.Max(min, max));
+                                    collideBounds.Encapsulate(new Bounds(collideBounds.center + worldToLocalMatrix.MultiplyVector(down * -top), collideBounds.size));
 
                                     if (Physics.CheckBox(
-                                            matrix.MultiplyPoint(bounds.center),
-                                            Vector3.Scale(bounds.extents, matrix.lossyScale),
+                                            matrix.MultiplyPoint(collideBounds.center),
+                                            Vector3.Scale(collideBounds.extents, matrix.lossyScale),
                                             matrix.rotation,
                                             layerMask))
                                         return false;
@@ -2263,7 +2339,7 @@ namespace ZG.Voxel
                                     if (maxDistance > 0.0f)
                                     {
                                         Vector3[] corners = new Vector3[8];
-                                        bounds.GetCorners(matrix,
+                                        raycastBounds.GetCorners(matrix,
                                             out corners[0],
                                             out corners[1],
                                             out corners[2],
@@ -2273,11 +2349,14 @@ namespace ZG.Voxel
                                             out corners[6],
                                             out corners[7]);
 
-                                        Array.Sort(corners, __Compare);
+                                        Comparer comparer;
+                                        comparer.forward = -down;
+                                        Array.Sort(corners, comparer);
 
                                         if (!Physics.Raycast(corners[0], down, maxDistance, layerMask) ||
                                             !Physics.Raycast(corners[1], down, maxDistance, layerMask) ||
-                                            !Physics.Raycast(corners[2], down, maxDistance, layerMask))
+                                            !Physics.Raycast(corners[2], down, maxDistance, layerMask) ||
+                                            !Physics.Raycast(corners[3], down, maxDistance, layerMask))
                                             return false;
                                     }
 
@@ -2326,11 +2405,6 @@ namespace ZG.Voxel
             return result;
         }
         
-        private static int __Compare(Vector3 x, Vector3 y)
-        {
-            return Mathf.RoundToInt(x.y - y.y);
-        }
-
         private static bool __Check(float x, float y, MapInfo[] mapInfos, MapFilter[] filters, out float result)
         {
             result = 1.0f;
